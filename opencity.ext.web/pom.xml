@@ -407,15 +407,8 @@
 
 	</dependencies>
 	
- 	<repositories>
-	  	<repository>
-	      <id>opencity-ext</id>
-	      <url>http://oeg-dev.dia.fi.upm.es:8081/nexus/content/repositories/opencity-ext/</url>
-	    </repository>
-	</repositories>
-
 	<build>
-		<finalName>sede</finalName>
+		<finalName>opencityext</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
