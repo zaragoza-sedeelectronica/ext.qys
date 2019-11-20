@@ -72,6 +72,7 @@ import org.sede.core.rest.view.TransformadorXml;
 import org.sede.core.utils.ConvertDate;
 import org.sede.core.utils.Funciones;
 import org.sede.core.utils.Propiedades;
+import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.InformacionPublicaController;
 import org.sede.servicio.qys.dao.consulta.BarrioDato;
 import org.sede.servicio.qys.dao.consulta.ExternoDato;
@@ -97,6 +98,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
+import com.googlecode.genericdao.search.Filter;
+import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
 
 /**
@@ -147,7 +150,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * 
 	 * @param entityManager
 	 */
-	@PersistenceContext(unitName=Esquema.TICKETING)
+	@PersistenceContext(unitName=ConfigQys.ESQUEMA)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}
@@ -305,6 +308,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 								+"FROM HBCATEGORYLEVELS c, hbcategories d, "
 								+"HBCATEGORYLEVELS c1, hbcategories d1 "
 								+"where "
+								+ "c1.CAL_ISCATEGORY(+) > 0 and "
 								+"c.cal_hbid not in(2,"
 								+ excludedCategoriesToString()
 								+ ") "
@@ -319,7 +323,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 								+"where "
 								+"c.cal_parent=3899392 "
 								+"and c.cal_hbid=d.cat_hbid(+) "
-								+"and c.cal_hbid in (select c1.cal_parent from HBCATEGORYLEVELS c1) "
+								+"and c.cal_hbid in (select c1.cal_parent from HBCATEGORYLEVELS c1 where c1.cal_iscategory>0) "
 								+") order by 2 asc ";
 					} else {
 						sql = "SELECT nvl2(c2.cal_hbid,c2.cal_hbid,nvl2(c1.cal_hbid,c1.cal_hbid,c.CAL_HBID)) as service_code, "
@@ -462,225 +466,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 			}
 		});
 	}
-	/**
-	 * 
-	 * Metodo buscar y contar peticiones
-	 * 
-	 * @param rows
-	 * @param start
-	 * @param sort
-	 * @param ids
-	 * @param title
-	 * @param notes
-	 * @param service_code
-	 * @param externo_code
-	 * @param agency_responsible
-	 * @param account_id
-	 * @param user_id
-	 * @param startDate
-	 * @param endDate
-	 * @param type
-	 * @param status
-	 * @param validated
-	 * @param usuarioTicketing
-	 * @param group_operator
-	 * @param operator
-	 * @param answer_requested
-	 * @param barrio_code
-	 * @param origin
-	 * @param inspector
-	 * @param operadorGet
-	 * @param id_cat_sip
-	 * @return
-	 * @throws SQLException
-	 */
-	public SearchResult<Request> searchAndCountRequest(final int rows, 
-			final int start, 
-			final String sort, 
-			final String ids, 
-			final String title,
-			final String notes,
-			final String service_code,
-			final Integer externo_code,
-			final Integer agency_responsible,
-			final Long account_id,
-			final Long user_id,
-			final Date startDate, 
-			final Date endDate,
-			final String type,
-			final String status,
-			final String validated,
-			final String usuarioTicketing,
-			final String group_operator,
-			final String operator,
-			final String answer_requested,
-			final String barrio_code,
-			final String origin,
-			final String inspector,
-			final String operadorGet,
-			final Integer id_cat_sip) throws SQLException {
-		
-		
-		return em().unwrap(Session.class).doReturningWork(new ReturningWork<SearchResult<Request>>() {					
-			public SearchResult<Request> execute(Connection connection) throws SQLException {
-				CallableStatement st = null;
-				try {
-					st = connection.prepareCall(crearStatement("REQUESTS", "GET", 27));
-					st.setInt(1, rows);
-					st.setInt(2, start);
-					if (sort == null) {
-						st.setNull(3, OracleTypes.VARCHAR);
-					} else {
-						st.setString(3, sort);	
-					}
-					
-					if (ids == null) {
-						st.setNull(4, OracleTypes.VARCHAR);
-					} else {
-						st.setString(4, ids);	
-					}
-					if (title == null) {
-						st.setNull(5, OracleTypes.VARCHAR);
-					} else {
-						st.setString(5, title);	
-					}
-					if (notes == null) {
-						st.setNull(6, OracleTypes.VARCHAR);
-					} else {
-						st.setString(6, notes);	
-					}
-					if (service_code == null || "".equals(service_code.trim())) {
-						st.setNull(7, OracleTypes.NUMBER);
-					} else {
-						st.setString(7, service_code);	
-					}
-					if (externo_code == null || externo_code <= 0) {
-						st.setNull(8, OracleTypes.NUMBER);
-					} else {
-						st.setInt(8, externo_code);	
-					}
-					if (agency_responsible == null) {
-						st.setNull(9, OracleTypes.NUMBER);
-					} else {
-						st.setInt(9, agency_responsible);	
-					}
-					if (account_id == null) {
-						st.setNull(10, OracleTypes.NUMBER);
-					} else {
-						st.setLong(10, account_id);	
-					}
-					if (user_id == null) {
-						st.setNull(11, OracleTypes.NUMBER);
-					} else {
-						st.setLong(11, user_id);	
-					}
-					if (startDate == null) {
-						st.setNull(12, OracleTypes.DATE);
-					} else {
-						st.setDate(12, new java.sql.Date(startDate.getTime()));
-					}
-					
-					if (endDate == null) {
-						st.setNull(13, OracleTypes.DATE);
-					} else {
-						st.setDate(13, new java.sql.Date(endDate.getTime()));
-					}
-					if (type == null) {
-						st.setNull(14, OracleTypes.VARCHAR);
-					} else {
-						st.setString(14, type);	
-					}
-					if (status == null) {
-						st.setNull(15, OracleTypes.VARCHAR);
-					} else {
-						st.setString(15, status);	
-					}
-					if (validated == null) {
-						st.setNull(16, OracleTypes.VARCHAR);
-					} else {
-						st.setString(16, validated);	
-					}
-					if (usuarioTicketing == null) {
-						st.setNull(17, OracleTypes.NUMBER);
-					} else {
-						st.setInt(17, Integer.parseInt(usuarioTicketing));	
-					}
-					
-					if (group_operator == null) {
-						st.setNull(18, OracleTypes.VARCHAR);
-					} else {
-						st.setString(18, group_operator);	
-					}
-					
-					if (operator == null) {
-						st.setNull(19, OracleTypes.VARCHAR);
-					} else {
-						st.setString(19, operator);	
-					}
-					if (answer_requested == null) {
-						st.setNull(20, OracleTypes.VARCHAR);
-					} else {
-						st.setString(20, answer_requested);	
-					}
-					
-					if (barrio_code == null) {
-						st.setNull(21, OracleTypes.NUMBER);
-					} else {
-						st.setString(21, barrio_code);	
-					}
-					
-					if (origin == null || "".equals(origin.trim())) {
-						st.setNull(22, OracleTypes.NUMBER);
-					} else {
-						st.setInt(22, Integer.parseInt(origin));	
-					}
-					
-					if (inspector == null) {
-						st.setNull(23, OracleTypes.VARCHAR);
-					} else {
-						st.setString(23, inspector);	
-					}
-					
-					if (operadorGet == null) {
-						st.setNull(24, OracleTypes.VARCHAR);
-					} else {
-						st.setString(24, operadorGet);	
-					}
-					if (id_cat_sip == null) {
-						st.setNull(25, OracleTypes.NUMBER);
-					} else {
-						st.setInt(25, id_cat_sip);	
-					}
-					st.registerOutParameter(26, OracleTypes.CLOB);
-					st.registerOutParameter(27, OracleTypes.NUMBER);
-		            st.executeQuery();
-		            TransformadorXml trans = new TransformadorXml();
-		            @SuppressWarnings("unchecked")
-					SearchResult<Request> results =  (SearchResult<Request>)trans.pasarAObjeto(st.getString(26), true, SearchResult.class, Request.class);
-					if (results.getResult() == null) {
-						results.setResult(new ArrayList<Request>());
-						results.setRows(0);
-						results.setTotalCount(0);
-					} else {
-						results.setStart(start);
-						results.setRows(rows);
-						results.setTotalCount(st.getInt(27));
-					}
-					return results;
-				} catch (SQLException e) {
-					logger.error(e.getMessage());
-					return null;
-				} catch (FormatoNoSoportadoException e) {
-					logger.error(e.getMessage());
-					return null; 
-				} finally {
-					if (st != null) {
-						st.close();
-					}
-				}
-			}
-		});
-	}
+	
 
 	/**
 	 * Metodo crear consulta
@@ -972,12 +758,12 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @return
 	 * @throws SQLException
 	 */
-	//@Override
+	
 	public ResponseEntity<?> findByToken(BigDecimal identifier, String token) throws SQLException {
 		try {
 			Query q = em().createNativeQuery("SELECT RQT_REQUESTNUMBER FROM hbrequests where RQT_REQUESTNUMBER=? and token=?").setParameter(1, identifier).setParameter(2, token);
 			BigDecimal id = ((BigDecimal)q.getSingleResult());
-			Object ret = detalle(id, "2");
+			Object ret = detalle(id, UtilsQyS.ID_MAIN_ADMIN.toString());
 			if (ret instanceof Request) {
 				return ResponseEntity.ok(ret);
 			} else {
@@ -1004,13 +790,13 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws SQLException
 	 * @throws FormatoNoSoportadoException
 	 */
-	public ResponseEntity<?> acciones(final BigDecimal id, final Integer accion, final String texto, final Date fecha, final BigDecimal idExterno, final String usuarioAdmin, final String uuid, final String clientId, final Integer internalStatus) throws SQLException, FormatoNoSoportadoException {
+	public ResponseEntity<?> acciones(final BigDecimal id, final Integer accion, final String texto, final Date fecha, final BigDecimal idExterno, final String idInterno, final String usuarioAdmin, final String uuid, final String clientId, final Integer internalStatus) throws SQLException, FormatoNoSoportadoException {
 		return em().unwrap(Session.class).doReturningWork(new ReturningWork<ResponseEntity<?>>() {					
 			public ResponseEntity<?> execute(Connection connection) throws SQLException {
 			CallableStatement st = null;
 			try {
 				int i = 0;
-				st = connection.prepareCall(crearStatement("REQUESTS", "ACCIONES", 10));
+				st = connection.prepareCall(crearStatement("REQUESTS", "ACCIONES", 11));
 				
 				st.setBigDecimal(++i, id);
 				st.setBigDecimal(++i, new BigDecimal(accion));
@@ -1030,6 +816,11 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 					st.setNull(++i, OracleTypes.NUMERIC);
 				} else {
 					st.setBigDecimal(++i, idExterno);	
+				}
+				if (idInterno == null) {
+					st.setNull(++i, OracleTypes.VARCHAR);
+				} else {
+					st.setString(++i, idInterno);	
 				}
 				if (usuarioAdmin == null) {
 					st.setNull(++i, OracleTypes.VARCHAR);
@@ -1092,7 +883,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws FormatoNoSoportadoException
 	 * @throws ParseException
 	 */
-	//@Override
+	
 	public void enviarCapaz(SolicitudInformacionPublica registro) throws SQLException, FormatoNoSoportadoException, ParseException {
 		String json = generarJson(registro);
 		
@@ -1124,7 +915,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 				}
 			}
 		}
-		this.acciones(registro.getId(), 10, resp.getContenido(), null, null, "" + 3506176, null, null, null);
+		this.acciones(registro.getId(), 10, resp.getContenido(), null, null, null, "" + 3506176, null, null, null);
 	}
 
 	/**
@@ -1234,7 +1025,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param type
 	 * @return
 	 */
-	//@Override
+	
 	public SearchResult<ServiceDatos> statistics(String serviceCode, Integer year, BigDecimal type) {
 		try {
 			StringBuilder sql = new StringBuilder();
@@ -1403,7 +1194,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param datos
 	 * @return
 	 */
-	//@Override
+	
 	public ServiceDatos obtenerTotal(SearchResult<ServiceDatos> datos) {
 		
 		ServiceDatos d = new ServiceDatos();
@@ -1423,7 +1214,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param year
 	 * @return
 	 */
-	//@Override
+	
 	public List<ServiceConsulta> obtenerCategoriasConTotal(boolean onlyPublic, String year) {
 		Query query = this.em().createNativeQuery("select count(*), s.id, nvl2(r.rqt_closedate, 'Cerrada', 'Abierta') FROM hbrequests r, categoria_sip s "
 				+ "WHERE " 
@@ -1503,7 +1294,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param rootCategory
 	 * @return
 	 */
-	//@Override
+	
 	public SearchResult<Category> getAdjacentCategories(BigDecimal rootCategory) {
 		try {
 			Query queryPermisosGrupo = this.em().createNativeQuery("select " 
@@ -1565,7 +1356,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param registro
 	 * @return
 	 */
-	//@Override
+	
 	public ResponseEntity<?> crearCategory(Category registro) {
 		registro.setService_code(obtenerIdCategoria());
 		
@@ -1622,7 +1413,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param registro
 	 * @return
 	 */
-	//@Override
+	
 	public ResponseEntity<?> saveCategory(Category registro) {
 		try {
 			
@@ -1669,7 +1460,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param req
 	 * @throws IOException
 	 */
-	//@Override
+	
 	public void almacenarAdjunto(Request req) throws IOException {
 		if (req.getMedia_body() != null && req.getMedia_name() != null) {
 			
@@ -1693,7 +1484,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws SQLException
 	 * @throws FormatoNoSoportadoException
 	 */
-	//@Override
+	
 	public Request guardar(Request req, String usuarioAdmin) throws SQLException, FormatoNoSoportadoException {
 		return crear(req, UtilsQyS.OPGUARDAR, usuarioAdmin, "GUARDAR", null);
 	}
@@ -1707,7 +1498,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param parseInt
 	 * @return
 	 */
-	//@Override
+	
 	public ResponseEntity<?> asociar(final BigDecimal id, final Integer service_code,
 			final Integer agency_responsible_code, final int user_id) {
 		
@@ -1738,7 +1529,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param id
 	 * @return
 	 */
-	//@Override
+	
 	public Value obtenerEstadoDeQueja(BigDecimal id) {
 		
 		String sql = "SELECT r.rst_id,s.RST_NAME from hbrequests r,HBREQUESTSTATES s "
@@ -1766,7 +1557,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param clientId
 	 * @return
 	 */
-	//@Override
+	
 	public ResponseEntity<?> devolverEstadoAnteriorQueja(final BigDecimal id,
 			final Value estadoAnterior, final String mensaje, final String usuarioAdmin,
 			final String clientId) {
@@ -1816,7 +1607,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	//@Override
+	
 	public void almacenarInforme(JasperPrint informe, String fileName) throws IOException, JRException {
 		JasperExportManager.exportReportToPdfFile(informe, Propiedades.getString("datos") + "/aplicaciones/ticketing/" + fileName);
 	}
@@ -1831,7 +1622,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @return
 	 * @throws JRException
 	 */
-	//@Override
+	
 	public JasperPrint generarInformeOrdenTrabajo(Request req, String externo, String rootCategory, Peticion peticion) throws JRException {
 		
 		@SuppressWarnings("deprecation")
@@ -1973,7 +1764,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 			method.releaseConnection();
 		}
 	}
-	@Override
+	
 	public String obtenerNifDeRequest(Request registro) {
 		String[] lines = registro.getNotes().split(System.getProperty("line.separator"));
 		for (int i = 0; i < lines.length; i++) {

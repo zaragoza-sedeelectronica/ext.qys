@@ -674,7 +674,7 @@ public class CitaPreviaGenericDAOImpl extends GenericDAOImpl <CitaPrevia, Intege
 		return false;
 	}
 	
-	@Override
+	
 	public Cita nuevaCita(int idAgenda, String lastName, String firstName, String email, String phone, String nif, boolean lopd, String diaCita,
 			String horaCita, String expediente) throws Exception {
 		try {

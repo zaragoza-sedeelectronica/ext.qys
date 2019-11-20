@@ -5,7 +5,7 @@ import org.sede.core.anotaciones.Esquema;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ConfigQys implements PropertyFileInterface {
+public class ConfigQysEquipamiento implements PropertyFileInterface {
 	public static final String ESQUEMA = Esquema.TICKETING;
 	public static final String TM = Esquema.TMTICKETING;
 	
@@ -17,7 +17,7 @@ public class ConfigQys implements PropertyFileInterface {
 	}
 
 	public String getEntity() {
-		return "org.sede.servicio.qys.entity";
+		return "org.sede.servicio.equipamiento.entity";
 	}
 
 }

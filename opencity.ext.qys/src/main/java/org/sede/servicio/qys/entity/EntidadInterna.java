@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,33 +13,32 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicUpdate;
+import org.sede.core.anotaciones.Esquema;
 import org.sede.core.anotaciones.Permisos;
 import org.sede.core.dao.EntidadBase;
 import org.sede.core.utils.Funciones;
-import org.sede.servicio.qys.ConfigQys;
 
 /**
- * Clase EntidadExterna
+ * Clase EntidadInterna
  *
  * @author Ayuntamiento Zaragoza
  *
  */
-@XmlRootElement(name = "entidad-externa")
+@XmlRootElement(name = "entidad-interna")
 @Entity
-@Table(name = "HB_ENTIDADESEXTERNAS", schema = ConfigQys.ESQUEMA)
+@Table(name = "HB_ENTIDADESINTERNAS", schema = Esquema.TICKETING)
 @DynamicUpdate
 @XmlAccessorType(XmlAccessType.FIELD)
-@SequenceGenerator(name = "SECUENCIA_SEQ_ENTIDADEXTERNA", sequenceName = "SEQ_ENTIDADEXTERNA", allocationSize = 1)
 @BatchSize(size=100)
-public class EntidadExterna extends EntidadBase implements java.io.Serializable {
+public class EntidadInterna extends EntidadBase implements java.io.Serializable {
 
 	/**
 	 *  variable id
 	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SECUENCIA_SEQ_ENTIDADEXTERNA")
-	@Column(name = "ID", unique = true, nullable = false, precision = 22, scale = 0)
-	private BigDecimal id;
+	@Size(max = 50)
+	@Column(name = "ID", nullable = false, unique = true)
+	private String id;
 	/**
 	 *  variable name
 	 */
@@ -72,11 +68,11 @@ public class EntidadExterna extends EntidadBase implements java.io.Serializable 
 	/**
 	 * Constructor
 	 */
-	public EntidadExterna() {
+	public EntidadInterna() {
 		super();
 	}
 
-	public BigDecimal getId() {
+	public String getId() {
 		return id;
 	}
 
@@ -112,7 +108,7 @@ public class EntidadExterna extends EntidadBase implements java.io.Serializable 
 		this.user_id = user_id;
 	}
 
-	public void setId(BigDecimal id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

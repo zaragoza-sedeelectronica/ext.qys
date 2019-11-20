@@ -2,6 +2,7 @@ package org.sede.servicio.qys;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -21,15 +23,18 @@ import net.sf.jasperreports.engine.JasperPrint;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.jaxrs.ext.search.SearchParseException;
 import org.sede.core.anotaciones.Cache;
 import org.sede.core.anotaciones.Description;
 import org.sede.core.anotaciones.Esquema;
+import org.sede.core.anotaciones.Fiql;
 import org.sede.core.anotaciones.Gcz;
 import org.sede.core.anotaciones.OpenData;
 import org.sede.core.anotaciones.Permisos;
 import org.sede.core.anotaciones.PermisosUser;
 import org.sede.core.anotaciones.ResponseClass;
 import org.sede.core.dao.JPAIgnoreTraversableResolver;
+import org.sede.core.dao.SearchFiql;
 import org.sede.core.geo.Geometria;
 import org.sede.core.geo.Punto;
 import org.sede.core.plantilla.LayoutInterceptor;
@@ -48,6 +53,8 @@ import org.sede.servicio.acceso.dao.CiudadanoGenericDAO;
 import org.sede.servicio.acceso.entity.Ciudadano;
 import org.sede.servicio.citaprevia.dao.CitaPreviaGenericDAO;
 import org.sede.servicio.citaprevia.entity.Cita;
+import org.sede.servicio.qys.dao.HBRequestDao;
+import org.sede.servicio.qys.dao.HbUserGenericDao;
 import org.sede.servicio.qys.dao.QySDao;
 import org.sede.servicio.qys.dao.consulta.ServiceDatos;
 import org.sede.servicio.qys.entity.Adjunto;
@@ -59,6 +66,8 @@ import org.sede.servicio.qys.entity.ServiceDefinition;
 import org.sede.servicio.qys.entity.SolicitudInformacionPublica;
 import org.sede.servicio.qys.entity.UtilsQyS;
 import org.sede.servicio.qys.entity.Value;
+import org.sede.servicio.qys.entity.db.Hbrequests;
+import org.sede.servicio.qys.entity.db.Hbusers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +90,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.googlecode.genericdao.search.Filter;
+import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
 
 /**
@@ -108,6 +119,13 @@ public class QysController {
 	 */
 	@Autowired
 	private QySDao dao;
+	
+	@Autowired
+	private HbUserGenericDao daoUser;
+	
+	@Autowired
+	private HBRequestDao daoRequest;
+	
 	/**
 	 *  Initial ciudadano
 	 */
@@ -168,7 +186,7 @@ public class QysController {
 	@OpenData
 	@Cache(Cache.DURACION_30MIN)
 	@ResponseClass(value = Request.class, entity = SearchResult.class)
-	@RequestMapping(method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
+	@RequestMapping(method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.GEOJSON, MimeTypes.XML, MimeTypes.GEORSS, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
 	@Description("Listado de quejas")
 //	@Permisos(Permisos.DET) 
     public @ResponseBody ResponseEntity<?> apiListRequests(
@@ -181,6 +199,7 @@ public class QysController {
     		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String serviceCode,
     		@RequestParam(name = "origin", required = false) @Description("Origen de la queja") String origin,
     		@RequestParam(name = "externo_code", required = false) @Description("Identificador del entidad a la que se deriva") String externoCode,
+    		@RequestParam(name = "interno_code", required = false) @Description("Identificador del gestor al que se deriva") String internoCode,
     		@RequestParam(name = "agency_responsible_code", required = false) String agencyResponsibleId,
     		@Permisos(Permisos.NEW) @RequestParam(name = "account_id", required = false) @Description("Identificador del usuario") String accountId,
     		@Permisos(Permisos.NEW) @RequestParam(name = "user_id", required = false) @Description("Identificador del usuario") String userId,
@@ -196,7 +215,7 @@ public class QysController {
     		@RequestParam(name = "id_cat_sip", required = false) String idCatSip
     		) throws SQLException {
 		try {
-
+			
 			Peticion peticion = Funciones.getPeticion();
 			String usuarioTicketing = UtilsQyS.obtenerUsuarioTicketing(peticion);
 			String externoTicketing = UtilsQyS.obtenerExternoTicketing(peticion);
@@ -245,9 +264,12 @@ public class QysController {
 			if (externoTicketing != null) {
 				externoCode = externoTicketing;
 			}
-			String inspector = null;
+			
 			if (peticion.getPermisosEnSeccion() != null && peticion.getPermisosEnSeccion().contains(Permisos.INSPECTOR)) {
-				inspector = peticion.getClientId();
+				internoCode = peticion.getClientId();
+			} else if (!peticion.getPermisosEnSeccion().contains("SENDINSPECTOR")) {
+				// Sin permiso no se puede consultar por identificador de externo
+				internoCode = null;
 			}
 			
 			sort = dao.nombresParaBBDD(sort);
@@ -275,21 +297,24 @@ public class QysController {
 				type = SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION.toString();
 			}
 			
-			// Como mucho 1000 resultados
+//			// Como mucho 1000 resultados
 			rows = rows > 1000 ? 1000 : rows;
-			SearchResult<Request> results = dao.searchAndCountRequest(rows,
+			SearchResult<Request> results = daoRequest.searchAndCountRequest(rows,
 					start, sort, ids, title, notes, 
 					StringUtils.isEmpty(serviceCode) ? null : serviceCode,
 					StringUtils.isEmpty(externoCode) ? null : Integer.parseInt(externoCode),	
 					StringUtils.isEmpty(agencyResponsibleId) ? null : Integer.parseInt(agencyResponsibleId),
 					StringUtils.isEmpty(accountId) ? null : Long.parseLong(accountId),
 					StringUtils.isEmpty(userId) ? null : Long.parseLong(userId),
-					startDate, endDate, type, status, validated, usuarioTicketing, groupOperator, operator, answerRequested, barrioCode, origin, inspector, Funciones.getPeticion().getClientId(),
+					startDate, endDate, type, status, validated, usuarioTicketing, groupOperator, operator, answerRequested, barrioCode, origin, internoCode, Funciones.getPeticion().getClientId(),
 					StringUtils.isEmpty(idCatSip) ? null : Integer.parseInt(idCatSip));
-			tratarCoordenadas(results);
+//			tratarCoordenadas(results);
+			
 			return ResponseEntity.ok(results);
+			
+			
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error(Funciones.getStackTrace(e));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
 		}
     }
@@ -304,6 +329,7 @@ public class QysController {
      */
     @SuppressWarnings("unchecked")
 	@OpenData
+	@Permisos(Permisos.DET)
     @Description("Detalle de una queja")
     @ResponseClass(Request.class)
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MimeTypes.GEOJSON, MimeTypes.GEORSS,MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
@@ -312,33 +338,19 @@ public class QysController {
         String usuarioTicketing = UtilsQyS.obtenerUsuarioTicketing(peticion);
         String externoTicketing = UtilsQyS.obtenerExternoTicketing(peticion);
         if (peticion.getPermisosEnSeccion().contains(Permisos.ADMIN)) {
-            if (usuarioTicketing == null) {
+        	Hbrequests registro = daoRequest.findRqtRequestNumber(id);
+        	if (usuarioTicketing == null) {
                 usuarioTicketing = "" + accountId;
             }
-            if (externoTicketing == null) {
-                Object req = dao.detalle(id, usuarioTicketing);
-                if (req instanceof Request) {
-                    return ResponseEntity.ok(tratarCoordenada((Request)req));
-                } else { //FIXME: ok o badrequest???
-                    return ResponseEntity.ok(req);
-                }
-            } else {
-                Object retorno = dao.detalle(id, usuarioTicketing);
-                if (retorno instanceof Request) {
-                    Request queja = (Request) retorno;
-                    if (queja.getExterno_code().equals(new BigDecimal(externoTicketing))) {
-                        return ResponseEntity.ok(retorno);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
-                    }
-                } else { //FIXME: ok o badrequest???
-                    return ResponseEntity.ok(retorno);
-                }
-            }
+    		if (registro == null || !UtilsQyS.puedeAccederAQueja(registro, usuarioTicketing, externoTicketing)) {
+    			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
+    		} else {
+	        	return ResponseEntity.ok(registro);
+    		}
         } else {
-            ResponseEntity<?> results = apiListRequests(0, 1, null, "" + id, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+            ResponseEntity<?> results = apiListRequests(0, 1, null, "" + id, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
             if (results.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.ok(((ArrayList<Request>) results.getBody()).get(0));
+                return ResponseEntity.ok(((SearchResult<Hbrequests>) results.getBody()).getResult().get(0));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
             }
@@ -575,29 +587,15 @@ public class QysController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = {
 			MediaType.TEXT_HTML_VALUE, "*/*" })
-	public String home(
-    		@RequestParam(name = CheckeoParametros.PARAMSTART, defaultValue = CheckeoParametros.START) int start, 
-    		@RequestParam(name = CheckeoParametros.PARAMROWS, defaultValue = CheckeoParametros.ROWS) int rows, 
-    		@RequestParam(name = CheckeoParametros.PARAMSORT, required = false) String sort, 
-    		@RequestParam(name = "service_request_id", required = false) @Description("Identificador de la queja") String ids, //se pueden poner varios IDs Separados por coma
-    		@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
-    		@Permisos(Permisos.ADMIN)@RequestParam(name = "notes", required = false) String notes,
-    		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String service_code,
-    		@RequestParam(name = "origin", required = false) @Description("Origen de la queja") String origin,
-    		@RequestParam(name = "externo_code", required = false) @Description("Identificador del entidad a la que se deriva") String externo_code,
-    		@RequestParam(name = "agency_responsible_code", required = false) String agency_responsible_id,
-    		@Permisos(Permisos.NEW) @RequestParam(name = "account_id", required = false) @Description("Identificador del usuario") String account_id,
-    		@Permisos(Permisos.NEW) @RequestParam(name = "user_id", required = false) @Description("Identificador del usuario") String user_id,
-    		@RequestParam(name = "start_date", required = false) @DateTimeFormat(pattern = ConvertDate.DATE_FORMAT) @Description("Quejas introducidas despúes de esta fecha") Date start_date,
-    		@RequestParam(name = "end_date", required = false) @DateTimeFormat(pattern = ConvertDate.DATE_FORMAT)  @Description("Quejas introducidas antes de esta fecha") Date end_date,
-    		@RequestParam(name = "group_operator", required = false) String group_operator, //El identificador de usuario de quejas y sugerencias
-    		@RequestParam(name = "operator", required = false) String operator,
-    		@RequestParam(name = "answer_requested", required = false) String answer_requested,
-    		@RequestParam(name = "barrio_code", required = false) String barrio_code,
-    		@RequestParam(name = "type", required = false) String type,
-    		@RequestParam(name = "status", required = false) String status,
-    		@RequestParam(name = "validated", required = false) String validated,
-    		@RequestParam(name = "id_cat_sip", required = false) String id_cat_sip, Model model, HttpServletRequest request) {
+	public String home(SearchFiql search, 
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "start_date", required = false) @DateTimeFormat(pattern="dd-MM-yyyy") Date startDate,
+			@RequestParam(name = "end_date", required = false) @DateTimeFormat(pattern="dd-MM-yyyy") Date endDate,
+			@RequestParam(name = "barrio_code", required = false) Integer barrioCode,
+			@RequestParam(name = "id_cat_sip", required = false) Integer idCatSip,
+			@RequestParam(name = "service_code", required = false) BigDecimal serviceCode,
+			@RequestParam(name = "service_name", required = false) String serviceName,
+			Model model, HttpServletRequest request) {
 		try {
 			
 			if (servicioResolucionInformacionPublica()) {
@@ -609,7 +607,7 @@ public class QysController {
 				model.addAttribute("title", "Quejas y sugerencias");
 			}
 			
-			model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, notes, service_code, origin, externo_code, agency_responsible_id, account_id, user_id, start_date, end_date, group_operator, operator, answer_requested, barrio_code, type, status, validated, id_cat_sip));
+			model.addAttribute(ModelAttr.RESULTADO, apiListar(search, status, startDate, endDate, barrioCode,idCatSip, serviceCode, serviceName));
 		} catch (Exception e) {
 			logger.error("ERROR", e);
 			model.addAttribute("message", e.getMessage());
@@ -741,7 +739,7 @@ public class QysController {
     		@RequestParam(name = "id_cat_sip", required = false) @Description("Identificador de tipo de Solicitud de Información pública") String id_cat_sip,
     		HttpServletRequest request, Model model) throws SQLException {
 		Ciudadano user = Funciones.getUser(request);
-		model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, notes, serviceCode, null, null, null, null, ("" + user.getId()), startDate, endDate, null, null, null, barrioCode, type, status, null, id_cat_sip));
+		model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, notes, serviceCode, null, null, null, null, null, ("" + user.getId()), startDate, endDate, null, null, null, barrioCode, type, status, null, id_cat_sip));
 		return MAPPING + "/user";
 	}
 	
@@ -993,6 +991,7 @@ public class QysController {
 			Date fecha = null;
 			String mailExterno = null;
 			BigDecimal idExterno = null;
+			String idInterno = null;
 			String linkOrdenTrabajo = "";
 			String descripcion = params.get("description");
 			if (accion == 5) { // Solicitar mas informacion
@@ -1030,7 +1029,7 @@ public class QysController {
 			if (accion == 8) { // Derivar a externo
 				mailExterno = params.get("mailExterno");
 				idExterno = new BigDecimal(params.get("idExterno"));
-				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), null);
+				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				if (UtilsQyS.ID_EXTERNO_FCC.equals(idExterno)) {
 					
 					TransformadorXml transformador = new TransformadorXml();
@@ -1041,7 +1040,7 @@ public class QysController {
 					peticion.setFormato(tipo);
 					Funciones.sendMail("jardines - zaragoza", respuesta.toString(), mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 					descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
-					obj = dao.acciones(id, 10, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), null);
+					obj = dao.acciones(id, 10, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				} else if (UtilsQyS.ID_EXTERNOLIMPIEZA_FCC.equals(idExterno)) {
 					TransformadorXml transformador = new TransformadorXml();
 					StringBuilder respuesta = new StringBuilder();
@@ -1051,7 +1050,7 @@ public class QysController {
 					peticion.setFormato(tipo);
 					Funciones.sendMail("limpieza - zaragoza", respuesta.toString(), mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 					descripcion = "Enviado por integracion a " + mailExterno + ": Descripcion: " + descripcion;
-					obj = dao.acciones(id, 10, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), null);
+					obj = dao.acciones(id, 10, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				} else {
 					if (params.containsKey("incluir_orden")) {
 						// Generamos la orden de trabajo, 
@@ -1130,13 +1129,13 @@ public class QysController {
 					descripcion = descripcion + System.getProperty("line.separator") + dao.enviarCapaz((Request)original, diaCita, horaCita, expediente + "/" + year);
 				}
 				
-				obj = dao.acciones(id, 10, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), null);
+				obj = dao.acciones(id, 10, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				
 				return ResponseEntity.ok(obj);
 			} else if (accion == 11) {
 				mailExterno = params.get("mailExterno");
 				idExterno = new BigDecimal(params.get("idExterno"));
-				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), null);
+				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				if (!StringUtils.isEmpty(mailExterno)) {
 					Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias.", descripcion, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 					descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
@@ -1144,7 +1143,7 @@ public class QysController {
 				return ResponseEntity.ok(obj);
 			} else {
 				Integer internalStatus = params.get("internalStatus") == null ? null : Integer.parseInt(params.get("internalStatus"));
-				return dao.acciones(id, accion, descripcion, fecha, idExterno, usuarioTicketing, uuid, peticion.getClientId(), internalStatus);
+				return dao.acciones(id, accion, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), internalStatus);
 			}
 		} catch (SQLException ex) {
 			logger.error(ex.getMessage());
@@ -1165,5 +1164,91 @@ public class QysController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
 		}
 	}
+
+	@OpenData
+	@Cache(Cache.DURACION_30MIN)
+	@Description("Listado de registros")
+	@ResponseClass(value = Hbrequests.class, entity = SearchResult.class)
+	@RequestMapping(value = "/list", method = RequestMethod.GET, produces = {MimeTypes.GEOJSON, MimeTypes.GEORSS, MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
+	public @ResponseBody ResponseEntity<?> apiListar(@Fiql SearchFiql search, 
+			@RequestParam(name = "status", required = false) String status,
+			@RequestParam(name = "start_date", required = false) @DateTimeFormat(pattern="dd-MM-yyyy") Date startDate,
+			@RequestParam(name = "end_date", required = false) @DateTimeFormat(pattern="dd-MM-yyyy") Date endDate,
+			@RequestParam(name = "barrio_code", required = false) Integer barrioCode,
+			@RequestParam(name = "id_cat_sip", required = false) Integer idCatSip,
+			@RequestParam(name = "service_code", required = false) BigDecimal serviceCode,
+			@RequestParam(name = "service_name", required = false) String serviceName) throws SearchParseException, ParseException {
+		search.setExcludeFields("status", "barrio_code", "id_cat_sip", "service_code", "service_name", "start_date", "end_date");
+		Search busqueda = search.getConditions(Hbrequests.class);
+		busqueda.addFilter(Filter.equal("rqtPublic", "S"));
+		busqueda.addFilter(Filter.equal("validated", "S"));
+		busqueda.addFilter(Filter.greaterThan("service_request_id", UtilsQyS.RQT_ID_FROM));
+		if (barrioCode != null) {
+			busqueda.addFilter(Filter.equal("portal.junta.id", barrioCode));	
+		}
+		if (barrioCode != null) {
+			busqueda.addFilter(Filter.equal("catSip.id", idCatSip));	
+		}
+		
+		if (serviceCode != null) {
+			busqueda.addFilter(Filter.equal("hbcategories.calHbid", serviceCode));	
+		}
+		if (serviceName != null) {
+			busqueda.addFilter(Filter.ilike("hbcategories.calName", serviceName));	
+		}
+		if ("open".equals(status)) {
+			busqueda.addFilterEmpty("updated_datetime");
+		} else if ("closed".equals(status)) {
+			busqueda.addFilterNotEmpty("updated_datetime");
+		}
+		if (servicioResolucionInformacionPublica()) {
+			busqueda.addFilter(Filter.equal("type.rtyHbid", SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION));
+		}
+		
+		if (startDate != null || endDate != null) {
+			if (!Funciones.getPeticion().getPermisosEnSeccion().contains(Permisos.ADMIN)) {
+				startDate = UtilsQyS.ajustarFechaInicio(startDate, endDate);
+				endDate = UtilsQyS.ajustarFechaFin(startDate, endDate);
+			} else {
+				if (startDate == null) {
+					startDate = new Date();
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(endDate);
+					cal.add(Calendar.YEAR, -1);
+					startDate = cal.getTime();
+				} else if (endDate == null) {
+					endDate = new Date();
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(startDate);
+					cal.add(Calendar.YEAR, 1);
+					endDate = cal.getTime();
+				}
+			}
+			busqueda.addFilter(Filter.greaterOrEqual("rqtRequestdatetime", startDate));
+			busqueda.addFilter(Filter.lessOrEqual("rqtRequestdatetime", endDate));
+		}
+		
+		
+		return ResponseEntity.ok(daoRequest.searchAndCount(busqueda));
+    }
+
+// TODO BORRAR	@Permisos(Permisos.ADMIN)
+//	@Cache(Cache.DURACION_30MIN)
+//	@RequestMapping(value = "/change-all-pass", method = RequestMethod.GET, produces = {MimeTypes.GEOJSON, MimeTypes.GEORSS, MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
+//	public @ResponseBody ResponseEntity<?> apiChangePass() {
+//		List<Hbusers> usr = daoUser.findAll();
+//		
+//		Query update = daoUser.em().createNativeQuery("Update HBUSERS set PASSWORD=? where USR_HBID = ? ");
+//		
+//		for (Hbusers u : usr) {
+//			update.setParameter(1, Funciones.calculateUserPassword(u.getUsrPassword()));
+//			update.setParameter(2, u.getUsrHbid());
+//			System.out.println(u.getUsrHbid() + ":" + u.getUsrPassword() + ":" + update.executeUpdate() + ":" + Funciones.calculateUserPassword(u.getUsrPassword()));
+//			
+//			
+//		}
+//		System.out.println("OKKK");
+//		return ResponseEntity.ok(new Mensaje(200, "Actualizacion realizada"));
+//    }
 	
 }

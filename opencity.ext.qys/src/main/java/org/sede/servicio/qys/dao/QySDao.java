@@ -80,63 +80,7 @@ public interface QySDao extends GenericDAO<Request, BigDecimal> {
 	 * @throws SQLException
 	 */
 	public Object detalle(final BigDecimal id, final String usuarioTicketing) throws SQLException;
-	/**
-	 * 
-	 * Metodo buscar y contar peticiones
-	 * 
-	 * @param rows
-	 * @param start
-	 * @param sort
-	 * @param ids
-	 * @param title
-	 * @param notes
-	 * @param service_code
-	 * @param externo_code
-	 * @param agency_responsible
-	 * @param account_id
-	 * @param user_id
-	 * @param start_date
-	 * @param end_date
-	 * @param type
-	 * @param status
-	 * @param validated
-	 * @param usuarioTicketing
-	 * @param group_operator
-	 * @param operator
-	 * @param answer_requested
-	 * @param barrio_code
-	 * @param origin
-	 * @param inspector
-	 * @param operadorGet
-	 * @param id_cat_sip
-	 * @return
-	 * @throws SQLException
-	 */
-	public SearchResult<Request> searchAndCountRequest(final int rows, 
-			final int start, 
-			final String sort, 
-			final String ids, 
-			final String title,
-			final String notes,
-			final String service_code,
-			final Integer externo_code,
-			final Integer agency_responsible,
-			final Long account_id,
-			final Long user_id,
-			final Date start_date, 
-			final Date end_date,
-			final String type,
-			final String status,
-			final String validated,
-			final String usuarioTicketing,
-			final String group_operator,
-			final String operator,
-			final String answer_requested,
-			final String barrio_code,
-			final String origin,
-			final String inspector,
-			final String operadorGet,
-			final Integer id_cat_sip) throws SQLException;
+	
 	/**
 	 * Metodo crear
 	 *  
@@ -199,7 +143,7 @@ public interface QySDao extends GenericDAO<Request, BigDecimal> {
 	 * @throws SQLException
 	 * @throws FormatoNoSoportadoException
 	 */
-	public ResponseEntity<?> acciones(final BigDecimal id, final Integer accion, final String texto, final Date fecha, final BigDecimal idExterno, final String usuarioAdmin, final String uuid, final String clientId, final Integer internalStatus) throws SQLException, FormatoNoSoportadoException;
+	public ResponseEntity<?> acciones(final BigDecimal id, final Integer accion, final String texto, final Date fecha, final BigDecimal idExterno, final String idInterno, final String usuarioAdmin, final String uuid, final String clientId, final Integer internalStatus) throws SQLException, FormatoNoSoportadoException;
 	/**
 	 * Metodo enviar capaz
 	 * 

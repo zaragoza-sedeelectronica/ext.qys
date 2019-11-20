@@ -1,6 +1,5 @@
 package org.sede.servicio.qys.dao;
 
-import java.math.BigDecimal;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -10,9 +9,9 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
+import org.sede.core.anotaciones.Esquema;
 import org.sede.core.dao.JPAIgnoreTraversableResolver;
-import org.sede.servicio.qys.ConfigQys;
-import org.sede.servicio.qys.entity.EntidadExterna;
+import org.sede.servicio.qys.entity.EntidadInterna;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +23,9 @@ import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
  * @author Ayuntamiento Zaragoza
  *
  */
-@Repository("entidadExternaTicketing")
-@Transactional(ConfigQys.TM)
-public class EntidadExternaGenericDAOImpl extends GenericDAOImpl <EntidadExterna, BigDecimal> implements EntidadExternaGenericDAO {
+@Repository("entidadInternaTicketing")
+@Transactional(Esquema.TMTICKETING)
+public class EntidadInternaGenericDAOImpl extends GenericDAOImpl <EntidadInterna, String> implements EntidadInternaGenericDAO {
 	
 		
 	/**
@@ -34,7 +33,7 @@ public class EntidadExternaGenericDAOImpl extends GenericDAOImpl <EntidadExterna
 	 * 
 	 * @param entityManager
 	 */
-	@PersistenceContext(unitName=ConfigQys.ESQUEMA)
+	@PersistenceContext(unitName=Esquema.TICKETING)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}

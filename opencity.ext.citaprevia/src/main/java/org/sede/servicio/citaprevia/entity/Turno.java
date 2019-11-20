@@ -4,7 +4,7 @@ package org.sede.servicio.citaprevia.entity;
 import javax.persistence.Entity;
 import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "turno")
-@Entity
+//@Entity
 public class Turno {
 	
 	private String hora;

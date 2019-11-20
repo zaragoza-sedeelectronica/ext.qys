@@ -12,7 +12,7 @@ import org.sede.core.dao.EntidadBase;
 import org.sede.core.utils.ConvertDate;
 
 @XmlRootElement(name="dias")
-@Entity
+//@Entity
 public class Dias extends EntidadBase {
 	
 	private Date fecha;

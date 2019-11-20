@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.sede.core.rest.Peticion;
+import org.sede.servicio.qys.entity.db.Hbrequestactions;
+import org.sede.servicio.qys.entity.db.Hbrequests;
 
 /**
  * Clase UtilsQyS
@@ -16,6 +18,16 @@ public class UtilsQyS {
 	private UtilsQyS() {
 		super();
 	}
+	
+	/**
+	 *  usuarios especiales
+	 */
+	//FIXME extraer a fichero de propiedades
+	public static final BigDecimal ID_MAIN_ADMIN = new BigDecimal(2);
+	//FIXME extraer a fichero de propiedades
+	public static final BigDecimal ID_010 = new BigDecimal(235798528);
+	// FIXME extraer a fichero de propiedades
+	public static final int RQT_ID_FROM = 0;//375997;
 	/**
 	 *  variable PROPGCZUSR
 	 */
@@ -243,4 +255,40 @@ public class UtilsQyS {
 		}
 	}
 
+	public static boolean puedeAccederAQueja(Hbrequests registro, String usuarioTicketing, String externoTicketing) {
+		BigDecimal userTicketing = new BigDecimal(usuarioTicketing);
+		
+		if (externoTicketing == null) {
+			if (userTicketing.equals(registro.getUsrHbidRequester())
+					|| userTicketing.equals(registro.getUsrHbidIntroducer())
+					|| userTicketing.equals(registro.getUsrHbidManager())
+					|| userTicketing.equals(ID_MAIN_ADMIN)
+					|| (registro.getUsrHbidManager() == null
+							&& (userTicketing.equals(ID_MAIN_ADMIN)
+									|| userTicketing.equals(ID_010)))) {
+				return true;
+			} else {
+				for (Hbrequestactions accion : registro.getActions()) {
+					if (accion.getUsrHbidAgent().equals(userTicketing)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		} else if (registro.getHbEntidadesexternas().getId().equals(new BigDecimal(externoTicketing))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static BigDecimal[] asBigDecimalArray(String valor) {
+		String[] datos = valor.split(",");
+		BigDecimal[] bd = new BigDecimal[datos.length];
+		for (int i = 0; i < datos.length; i++) {
+			bd[i] = new BigDecimal(datos[i]);
+		}
+		return bd;
+	}
+	
 }
