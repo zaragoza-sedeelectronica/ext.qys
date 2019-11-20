@@ -108,8 +108,8 @@
                 <a class="label label-info" th:href="'?service_code='+${registro.service_code}">
                     <th:block sede:rdf="${registro.get('service_name')}" />
                 </a>
-                <a th:if="${registro.id_cat_sip}" class="label label-danger" th:href="'?id_cat_sip='+${registro.id_cat_sip}">
-                    <th:block sede:rdf="${registro.get('cat_sip')}" />
+                <a th:if="${registro.catSip}" class="label label-danger" th:href="'?id_cat_sip='+${registro.catSip.id}">
+                    <th:block th:text="${registro.catSip.title}" />
                 </a>
                 
                 <th:block th:switch="${registro.status}">
@@ -118,7 +118,7 @@
                 </th:block>
                 <span sede:rdf="${registro.get('requested_datetime')}"></span>
                 <div><pre sede:rdf="${registro.get('description')}" class="shorten"></pre></div>
-                <div th:if="!${#strings.isEmpty(registro.service_notice)}"><span class="label label-danger">Respuesta</span> <span sede:rdf="${registro.get('closed_datetime')}"></span><pre sede:rdf="${registro.get('service_notice')}" class="shorten"></pre></div>
+                <div th:if="!${#strings.isEmpty(registro.service_notice)}"><span class="label label-danger">Respuesta</span> <span sede:rdf="${registro.get('updated_datetime')}"></span><pre sede:rdf="${registro.get('service_notice')}" class="shorten"></pre></div>
                 <th:block th:utext="${registro.getRdf()}"></th:block>
             </li>
         </ul>

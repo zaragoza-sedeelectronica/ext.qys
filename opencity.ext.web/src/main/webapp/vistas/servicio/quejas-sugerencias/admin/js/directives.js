@@ -20,11 +20,11 @@ angular.module('app.directives', [])
                 	
                     var modalInstance = $uibModal.open({
                         templateUrl: '/cont/vistas/servicio/quejas-sugerencias/admin/templates/accionModal.html',
-                        controller: function($scope, $uibModalInstance, regInterno, accionesBase, entidadExterna, inspectores, estados_internos, permisos, selectedIds) {
+                        controller: function($scope, $uibModalInstance, regInterno, accionesBase, entidadExterna, entidadInterna, estados_internos, permisos, selectedIds) {
                         	
                             $scope.registro = regInterno;
                             $scope.entidadExterna = entidadExterna;
-                            $scope.inspectores = inspectores;
+                            $scope.entidadInterna = entidadInterna;
                             $scope.permisos = permisos;
                             $scope.selectedIds = selectedIds;
                             $scope.estados_internos = estados_internos;
@@ -130,7 +130,7 @@ angular.module('app.directives', [])
                                 result.registro = $scope.registro;
                                 result.accion = $scope.accion;
                                 result.attachment = $scope.attachment;
-                                result.inspectores = $scope.inspectores;
+                                result.entidadInterna = $scope.entidadInterna;
                                 result.estados_internos = $scope.estados_internos;
                                 result.permisos = $scope.permisos;
                                 result.entidadExternaSelected = $scope.accion.entidadExternaSelected;
@@ -151,8 +151,8 @@ angular.module('app.directives', [])
                             accionesBase: function() {
                                 return $scope.$parent.acciones;
                             },
-                            inspectores: function() {
-                                return $scope.$parent.inspectores;
+                            entidadInterna: function() {
+                                return $scope.$parent.entidadInterna;
                             },
                             estados_internos: function() {
                             	return $scope.$parent.estados_internos;
@@ -218,18 +218,10 @@ angular.module('app.directives', [])
 	                        }
 	
 	                        if (accion.id == 11) {
-	                            if (angular.isDefined(registro.zona_inspeccion)) {
-	                            	var id_usuario;
-	                            	angular.forEach(result.inspectores, function(value, key) {
-	                            		
-	                            		  if (value.id == registro.zona_inspeccion) {
-	                            			  id_usuario = value.user;
-	                            		  }
-	                            		});
-	                            	
-	                                idExterno = "&idExterno=" + id_usuario;
+	                            if (angular.isDefined(registro.entidadInterna)) {
+	                                idExterno = "&idInterno=" + registro.entidadInterna.id;
 	                            } else {
-	                                Informer.inform("Seleccione un inspector al que derivar la queja", "danger");
+	                                Informer.inform("Seleccione un interno al que derivar la queja", "danger");
 	                                return;
 	                            }
 	                        }
@@ -293,8 +285,8 @@ angular.module('app.directives', [])
         };
     }
 ])
-    .directive('modalEntidad', ['$uibModal', 'Restangular', 'RestangularEntidades', 'Informer',
-        function($uibModal, Restangular, RestangularEntidades, Informer) {
+    .directive('modalEntidad', ['$uibModal', 'Restangular', 'RestangularEntidades', 'RestangularInternos', 'Informer',
+        function($uibModal, Restangular, RestangularEntidades, RestangularInternos, Informer) {
             return {
                 restrict: 'EA',
                 scope: {
@@ -308,8 +300,9 @@ angular.module('app.directives', [])
 
                         var modalInstance = $uibModal.open({
                             templateUrl: '/cont/vistas/servicio/quejas-sugerencias/admin/templates/entidadModal.html',
-                            controller: function($scope, $uibModalInstance, entidadExternaSelected) {
-                                $scope.accion={};
+                            controller: function($scope, $uibModalInstance, entidadExternaSelected, tipoaccion) {
+				$scope.tipoaccion = tipoaccion;                                
+				$scope.accion={};
                                 $scope.accion.entidadExternaSelected = entidadExternaSelected || {};
                                 
                                 $scope.btnModalGuardarEntidad = function() {
@@ -325,38 +318,72 @@ angular.module('app.directives', [])
                                 entidadExternaSelected: function() {
                                     return $scope.modelo;
                                 },
+                                tipoaccion: function() {
+                                    return $attrs.accion;
+                                }
                             }
                         });
 
                         modalInstance.result.then(function(result) {
-                            var entidadExterna = result;
-                            if (angular.isUndefined(entidadExterna.id)) {
-                                RestangularEntidades.all('').post(entidadExterna, {}, {}).then(function(data) {
-                                    //TODO: Eliminar peticion GET y anyadir 'data' a sessionStorage.reqentidadexterna restangularizando el objeto
-                                    RestangularEntidades.all('').getList({
-                                        results_only: false,
-                                        refresh: 'S',
-                                    }).then(function(data) {
-                                        $scope.$parent.$parent.entidadExterna = data;
-                                        sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));
-                                    }, function(result) {
-                                        Informer.inform(result.data.error || result.data.mensaje, "danger");
-                                    });
-                                    Informer.inform("El registro se ha creado correctamente.", "success");
-                                    // $location.path('/');
-                                }, function(result) {
-                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
-                                    // $location.path('/');
-                                });
-                            } else {
-                                var entidadExternaRestangular = RestangularEntidades.copy(entidadExterna);
-                                RestangularEntidades.one('').customPUT(entidadExternaRestangular, entidadExternaRestangular.id).then(function(data) {
-                                    Informer.inform("El registro se ha modificado correctamente.", "success");
-                                    sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));
-                                }, function(result) {
-                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
-                                });
-                            }
+                        	if ($attrs.accion == "interno") {
+                        		var entidadExterna = result;
+	                            if ($attrs.icon.indexOf('plus') >= 0) {
+	                            	RestangularInternos.all("").post(entidadExterna, {}, {}).then(function(data) {
+	                                    //TODO: Eliminar peticion GET y anyadir 'data' a sessionStorage.reqentidadinterna restangularizando el objeto
+	                            		RestangularInternos.all("").getList({
+	                                        results_only: false,
+	                                        refresh: 'S',
+	                                    }).then(function(data) {
+	                                        $scope.$parent.entidadInterna = data;
+	                                        sessionStorage.setItem('reqentidadinterna', JSON.stringify(data));
+	                                    }, function(result) {
+	                                        Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                    });
+	                                    Informer.inform("El registro se ha creado correctamente.", "success");
+	                                    // $location.path('/');
+	                                }, function(result) {
+	                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                    // $location.path('/');
+	                                });
+	                            } else {
+	                                var entidadExternaRestangular = RestangularInternos.copy(entidadExterna);
+	                                RestangularInternos.one("").customPUT(entidadExternaRestangular, entidadExternaRestangular.id).then(function(data) {
+	                                    Informer.inform("El registro se ha modificado correctamente.", "success");
+	                                    sessionStorage.setItem('reqentidadinterna', JSON.stringify(data));
+	                                }, function(result) {
+	                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                });
+	                            }
+                        	} else {
+                        		var entidadExterna = result;
+	                            if (angular.isUndefined(entidadExterna.id)) {
+	                                RestangularEntidades.all("").post(entidadExterna, {}, {}).then(function(data) {
+	                                    //TODO: Eliminar peticion GET y anyadir 'data' a sessionStorage.reqentidadexterna restangularizando el objeto
+	                                    RestangularEntidades.all("").getList({
+	                                        results_only: false,
+	                                        refresh: 'S',
+	                                    }).then(function(data) {
+	                                        $scope.$parent.entidadExterna = data;
+	                                        sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));
+	                                    }, function(result) {
+	                                        Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                    });
+	                                    Informer.inform("El registro se ha creado correctamente.", "success");
+	                                    // $location.path('/');
+	                                }, function(result) {
+	                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                    // $location.path('/');
+	                                });
+	                            } else {
+	                                var entidadExternaRestangular = RestangularEntidades.copy(entidadExterna);
+	                                RestangularEntidades.one("").customPUT(entidadExternaRestangular, entidadExternaRestangular.id).then(function(data) {
+	                                    Informer.inform("El registro se ha modificado correctamente.", "success");
+	                                    sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));
+	                                }, function(result) {
+	                                    Informer.inform(result.data.error || result.data.mensaje, "danger");
+	                                });
+	                            }
+                        	}
 
                         }, function() {
 
@@ -434,7 +461,7 @@ angular.module('app.directives', [])
 
                         var modalInstance = $uibModal.open({
                             templateUrl: '/cont/vistas/servicio/quejas-sugerencias/admin/templates/busquedaModal.html',
-                            controller: function($scope, $uibModalInstance, types, estados, origin, entidadExterna, permisos, categories) {
+                            controller: function($scope, $uibModalInstance, types, estados, origin, entidadExterna, entidadInterna, estados_internos, permisos, categories) {
 
                             	$scope.linkExcel = CryptoJS.HmacSHA1("excel#" + clientID + "#"+ datosUsuario.rootcat_ticketing, secretKey, {asBytes: true}).toString();
                             	$scope.linkCsv = CryptoJS.HmacSHA1("csv#" + clientID + "#"+ datosUsuario.rootcat_ticketing, secretKey, {asBytes: true}).toString();
@@ -445,6 +472,9 @@ angular.module('app.directives', [])
                                 $scope.estados = estados;
                                 $scope.origin = origin;
                                 $scope.entidadExterna = entidadExterna;
+                                $scope.entidadInterna = entidadInterna;
+                                $scope.estados_internos = estados_internos;
+
                                 $scope.permisos = permisos;
                                 $scope.categories = categories;
 
@@ -485,6 +515,12 @@ angular.module('app.directives', [])
                                 entidadExterna: function() {
                                     return $scope.entidadExterna;
                                 },
+                                entidadInterna: function() {
+                                    return $scope.entidadInterna;
+                                },
+                                estados_internos: function() {
+                                    return $scope.estados_internos;
+                                },
                                 permisos: function() {
                                     return $scope.permisos;
                                 },
@@ -509,11 +545,13 @@ angular.module('app.directives', [])
                                 sort: 'requested_datetime desc',
                                 start: start,
                                 title: query.title,
-                                service_code: query.service_code,
+                                service_code: angular.isDefined(query.service_code) ? query.service_code.toString() : '',
                                 externo_code: query.externo_code,
+                                interno_code: query.interno_code,
+                                internal_status: query.internal_status,
                                 start_date: $filter('date')(query.start_date, 'yyyy-MM-ddTHH:mm:ss\'Z\''),
                                 end_date: $filter('date')(query.end_date, 'yyyy-MM-ddTHH:mm:ss\'Z\''),
-                                type: query.tipo,
+                                type: angular.isDefined(query.tipo) ? query.tipo.toString() : '',
                                 answer_requested: query.answer_requested,
                                 barrio_code: query.barrio_code,
                                 group_operator:query.group_operator,
@@ -528,7 +566,6 @@ angular.module('app.directives', [])
                             	$scope.$$childTail.query = query;
                                 datosListados = datosListados.concat(data); //De otro modo, se pierden los datos ya listados
                                 $scope.$$childTail.registros = datosListados;
-                                
                             }, function(result) {
                                 Informer.inform(result.data.error || result.data.mensaje, "danger");
                             });

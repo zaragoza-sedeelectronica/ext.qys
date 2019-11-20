@@ -20,8 +20,8 @@
             <span class="glyphicon glyphicon-list-alt"></span>
             <span class="hidden-xs">Informe odt</span>
         </a>
-        <modal-accion accion="1" title="Resolver" icon="fa-check" ayuda="Marca la queja como resuelta, no contesta al ciudadano" ng-show="permisos.MOD && registro.service_request_id"></modal-accion>
-        <modal-accion accion="2" title="Contestar" icon="fa-envelope" ayuda="Contesta al ciudadano y cierra la queja" ng-show="permisos.CONTESTAR && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0]}}"></modal-accion>
+        <modal-accion accion="1" title="Resolver" icon="fa-check" ayuda="Marca la queja como resuelta, no contesta al ciudadano" ng-show="permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
+        <modal-accion accion="2" title="Contestar" icon="fa-envelope" ayuda="Contesta al ciudadano y cierra la queja" ng-show="permisos.CONTESTAR && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0 || registro.status == 'closed']}}"></modal-accion>
         <a class="btn btn-default" ng-show="usuario.sup_service_code && registro.service_request_id" ng-click="derivarAServicio()">
             <span class="glyphicon glyphicon-arrow-up"></span>
             <span class="hidden-xs">Poner categor&iacute;a padre</span>
@@ -32,8 +32,8 @@
         <modal-accion accion="11" title="Derivar a Inspector" icon="fa-screenshot" ng-show="permisos.SENDINSPECTOR && registro.service_request_id"></modal-accion>
         <modal-accion accion="9" title="Informar" icon="fa-envelope" ayuda="Envia un correo al ciudadano" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0]}}"></modal-accion>
         <modal-accion accion="5" title="Solicitar" icon="fa-tag" ayuda="Envia un acceso temporal al usuario para que aporte informacion" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0]}}"></modal-accion>
-        <modal-accion accion="6" title="Rechazar" icon="glyphicon-remove-circle" ayuda="Contesta al ciudadano, cierra la queja marcandola como Rechazada" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id"></modal-accion>
-        <modal-accion accion="3" title="Archivar" icon="glyphicon-folder-close" ayuda="Cierra la queja, marcandola como Archivada" ng-show="permisos.MOD && registro.service_request_id && !usuario.externo_ticketing"></modal-accion>
+        <modal-accion accion="6" title="Rechazar" icon="glyphicon-remove-circle" ayuda="Contesta al ciudadano, cierra la queja marcandola como Rechazada" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
+        <modal-accion accion="3" title="Archivar" icon="glyphicon-folder-close" ayuda="Cierra la queja, marcandola como Archivada" ng-show="permisos.MOD && registro.service_request_id && !usuario.externo_ticketing" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
         <modal-accion accion="4" title="Borrar" icon="fa-trash" ayuda="Cierra la queja, marcandola como Borrada" ng-show="permisos.DEL && registro.service_request_id"></modal-accion>
         
         <modal-accion accion="13" title="Realizada por valoraci&oacute;n" icon="glyphicon-folder-close" ayuda="" ng-show="usuario.externo_ticketing"></modal-accion>
@@ -134,28 +134,42 @@
                                             <li>
                                                 <strong>Fecha cierre:</strong>{{registro.closed_datetime | date:'dd-MM-yyyy HH:mm'}}</li>
                                             <li ng-show="permisos.SENDINSPECTOR">
-                                                <strong>Fecha derivada a inspector:</strong>{{registro.inspector_datetime | date:'dd-MM-yyyy HH:mm'}}</li>
+                                                <strong>Fecha derivada a interno:</strong>{{registro.inspector_datetime | date:'dd-MM-yyyy HH:mm'}}</li>
                                             <li ng-show="permisos.ADMINOPERADOR">
                                                 <strong>Operador:</strong> {{registro.operator}}</li>
                                         </ul>
                                     </div>
                                     Origen
-                                    <select class="form-control" data-ng-model="registro.origin" ng-options="obj.id as obj.text for obj in origin"></select>
+                                    <select class="form-control" style="width:100px" data-ng-model="registro.origin" ng-options="obj.id as obj.text for obj in origin"></select>
                                     Tipo
-                                    <select class="form-control" data-ng-model="registro.type" ng-options="obj.id as obj.text for obj in types"></select>
+                                    <select class="form-control" style="width:100px" data-ng-model="registro.type" ng-options="obj.id as obj.text for obj in types"></select>
+                                    <span ng-show="permisos.PUB && registro.service_request_id">
+                                    	SIP
+                                    	<select style="width:100px" class="form-control" data-ng-model="registro.id_cat_sip" ng-options="obj.id as obj.text for obj in catsip"></select>
+                                    </span>
                                     Prioridad
                                     <select class="form-control" data-ng-model="registro.priority" ng-options="obj.id as obj.text for obj in priority"></select>
                                     <span ng-show="categories.length==0">
                                         Categoria
                                         <strong>{{registro.service_name}}</strong>
                                     </span>
-                                    Estado
-                                    <strong>{{registro.status_admin}}</strong>{{registro.externo_name}} {{registro.inspector}}
-
-                                    <span ng-show="permisos.PUB && registro.visible">Publicada
-                                        <strong ng-show="registro.validated==='S'">Publicada</strong>
-                                        <strong ng-show="registro.validated==='N'">Pendiente</strong>
-                                        <strong ng-show="registro.validated==='R'">No Publicada</strong>
+                                    <span ng-show="registro.service_request_id">
+	                                    Estado
+	                                    <strong>{{registro.status_admin}}</strong>{{registro.externo_name}} {{registro.inspector}}
+	
+	                                    <span ng-show="permisos.PUB && registro.visible">Publicada
+	                                        <strong ng-show="registro.validated==='S'">Publicada</strong>
+	                                        <strong ng-show="registro.validated==='N'">Pendiente</strong>
+	                                        <strong ng-show="registro.validated==='R'">No Publicada</strong>
+	                                    </span>
+                                    </span>
+                                    <span ng-show="{{registro.service_request_id === undefined}}">
+                                    	Visible
+                                    	<select class="form-control" type="text" ng-model="registro.public">
+                                                <option value="" selected></option>
+                                                <option value="S">Sí</option>
+                                                <option value="N">No</option>
+                                        </select>
                                     </span>
                                 </div>
                             </div>
@@ -194,17 +208,6 @@
 				                        </div>
 				                    </div>
 				                </div>
-                                <div class="form-group" ng-show="permisos.ZONAINSPECCION && registro.service_request_id">
-                                    <label class="col-sm-2 control-label" for="registro.zona_inspeccion">Zona de inspecci&oacute;n:</label>
-                                    <div class="col-sm-8">
-				                        <div class="input-group">
-		                                 
-		                                <select class="form-control" required="required" ng-model="registro.zona_inspeccion" ng-options="obj.id as obj.name for obj in inspectores">
-		                        			<option value=''>Select</option>
-		                    			</select>
-		                    			</div>
-		                    		</div>
-                            	</div>
                             </div>
                         </uib-tab>
                         <!-- <uib-tabset>-->
@@ -280,10 +283,9 @@
                         <uib-tab heading="Cita" ng-show="cita">
                         	<dl class="dl-horizontal">
                         	<dt>Fecha:</dt><dd>{{cita.fecha | date:'dd-MM-yyyy'}} {{cita.hora}}</dd>
-                        	<dt>Emplazamiento:</dt><dd>{{cita.emplazamiento}}</dd>
-                        	<dt>Expediente 1:</dt><dd>{{cita.expediente1}}</dd>
-                        	<dt>Expediente 2:</dt><dd>{{cita.expediente2}}</dd>
-                        	<dt>Expediente 3:</dt><dd>{{cita.expediente3}}</dd>
+                        	<dt>Persona:</dt><dd>{{cita.nombre}} NIF: {{cita.nif}}</dd>
+                        	<dt>Motivo:</dt><dd>{{cita.motivo}}</dd>
+                        	<dt>Datos:</dt><dd>{{cita.observacionesCita}}</dd>
                         	</dl>
                         </uib-tab>
                         <uib-tab heading="Adjuntos ({{registro.files.length}})" ng-show="registro.service_request_id">

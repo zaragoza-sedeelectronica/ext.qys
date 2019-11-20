@@ -102,6 +102,14 @@ var app = angular.module('app', [
             	RestangularConfigurer.setBaseUrl('/sede/servicio/quejas-sugerencias/entidad-externa');
             });
     }
+]).factory('RestangularInternos', ['Restangular',
+    function(Restangular) {
+        return Restangular
+            .withConfig(function(RestangularConfigurer) {
+                RestangularConfigurer
+                    .setBaseUrl('/sede/servicio/quejas-sugerencias/entidad-interna');
+            });
+    }
 ]).factory('RestangularPortalero', ['Restangular',
     function(Restangular) {
         return Restangular

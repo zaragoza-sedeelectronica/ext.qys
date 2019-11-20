@@ -61,7 +61,9 @@ function generarQueryString (puntoSinRestangular, original, service_code, agency
     if (puntoSinRestangular.expected_resolution_datetime!==original.expected_resolution_datetime) {
        	queryString = queryString + "&expected_resolution_datetime=" + filteredExpectedDate;
     }
-    
+    if (puntoSinRestangular.id_cat_sip!==original.id_cat_sip) {
+       	queryString = queryString + "&id_cat_sip=" + puntoSinRestangular.id_cat_sip;
+    }
     return queryString;
 	
 }
@@ -128,7 +130,9 @@ function generarQueryStringCrear (puntoSinRestangular, service_code, agency_resp
     if (!angular.isUndefined(puntoSinRestangular.expected_resolution_datetime)) {
     	queryString = queryString + "&expected_resolution_datetime=" + filteredExpectedDate;
     }
-    
+    if (!angular.isUndefined(puntoSinRestangular.public)) {
+    	queryString = queryString + "&public=" + puntoSinRestangular.public;
+    }
     
 //    if (portaleroSeleccion != null) {
 //    	queryString = queryString + "&x=" + portaleroSeleccion.x + "&y=" + portaleroSeleccion.y + "&address_id=" + portaleroSeleccion.id + "&address_string=" + portaleroSeleccion.calle.title;

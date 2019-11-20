@@ -82,7 +82,15 @@
                         </td>
                         <td data-title="Entrada"><a href="#/edit/{{ registro.service_request_id }}">{{registro.requested_datetime | date:'dd-MM-yyyy HH:mm'}}</a></td>
                         <td data-title="Asunto"><a href="#/edit/{{ registro.service_request_id }}">{{registro.type == 250544128 ? ('solicitud de: ' + registro.first_name) : registro.title}}</a> <a class="btn" href="#/edit/{{ registro.service_request_id }}" target="_blank" title="Abrir en pestaña nueva"><span class="glyphicon glyphicon-export"></span></a></td>
-                        <td data-title="Estado"><a href="#/edit/{{ registro.service_request_id }}">{{registro.status_admin}}</a></td>
+                        <td data-title="Estado">
+                        	<a href="#/edit/{{ registro.service_request_id }}">
+                        		<span ng-show="registro.status_admin.indexOf('nterno') >= 0">
+                        			{{registro.status_admin}} {{registro.inspector}}
+                        			
+                        		</span>
+                        		<span ng-show="registro.status_admin.indexOf('nterno') < 0">{{registro.status_admin}}</span> 
+                        		
+                        	</a></td>
                         <td data-title="Categoria"><a href="#/edit/{{ registro.service_request_id }}">{{registro.service_name}}</a></td>
                         <td data-title="Direccion"><a href="#/edit/{{ registro.service_request_id }}">{{registro.address_string}}</a></td>
                         <td data-title="Operador" ng-show="permisos.ADMINOPERADOR"><a href="#/edit/{{ registro.service_request_id }}" ng-show="registro.group_operator == usuario.usr_ticketing">{{registro.operator}}</a></td>

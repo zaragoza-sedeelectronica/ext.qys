@@ -54,11 +54,15 @@
                 </div>
             </div>
 			<div class="form-group" ng-show="accion.id==11">
-                <label class="col-sm-2 control-label" for="fechaAccion">Inspector:</label> 
-                <div class="col-sm-10">
-                    <select class="form-control" required="required" ng-model="registro.zona_inspeccion" ng-options="obj.id as obj.name for obj in inspectores">
+                <label class="col-sm-2 control-label" for="fechaAccion">Interno:</label> 
+                <div class="col-sm-8">
+                    <select class="form-control" required="required" ng-model="registro.entidadInterna" ng-options="obj as obj.name for obj in entidadInterna">
                         <option value=''>Select</option>
                     </select>
+                </div>
+                <div class="col-sm-2">
+                    <modal-entidad ng-show="!registro.entidadInterna" accion="interno" modelo="" icon="glyphicon-plus-sign"></modal-entidad>
+                    <modal-entidad ng-show="registro.entidadInterna" accion="interno" modelo="registro.entidadInterna" icon="glyphicon-edit"></modal-entidad>
                 </div>
             </div>
 
@@ -80,16 +84,18 @@
                     <input class="form-control" type="text" ng-model="registro.year"/>
                 </div>
                 <label class="col-sm-12 control-label">Cita previa</label>
-                <ul class="list-unstyled">
-                <li ng-repeat="dia in citaprevia" class="col-sm-4" ng-show="dia.horas.length>0">
-                	{{dia.fecha | date:'EEEE dd-MM-yyyy'}}
-                	<ul class="list-unstyled">
-                	<li ng-repeat="hora in dia.horas">
-                		<label><input type="radio" ng-model="registro.citaprevia" ng-value="{dia: dia.fecha, hora: hora.hora}">{{hora.hora}}</label>
-                	</li>
-                	</ul>
-                </li>
-                </ul>
+                <div class="overflow-y" style="height:20em;width:590px">
+	                <ul class="list-unstyled">
+	                <li ng-repeat="dia in citaprevia" class="col-sm-4" ng-show="dia.horas.length>0">
+	                	{{dia.fecha | date:'EEEE dd-MM-yyyy'}}
+	                	<ul class="list-unstyled">
+	                	<li ng-repeat="hora in dia.horas">
+	                		<label><input type="radio" ng-model="registro.citaprevia" ng-value="{dia: dia.fecha, hora: hora.hora}">{{hora.hora}}</label>
+	                	</li>
+	                	</ul>
+	                </li>
+	                </ul>
+	            </div>
                 <strong>{{registro.citaprevia}}</strong>
             </div>
            

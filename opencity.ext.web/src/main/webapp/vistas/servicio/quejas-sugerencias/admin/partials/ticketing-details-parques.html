@@ -61,7 +61,26 @@
                     <div ng-show="categories.length<=0">
                     	<input  type="checkbox" ng-model="asociar_mi_cat" id="asociar_mi_cat" ng-init="asociar_mi_cat=true"/> Asociar mi categoria
                     </div>
-
+                    <div class="row">
+                    <div class="col-md-2">
+					Origen
+					</div>
+					<div class="col-md-2">
+                    <select class="form-control" data-ng-model="registro.origin" ng-options="obj.id as obj.text for obj in origin"></select>
+                    </div>
+					<div class="col-md-2">
+                    Tipo
+                    </div>
+					<div class="col-md-2">
+                    <select class="form-control" data-ng-model="registro.type" ng-options="obj.id as obj.text for obj in types"></select>
+                    </div>
+					<div class="col-md-2">
+                    Prioridad
+                    </div>
+					<div class="col-md-2">
+                    <select class="form-control" data-ng-model="registro.priority" ng-options="obj.id as obj.text for obj in priority"></select>
+                    </div>
+					</div>
                             <div class="form-horizontal" style="margin-top:1em;">
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label" for="registro.title">Asunto:</label>
@@ -125,7 +144,7 @@
 
     <div class="col-sm-offset-2 col-sm-10">
 
-        <button class="btn btn-default" ng-click="guardar()" ng-show="permisos.NEW">
+        <button class="btn btn-default" ng-click="guardarParques()" ng-show="permisos.NEW">
             <span class="glyphicon glyphicon-inbox"></span>
             <span class="hidden-xs">Guardar</span>
         </button>
