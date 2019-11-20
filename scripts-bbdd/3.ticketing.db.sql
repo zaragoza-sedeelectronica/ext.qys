@@ -165,6 +165,16 @@
 	"DEP_NAME" VARCHAR2(30 BYTE), 
 	"DEP_HBVERSION" NUMBER(*,0)
    ) ;
+   
+   CREATE TABLE "HB_ENTIDADESINTERNAS" 
+   (	"ID" varchar2(50) NOT NULL ENABLE, 
+	"NOMBRE" VARCHAR2(400 BYTE) NOT NULL ENABLE, 
+	"EMAIL" VARCHAR2(400 BYTE), 
+	"TELEFONO" VARCHAR2(300 BYTE), 
+	"USER_ID" NUMBER, 
+	CONSTRAINT "HB_ENTIDADEINTERNAS_PK" PRIMARY KEY ("ID")
+   ) ;
+   
 --------------------------------------------------------
 --  DDL for Table HB_ENTIDADESEXTERNAS
 --------------------------------------------------------

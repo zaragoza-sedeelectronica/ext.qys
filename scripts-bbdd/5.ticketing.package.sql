@@ -27,6 +27,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
     v_notes in varchar2 default null,
 		v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
     v_user_id in numeric default null, 
@@ -45,7 +46,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
     operadorget in varchar2 default null,
     v_id_cat_sip in numeric default null,
     xmlsal OUT clob, total OUT number);
-    
+
     PROCEDURE GETACCIONES(v_filas IN number, v_inicio IN number,
     v_orden in varchar2, 
     v_ids in varchar2 default null, 
@@ -53,6 +54,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
     v_notes in varchar2 default null,
 		v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
 		v_start_date in date default null, 
@@ -68,8 +70,8 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
     origin in numeric default null,
     inspector in varchar2 default null,
     xmlsal OUT clob, total OUT number);
-    
-    
+
+
     PROCEDURE CREAR(
         v_service_code numeric default null,
 				p_email hbusers.cli_email%type default null, 
@@ -88,7 +90,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
 				p_publico varchar2 default null, 
 				v_x number default null, 
 				v_y number default null,
-    
+
         p_agency_code numeric default null,
         p_type numeric default 1,
         p_priority numeric default 2,
@@ -97,7 +99,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
         --p_visible varchar2 default null,
         p_zona_inspeccion numeric default null,
         p_fecha_prevista date default null,
-    
+
         p_usuarioadmin varchar2 default null,
         p_operator varchar2 default null,
         p_answer_requested varchar2 default null,
@@ -106,7 +108,7 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
 
         xmlsal OUT CLOB
     );
-    
+
     PROCEDURE GUARDAR(
         p_requestnumber number,
         p_service_code numeric default null,
@@ -126,43 +128,44 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
 				p_publico varchar2 default null, 
 				p_x number default null, 
 				p_y number default null,
-    
+
         p_agency_code numeric default null,
         p_type numeric default null,
         p_priority numeric default null,
         p_origin numeric default null,
         p_validated varchar2 default null,
        -- p_visible varchar2 default null,
-      
+
         p_zona_inspeccion numeric default null,
         p_fecha_prevista date default null,
-    
+
         p_usuarioadmin varchar2 default null,
         p_answer_requested varchar2 default null,
-        
+
         p_id_cita numeric default null,
         p_id_cat_sip numeric default null,
-        
+
         xmlsal OUT CLOB
     );
-    
+
     PROCEDURE ACCIONES(
         v_requestnumber number,
         p_accion numeric default null,
 				v_texto hbrequestactions.rqa_description%type default null, 
-				
+
         v_fecha date default null,
-        
+
         v_idexterno numeric default null,
-        
+        v_idinterno varchar2 default null,
+
         p_usuarioadmin varchar2 default null,
         p_usuariogcz varchar2 default null,
         p_uuid varchar2 default null,
         p_estadointerno number default null,
-    
+
         xmlsal OUT CLOB
     );
-    
+
      PROCEDURE ESTADOANTERIORQUEJA(
         v_requestnumber number,
         v_accion numeric default null,
@@ -170,25 +173,25 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
         p_usuarioadmin varchar2 default null,
         p_usuariogcz varchar2 default null
     );
-    
+
      PROCEDURE TOKEN(
         v_token varchar2 default null,
 				v_texto hbrequestactions.rqa_description%type default null, 
         xmlsal OUT CLOB
     );
-    
+
     PROCEDURE ASOCIAR(
         v_id numeric default null,
         v_service_code numeric default null,
         v_agency_responsible numeric default null,
         v_user_id numeric
     );
-    
+
     PROCEDURE CATEGORIA(
         rootCategory number default null,
         xmlsal OUT CLOB
     );
-    
+
      PROCEDURE INFORMES(
         v_start_date in date default null, 
         v_end_date in date default null,
@@ -199,12 +202,13 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
         usuarioTicketing in numeric default null,
         xmlsal OUT CLOB
     );
-    
+
     FUNCTION generarWhere(v_ids in varchar2 default null, 
     v_title in varchar2 default null,
     v_notes in varchar2 default null,
 		v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
     v_user_id in numeric default null,
@@ -223,10 +227,10 @@ create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
     operadorget in varchar2 default null,
     v_id_cat_sip in numeric default null
     ) RETURN string;
-    
-    
+
+
     FUNCTION GET_ROWS(pString IN varchar2) return integer;
-    
+
 END PCK_QYS_REQUESTS;
 /
 create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
@@ -283,9 +287,11 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
                     
                     xmlelement("updated_datetime", nvl2(hb_re.rqt_closedate,TO_CHAR(sys_extract_utc(CAST (hb_re.rqt_closedate AS TIMESTAMP)),'YYYY-MM-DD"T"HH24:MI:SS'),TO_CHAR(sys_extract_utc(CAST (acciones.fecha AS TIMESTAMP)),'YYYY-MM-DD"T"HH24:MI:SS')) ),
       
-                    xmlelement("x", replace(hb_re.rqt_geolocation.SDO_POINT.X,',','.')),
-                    xmlelement("y", replace(hb_re.rqt_geolocation.SDO_POINT.Y,',','.')),
-                    
+                    --xmlelement("x", replace(hb_re.rqt_geolocation.SDO_POINT.X,',','.')),
+                    --xmlelement("y", replace(hb_re.rqt_geolocation.SDO_POINT.Y,',','.')),
+                    xmlelement("x", replace(hb_re.x,',','.')),
+                    xmlelement("y", replace(hb_re.y,',','.')),
+                                        
                     xmlelement("zona_inspeccion", hb_re.RQT_ZONAINSPECCIONID),
                     xmlelement("inspector", hb_re.RQT_INSPECTORID),
                     xmlelement("id_cita", hb_re.ID_CITA),
@@ -364,6 +370,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     v_notes in varchar2 default null, 
         v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
     v_user_id in numeric default null, 
@@ -398,13 +405,13 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
       WHERE adjunto.RQT_HBID_REQUEST(+) = hb_re.rqt_hbid 
       and adjunto.USR_HBID_USERLOADFILE(+)=hb_re.USR_HBID_INTRODUCER
       AND hb_re.RST_ID=hb_st.RST_HBID(+) AND
-      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code,v_agency_responsible,v_account_id,v_user_id,v_start_date,v_end_date,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector,operadorget,v_id_cat_sip) ||'
+      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code, v_internal_status,v_agency_responsible,v_account_id,v_user_id,v_start_date,v_end_date,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector,operadorget,v_id_cat_sip) ||'
       hb_re.cat_hbid= hb_le.cal_hbid(+)';
     
     fromWhereCount := 'FROM hbrequests hb_re, hbcategorylevels hb_le, HBREQUESTSTATES hb_st
       WHERE 
        hb_re.RST_ID=hb_st.RST_HBID(+) AND
-      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code,v_agency_responsible,v_account_id,v_user_id,v_start_date,v_end_date,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector,operadorget,v_id_cat_sip) ||'
+      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code, v_internal_status,v_agency_responsible,v_account_id,v_user_id,v_start_date,v_end_date,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector,operadorget,v_id_cat_sip) ||'
       hb_re.cat_hbid= hb_le.cal_hbid(+)';
     
     /*fromwherecontar := 'FROM hbrequests hb_re, hbcategorylevels hb_le, HBREQUESTSTATES hb_st, hbusers usr
@@ -416,6 +423,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
      fromWhere := fromWhere || ' AND hb_re.cat_hbid!=1 AND hb_re.cat_hbid!=2 ';
      fromWhereCount := fromWhereCount || ' AND hb_re.cat_hbid!=1 AND hb_re.cat_hbid!=2 ';
     end if;
+
     total := GET_ROWS(fromWhereCount);
     if total > 0 then
       if total > 300 and v_start_date is null and v_account_id is null then
@@ -446,8 +454,8 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         hb_re.solicita_respuesta as answer_requested,
         hb_re.RQT_ZONAINSPECCIONID as zona_inspeccion,
         hb_re.RQT_INSPECTORID as inspector,
-        replace(hb_re.rqt_geolocation.SDO_POINT.X,'','',''.'') as x,
-        replace(hb_re.rqt_geolocation.SDO_POINT.Y,'','',''.'') as y,
+        replace(hb_re.x,'','',''.'') as x,
+        replace(hb_re.y,'','',''.'') as y,
         TO_CHAR(sys_extract_utc(CAST (hb_re.rqt_introductiondatetime AS TIMESTAMP)),''YYYY-MM-DD"T"HH24:MI:SS'') as requested_datetime,
         TO_CHAR(sys_extract_utc(CAST (hb_re.rqt_closedatetime AS TIMESTAMP)),''YYYY-MM-DD"T"HH24:MI:SS'') as closed_datetime,
         nvl2(hb_re.rqt_closedate,TO_CHAR(sys_extract_utc(CAST (hb_re.rqt_closedate AS TIMESTAMP)),''YYYY-MM-DD"T"HH24:MI:SS''), TO_CHAR(sys_extract_utc(CAST (hb_re.rqt_gestordate AS TIMESTAMP)),''YYYY-MM-DD"T"HH24:MI:SS'')) as updated_datetime,
@@ -496,6 +504,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     v_notes in varchar2 default null, 
         v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
         v_start_date in date default null, 
@@ -526,7 +535,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
       WHERE adjunto.RQT_HBID_REQUEST(+) = hb_re.rqt_hbid 
       and adjunto.USR_HBID_USERLOADFILE(+)=hb_re.USR_HBID_INTRODUCER
       AND hb_re.RST_ID=hb_st.RST_HBID(+) AND
-      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code,v_agency_responsible,v_account_id,null,null,null,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector, null,null) ||'
+      '|| generarWhere(v_ids,v_title,v_notes,v_service_code,v_externo_code, v_internal_status,v_agency_responsible,v_account_id,null,null,null,v_type,v_status,v_public,usuarioTicketing,p_groupoperator,p_operator, p_answer_requested, p_barrio, origin, inspector, null,null) ||'
       hb_re.cat_hbid= hb_le.cal_hbid(+)';
     
     if v_start_date is not null then
@@ -535,7 +544,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     
     
     if usuarioTicketing is null and v_account_id is null then
-     fromWhere := fromWhere || ' AND hb_re.cat_hbid>2 AND hb_re.rqt_introductiondatetime>=to_date(''11-12-2013'',''dd-mm-yyyy'') ';
+     fromWhere := fromWhere || ' AND hb_re.cat_hbid>2 AND hb_re.RQT_REQUESTNUMBER>=375997 ';
     end if;
     
      l_ctx := dbms_xmlgen.newcontext('SELECT request.rqt_requestnumber as id_aviso,
@@ -576,6 +585,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     v_notes in varchar2 default null,
         v_service_code in varchar2 default null, 
     v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
     v_agency_responsible in numeric default null, 
     v_account_id in numeric default null, 
     v_user_id in numeric default null,
@@ -600,23 +610,21 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
   BEGIN
     usuario := nvl(usuarioTicketing,v_account_id);
     if usuario is null and v_user_id is null then
-      consulta := consulta || 'hb_re.rqt_public=''S'' AND hb_re.rqt_validated=''S'' AND hb_re.rst_id!=5 AND hb_re.rqt_introductiondatetime>=to_date(''11-12-2013'',''dd-mm-yyyy'') AND ';
+      consulta := consulta || 'hb_re.rqt_public=''S'' AND hb_re.rqt_validated=''S'' AND hb_re.rst_id!=5 AND hb_re.RQT_REQUESTNUMBER>=375997 AND ';
     elsif v_user_id is null and usuario <> -1 and usuario<>2 then
       consulta := consulta || '(hb_re.USR_HBID_REQUESTER='||usuario
             ||' OR hb_re.USR_HBID_INTRODUCER='||usuario
             ||' OR hb_re.USR_HBID_MANAGER='|| usuario
             ||' OR hb_re.OPERADOR like ''%:'|| operadorget ||''''
             ||' OR (hb_re.USR_HBID_MANAGER is null and ('|| usuario ||'=2 or '||usuario||'=235798528))'
-            
-            --||' OR '|| usuario ||' in (select USR_HBID_AGENT from hbrequestactions where RQT_HBID_REQUEST = hb_re.RQT_HBID)'
             ||') AND ';
             
             if v_status is null and v_ids is null and usuarioTicketing is null then
-              consulta := consulta || 'hb_re.rqt_introductiondatetime>=to_date(''11-12-2013'',''dd-mm-yyyy'') AND ';
+              consulta := consulta || ' hb_re.RQT_REQUESTNUMBER>=375997 AND ';
             end if;
     end if;
     if inspector is not null then
-      consulta := consulta || '(hb_re.rqt_inspectorid='''|| inspector ||''' OR hb_re.OPERADOR like ''%:'|| inspector ||''') AND ';
+      consulta := consulta || '(hb_re.rqt_inspectorid='''|| inspector ||''') AND ';
     end if;
     if v_service_code is not null then
       consulta := consulta || 'hb_le.cal_hbid in ('|| v_service_code ||') AND ';
@@ -624,7 +632,9 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     if v_externo_code is not null then
       consulta := consulta || 'hb_re.RQT_EXTERNOID='|| v_externo_code ||' AND ';
     end if;
-    
+    if v_internal_status is not null then
+      consulta := consulta || 'hb_re.INTERNAL_STATUS='|| v_internal_status ||' AND ';
+    end if;
     if p_groupoperator is not null then
       consulta := consulta || 'hb_re.OPERADOR like '''|| p_groupoperator ||':%'' AND ';
     end if;
@@ -646,7 +656,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     end if;
     
     if p_barrio is not null then
-      consulta := consulta || 'hb_re.address_id in (select p.id_por from intra.portalero p, intra.junta j where j.id_junta=p.id_jun and j.id_junta='||p_barrio||') AND ';      
+      consulta := consulta || 'hb_re.address_id in (select p.id_por from intra.portalero p where p.id_jun='||p_barrio||') AND ';      
     end if;
 
     if v_public is not null then
@@ -806,8 +816,8 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
       v_account_id := 3506176;
     end if;
     
-    -- Si el usuario es parques y jardines o conservacion
-    if p_usuarioadmin = 4816905 or p_usuarioadmin = 4816903 then
+    -- Si el usuario es parques y jardines o conservacion o servicios sociales
+    if p_usuarioadmin = 4816905 or p_usuarioadmin = 4816903 or p_usuarioadmin = 257327104 then
       v_usuario_alta := p_usuarioadmin;
       v_substate := 1;
     else
@@ -860,7 +870,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     end if;
 
     v_zona_inspeccion := null;
-
+/*
     if p_zona_inspeccion is null then
       if v_address_id is not null then
         begin
@@ -873,7 +883,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     else
       v_zona_inspeccion := p_zona_inspeccion;
     end if;
-
+*/
     INSERT INTO hbrequests (rqt_hbid, rqt_hbversion, usr_hbid_requester, 
           usr_hbid_introducer,usr_hbid_manager, rst_id, rog_hbid, rty_hbid, rpt_hbid, 
           sgp_hbid, cat_hbid, 
@@ -910,28 +920,40 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     --asociamos al inspector correspondiente y la marcamos como pendiente
 
         CASE 
-            WHEN p_zona_inspeccion=1 or p_zona_inspeccion=4 THEN v_inspectorname := 'jaherrero';
-            WHEN p_zona_inspeccion=2 or p_zona_inspeccion=3 THEN v_inspectorname := 'jlopezr';
-
-            WHEN p_zona_inspeccion=5 THEN v_inspectorname := 'miroyo';
-            WHEN p_zona_inspeccion=6 or p_zona_inspeccion=7 THEN v_inspectorname := 'adelaserna';
-            WHEN p_zona_inspeccion=8 THEN v_inspectorname := 'papilluelo';
-            WHEN p_zona_inspeccion=9 or p_zona_inspeccion=11 THEN v_inspectorname := 'bbenito';
-            WHEN p_zona_inspeccion=10 THEN v_inspectorname := 'rjaime';
-            WHEN p_zona_inspeccion=13 or p_zona_inspeccion=14 THEN v_inspectorname := 'jhernandezt';
-            WHEN p_zona_inspeccion=15 or p_zona_inspeccion=16 THEN v_inspectorname := 'fmiravete';
-            WHEN p_zona_inspeccion=17 THEN v_inspectorname := 'jbuisan';
-            WHEN p_zona_inspeccion=18 or p_zona_inspeccion=12 THEN v_inspectorname := 'afranco';
-            WHEN p_zona_inspeccion=19 THEN v_inspectorname := 'dperezm';
-            WHEN p_zona_inspeccion=20 THEN v_inspectorname := '';
-            WHEN p_zona_inspeccion=21 THEN v_inspectorname := 'jlazaro';
+            WHEN p_zona_inspeccion=1 THEN v_inspectorname := 'sbandres';
+            WHEN p_zona_inspeccion=2 THEN v_inspectorname := 'mbarnola';
+            WHEN p_zona_inspeccion=3 THEN v_inspectorname := 'jbenedictoc';
+            WHEN p_zona_inspeccion=4 THEN v_inspectorname := 'bbenito';
+            WHEN p_zona_inspeccion=5 THEN v_inspectorname := 'jbuisan';
+            WHEN p_zona_inspeccion=6 THEN v_inspectorname := 'adelaserna';
+            WHEN p_zona_inspeccion=7 THEN v_inspectorname := 'afranco';
+            WHEN p_zona_inspeccion=8 THEN v_inspectorname := 'jhernandezt';
+            WHEN p_zona_inspeccion=9 THEN v_inspectorname := 'jaherrero';
+            WHEN p_zona_inspeccion=10 THEN v_inspectorname := 'vhuetehuerta';
+            WHEN p_zona_inspeccion=11 THEN v_inspectorname := 'aincausa';
+            WHEN p_zona_inspeccion=12 THEN v_inspectorname := 'rjaime';
+            WHEN p_zona_inspeccion=13 THEN v_inspectorname := 'jlazaro';
+            WHEN p_zona_inspeccion=14 THEN v_inspectorname := 'pmarin';
+            WHEN p_zona_inspeccion=15 THEN v_inspectorname := 'mvmarquina';
+            WHEN p_zona_inspeccion=16 THEN v_inspectorname := 'tmartinalbo';
+            WHEN p_zona_inspeccion=17 THEN v_inspectorname := 'cmartinezl';
+            WHEN p_zona_inspeccion=18 THEN v_inspectorname := 'rmartinezm';
+            WHEN p_zona_inspeccion=19 THEN v_inspectorname := 'lmateo';
+            WHEN p_zona_inspeccion=20 THEN v_inspectorname := 'mjmir';
+            WHEN p_zona_inspeccion=21 THEN v_inspectorname := 'fmiravete';
+            WHEN p_zona_inspeccion=22 THEN v_inspectorname := 'jlopezr';
+            WHEN p_zona_inspeccion=23 THEN v_inspectorname := 'cpalomero';
+            WHEN p_zona_inspeccion=24 THEN v_inspectorname := 'fppellicer';
+            WHEN p_zona_inspeccion=25 THEN v_inspectorname := 'dperezm';
+            WHEN p_zona_inspeccion=26 THEN v_inspectorname := 'msantolaria';
+            
             ELSE v_inspectorname := '';
           END CASE;
           ASOCIAR(v_requestnumber, v_service_code, 4816905, p_usuarioadmin);
           update hbrequests set rst_id=10, RQT_INSPECTORDATE=sysdate, RQT_INSPECTORID=v_inspectorname, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
     end if;
     if v_x is not null and v_y is not null then
-      update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(v_x,v_y, NULL), NULL, NULL) where rqt_hbid=v_id;
+      update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(v_x,v_y, NULL), NULL, NULL), x=v_x, y=v_y where rqt_hbid=v_id;
     end if;
 
     select REQACTIONID - 1 into v_actionnumber from FO_HBREQACTIONSID_UNIQUE_KEY;
@@ -1062,7 +1084,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP) 
           values(v_actionnumber,0,'Cambio de coordenadas',sysdate,sysdate,0,p_usuarioadmin,v_id,3,0);
-      update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(p_x,p_y, NULL), NULL, NULL) where rqt_requestnumber=p_requestnumber;
+      update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(p_x,p_y, NULL), NULL, NULL), x=p_x, y=p_y where rqt_requestnumber=p_requestnumber;
     end if;
     
     if p_origin is not null and p_origin <> 3 then
@@ -1288,7 +1310,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         v_fecha date default null,
         
         v_idexterno numeric default null,
-        
+        v_idinterno varchar2 default null,
         p_usuarioadmin varchar2 default null,
         p_usuariogcz varchar2 default null,
         p_uuid varchar2 default null,
@@ -1301,7 +1323,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
    v_id number;
    v_accion number;
    v_actionnumber number;
-   v_inspectorname varchar2(60);
    v_UsuarioNoExistente EXCEPTION;
    v_estadoInterno varchar2(100);
 
@@ -1340,7 +1361,12 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             values(v_actionnumber,0,'Cambio de Estado a Resuelta con estado '|| v_estadointerno,sysdate,sysdate,0,p_usuarioadmin,v_id,4,0,p_usuariogcz) ;
           end if;
 
-          update hbrequests set rst_id=4, RQT_RESOLVEDDATATIME=nvl2(v_fecha,v_fecha,sysdate), RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          --update hbrequests set rst_id=4, RQT_RESOLVEDDATATIME=nvl2(v_fecha,v_fecha,sysdate), RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          if p_usuariogcz = 'fcczaragoza' or p_usuariogcz = 'umbela' then
+            update hbrequests set rst_id=15, RQT_RESOLVEDDATATIME=nvl2(v_fecha,v_fecha,sysdate), RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          else
+            update hbrequests set rst_id=4, RQT_RESOLVEDDATATIME=nvl2(v_fecha,v_fecha,sysdate), RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          end if;
           
            if p_estadointerno is not null then
               update hbrequests set INTERNAL_STATUS= p_estadointerno where RQT_HBID=v_id;
@@ -1511,7 +1537,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           
           update hbrequests set rst_id=7, RQT_EXTERNODATE=sysdate, RQT_EXTERNOID=v_idexterno, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
   elsif v_accion=11 then
-    --derivar a inspector
+    --derivar a interno
           select REQACTIONID - 1 into v_actionnumber from FO_HBREQACTIONSID_UNIQUE_KEY;
           update FO_HBREQACTIONSID_UNIQUE_KEY set REQACTIONID = v_actionnumber;
           select REQACTIONID into v_actionnumber from FO_HBREQACTIONSID_UNIQUE_KEY;
@@ -1523,30 +1549,12 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           update FO_HBREQACTIONSID_UNIQUE_KEY set REQACTIONID = v_actionnumber;
           select REQACTIONID into v_actionnumber from FO_HBREQACTIONSID_UNIQUE_KEY;
           
-          CASE 
-            WHEN v_idexterno=1 THEN v_inspectorname := 'jaherrero';
-            WHEN v_idexterno=2 THEN v_inspectorname := 'jlopezr';
-            WHEN v_idexterno=3 THEN v_inspectorname := 'miroyo';
-            WHEN v_idexterno=4 THEN v_inspectorname := 'adelaserna';
-            WHEN v_idexterno=5 THEN v_inspectorname := 'clorente';
-            WHEN v_idexterno=6 THEN v_inspectorname := 'cdominguez';
-            WHEN v_idexterno=7 THEN v_inspectorname := 'bbenito';
-            WHEN v_idexterno=8 THEN v_inspectorname := 'rjaime';
-            WHEN v_idexterno=9 THEN v_inspectorname := 'jhernandezt';
-            WHEN v_idexterno=10 THEN v_inspectorname := 'aisabel';
-            WHEN v_idexterno=11 THEN v_inspectorname := 'fmiravete';
-            WHEN v_idexterno=12 THEN v_inspectorname := 'jbuisan';
-            WHEN v_idexterno=13 THEN v_inspectorname := 'afranco';
-            WHEN v_idexterno=14 THEN v_inspectorname := 'dperezm';
-            WHEN v_idexterno=15 THEN v_inspectorname := 'papilluelo';
-            WHEN v_idexterno=16 THEN v_inspectorname := 'jlazaro';
-            ELSE v_inspectorname := '';
-          END CASE;
+        
           
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP,OPERADOR) 
-          values(v_actionnumber,0,'Cambio de Estado a Derivada a inspector ' || v_inspectorname,sysdate,sysdate,0,p_usuarioadmin,v_id,10,0,p_usuariogcz) ;
-          
-          update hbrequests set rst_id=10, RQT_INSPECTORDATE=sysdate, RQT_INSPECTORID=v_inspectorname, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          values(v_actionnumber,0,'Cambio de Estado a Derivada a interno ' || v_idinterno,sysdate,sysdate,0,p_usuarioadmin,v_id,10,0,p_usuariogcz) ;
+
+          update hbrequests set rst_id=10, RQT_INSPECTORDATE=sysdate, RQT_INSPECTORID=v_idinterno, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
             
     elsif v_accion=9 then
     --informar al usuario
@@ -1714,9 +1722,9 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           select REQACTIONID into v_actionnumber from FO_HBREQACTIONSID_UNIQUE_KEY;
             
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP) 
-          values(v_actionnumber,0,'Cambio de Estado a Pendiente',sysdate,sysdate,0,v_account_id,v_id,3,0) ;
+          values(v_actionnumber,0,'Cambio de Estado a Recibida información',sysdate,sysdate,0,v_account_id,v_id,3,0) ;
           
-          update hbrequests set rst_id=1, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+          update hbrequests set rst_id=16, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
           delete from hbrequesttoken where token=v_token;
           
     commit;
@@ -1881,12 +1889,12 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
            
            
             --TOTAL
-            numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,l_values(indx).cal_hbid,null,null,null,null,p_start_date,p_end_date,null,null,null,p_usuarioTicketing,null,null,null,null,null,null,null,null) || swhere);
+            numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,l_values(indx).cal_hbid,null,null,null,null,null,p_start_date,p_end_date,null,null,null,p_usuarioTicketing,null,null,null,null,null,null,null,null) || swhere);
 
             --xmlsal := xmlsal || '<total>'|| numero ||'</total>';
             dbms_lob.writeappend(xmlsal,length('<total>'|| numero ||'</total>'),'<total>'|| numero ||'</total>');
             --CERRADAS o RESUELTAS
-            numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,l_values(indx).cal_hbid,null,null,null,null,p_start_date,p_end_date,null,'2,4',null,p_usuarioTicketing,null,null,null,null,null, null,null,null) || swhere);
+            numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,l_values(indx).cal_hbid,null,null,null,null,null,p_start_date,p_end_date,null,'2,4',null,p_usuarioTicketing,null,null,null,null,null, null,null,null) || swhere);
             --xmlsal := xmlsal || '<resueltas>'|| numero ||'</resueltas>';
             dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
             -- Pendientes de mas de un anyo
@@ -1956,13 +1964,12 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
                               <id>1</id><title>Datos Generales</title>'),'<result xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serviceConsulta">
                               <id>1</id><title>Datos Generales</title>');
         --TOTAL
-        dbms_output.put_line(sfrom || generarWhere(null,v_texto,null,null,null,null,null,null,p_start_date,p_end_date,null,null,null,p_usuarioTicketing, null, null, null, null, null,null,null,null) || swhere);
-        numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,null,null,null,null,null,p_start_date,p_end_date,null,null,null,p_usuarioTicketing, null, null, null, null, null,null,null,null) || swhere);
+        numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,null,null,null,null,null,null,p_start_date,p_end_date,null,null,null,p_usuarioTicketing, null, null, null, null, null,null,null,null) || swhere);
 
         --xmlsal := xmlsal || '<total>'|| numero ||'</total>';
         dbms_lob.writeappend(xmlsal,length('<total>'|| numero ||'</total>'),'<total>'|| numero ||'</total>');
         --CERRADAS o RESUELTAS
-        numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,null,null,null,null,null,p_start_date,p_end_date,null,'2,4',null,p_usuarioTicketing, null, null, null, null, null,null,null,null) || swhere);
+        numero := GET_ROWS(sfrom || generarWhere(null,v_texto,null,null,null,null,null,null,null,p_start_date,p_end_date,null,'2,4',null,p_usuarioTicketing, null, null, null, null, null,null,null,null) || swhere);
         --xmlsal := xmlsal || '<resueltas>'|| numero ||'</resueltas>';
         dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
         
