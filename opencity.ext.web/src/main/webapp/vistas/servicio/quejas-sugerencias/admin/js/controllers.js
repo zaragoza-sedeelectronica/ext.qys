@@ -1,6 +1,6 @@
 angular.module('app.controllers', [])
 
-    .controller('MainCtrl', ['$scope', '$window', '$location', '$filter', 'Informer', 'Restangular', 'RestangularEntidades', '$route', '$templateCache', function($scope, $window, $location, $filter, Informer, Restangular, RestangularEntidades, $route, $templateCache) {
+    .controller('MainCtrl', ['$scope', '$window', '$location', '$filter', 'Informer', 'Restangular', 'RestangularEntidades','RestangularInternos', '$route', '$templateCache', function($scope, $window, $location, $filter, Informer, Restangular, RestangularEntidades, RestangularInternos, $route, $templateCache) {
 
         $scope.selectedIds = [];
 
@@ -12,101 +12,96 @@ angular.module('app.controllers', [])
             $event.stopPropagation();
             $scope.datepickers[which] = true;
         };
-
-        $scope.inspectores = [
-            { id: 1, name: 'Zona Delicias equipo 1 (Jose Antonio Herrero)', user: 1, email: '' },
-            { id: 2, name: 'Zona Delicias equipo 2 (Joaquin Lopez)', user: 2, email: '' },
-            { id: 3, name: 'Zona Delicias equipo 3 (Joaquin Lopez)', user: 2, email: '' },
-            { id: 4, name: 'Zona Delicias equipo 4 (Jose Antonio Herrero)', user: 1, email: '' },
-            { id: 5, name: 'Parque Grande 1 (Isabel Royo)', user: 3, email: '' },
-            { id: 6, name: 'Parque Grande 2 (Angel de la Serna)', user: 4, email: '' },
-            { id: 7, name: 'Parque Grande 3 (Angel de la Serna)', user: 4, email: '' },
-            { id: 8, name: 'Parque Grande 4 (Pedro Apilluelo)', user: 15, email: '' },
-            { id: 9, name: 'Centro Equipo 1 (Basilio Benito)', user: 7, email: '' },
-            { id: 10, name: 'Centro Equipo 2 (Ricardo Jaime)', user: 8, email: '' },
-            { id: 11, name: 'Centro Equipo 3 (Basilio Benito)', user: 7, email: '' },
-            { id: 12, name: 'Centro Equipo 4 (Antonio Franco)', user: 13, email: '' },
-            { id: 13, name: 'Valdespartera Equipo 1 (Joaquin Hernandez)', user: 9, email: '' },
-            { id: 14, name: 'Valdespartera Equipo 2 (Joaquin Hernandez)', user: 9, email: '' },
-            { id: 15, name: 'Margen Izquierda Equipo 1 (Fernando Miravete)', user: 11, email: '' },
-            { id: 16, name: 'Margen Izquierda Equipo 2 (Fernando Miravete)', user: 11, email: '' },
-            { id: 17, name: 'Margen Izquierda Equipo 3 (Jesus Buisan)', user: 12, email: '' },
-            { id: 18, name: 'Margen Izquierda Equipo 4 (Antonio Franco)', user: 13, email: '' },
-            { id: 19, name: 'Umbela 1 y 2. ACTUR y Parque Goya (Daniel Perez)', user: 14, email: '' },
-            { id: 20, name: 'Umbela 3 y 4. Magnolia y Tio Jorge (Daniel Perez)', user: 14, email: '' },
-            { id: 21, name: 'Fuentes (Jesús Lázaro)', user: 16, email: '' }
-        ];
-        $scope.estados_internos = [
-            { id: 1, text: 'Obra Ejecutada' },
-            { id: 0, text: 'Sin Intervención' }
-        ];
+        
+       
         $scope.estados = [
-            { id: 1, text: 'Pendiente' },
-            { id: 2, text: 'Cerrada' },
-            { id: 3, text: 'No Asignada' },
-            { id: 4, text: 'Resuelta' },
-            { id: 5, text: 'Borrada' },
-            { id: 6, text: 'Solicitada información' },
-            { id: 7, text: 'Derivada a Externo' },
-            { id: 8, text: 'Rechazada' },
-            { id: 9, text: 'Archivada' },
-            { id: 10, text: 'Derivada a Inspector' },
-            { id: 11, text: 'Rechazada por externo' },
-            { id: 12, text: 'Ampliar información a externo' },
-            { id: 13, text: 'Realizada por valoración' },
-            { id: 14, text: 'Pendiente por valoracíon' }
-        ];
-        $scope.origin = [
-            { id: 4, text: 'Correo Convencional' },
-            { id: 2, text: 'E-mail' },
-            { id: 240386048, text: 'Inspección' },
-            { id: 1, text: 'Teléfono' },
-            { id: 233275393, text: 'Juntas' },
-            { id: 233275392, text: 'Policía' },
-            { id: 233275394, text: '010' },
-            { id: 241139712, text: 'Aplicaciones terceros' },
-            { id: 242712576, text: 'Registro' },
-            { id: 3, text: 'Web' }
-        ];
-
-        $scope.validated = [
-            { id: 'S', text: 'Publicada' },
-            { id: 'N', text: 'Pendiente' },
-            { id: 'R', text: 'No publicada' },
-        ];
-        $scope.answer_requested = [
-            { id: 'S', text: 'Pendiente' },
-            { id: 'N', text: 'No solicitada' },
-            { id: 'P', text: 'Contestada' },
-        ];
-
-        $scope.priority = [
-            { id: 2, text: 'Normal' },
-            { id: 3, text: 'Alta' }
-        ];
-
-        $scope.acciones = [
-            { id: 1, text: 'Resolver', respuestaTipo: '' },
-            { id: 2, text: 'Contestar', respuestaTipo: '' },
-            { id: 3, text: 'Archivar', respuestaTipo: '' },
-            { id: 4, text: 'Eliminar', respuestaTipo: '' },
-            { id: 5, text: 'Solicitar más información', respuestaTipo: '' },
-            { id: 6, text: 'Rechazar', respuestaTipo: '' },
-            { id: 7, text: 'Derivar a Web', respuestaTipo: '' },
-            { id: 8, text: 'Derivar a Externo', respuestaTipo: '' },
-            { id: 11, text: 'Derivar a Inspector', respuestaTipo: '' },
-            { id: 9, text: 'Informar al ciudadano', respuestaTipo: '' },
-
-            { id: 13, text: 'Realizada por valoración', respuestaTipo: '' },
-            { id: 14, text: 'Pendiente por valoración', respuestaTipo: '' },
-            { id: 20, text: 'Rechazada por externo', respuestaTipo: '' },
-            { id: 21, text: 'Ampliar información', respuestaTipo: '' },
-
-            { id: 22, text: 'Cambiar categoría', respuestaTipo: '' },
-
-            { id: 10, text: 'Anotar información', respuestaTipo: '' }
-        ];
-
+			 { id: 1, text: 'Pendiente' },
+			 { id: 2, text: 'Cerrada' },
+			 { id: 3, text: 'No Asignada' },
+			 { id: 4, text: 'Resuelta' },
+			 { id: 5, text: 'Borrada' },
+			 { id: 6, text: 'Solicitada información' },
+			 { id: 7, text: 'Derivada a Externo' },
+			 { id: 15, text: 'Finalizada por Externo' },
+			 { id: 8, text: 'Rechazada' },
+			 { id: 9, text: 'Archivada' },
+			 { id: 10, text: 'Derivada a Interno' },
+			 { id: 11, text: 'Rechazada por externo' },
+			 { id: 12, text: 'Ampliar información a externo' },
+			 { id: 13, text: 'Realizada por valoración' },
+			 { id: 14, text: 'Pendiente por valoracíon' },
+			 { id: 16, text: 'Recibida información' }
+		   ];
+		$scope.origin = [
+			 { id: 4, text: 'Correo Convencional' },
+			 { id: 2, text: 'E-mail' },
+			 { id: 240386048, text: 'Inspección' },
+			 { id: 1, text: 'Teléfono' },
+			 { id: 5, text: 'Fax' },
+			 { id: 233275393, text: 'Juntas' },
+			 { id: 233275392, text: 'Policía' },
+			 { id: 233275394, text: '010' },
+			 { id: 241139712, text: 'Aplicaciones terceros' },
+			 { id: 242712576, text: 'Registro' },
+			 { id: 6, text: 'Atención presencial' },
+			 { id: 7, text: 'CMSS. Comunitarios (Hoja H03-1)' },
+			 { id: 8, text: 'CMMS. Especializados(Hoja H03-1)' },
+			 { id: 9, text: 'Oficina de Morlanes (Hoja H03-1)' },
+			 { id: 10, text: 'Información Plza. Pilar y Seminario (Hoja H03-1)' },
+			 { id: 3, text: 'Web' }
+		   ];
+		$scope.catsip = [
+			{ id: 1, text : 'Información institucional y organizativa (organigrama, competencias, perfil y trayectoria profesional, etc.)'},
+			{ id: 2, text : 'Planes y programas operativos (plan de gobierno y otros planes/programas de actuación, resultados de su evaluación, etc.)'},
+			{ id: 3, text : 'Normativa (normas locales y documentos emitidos en el procedimiento de elaboración, etc.)'},
+			{ id: 4, text : 'Información económica (presupuestos y su ejecución, cuentas, informes de control externo, patrimonio, etc.)'},
+			{ id: 5, text : 'Ayudas y subvenciones'},
+			{ id: 6, text : 'Urbanismo'},
+			{ id: 7, text : 'Contratación administrativa'},
+			{ id: 8, text : 'Medio Ambiente'},
+			{ id: 9, text : 'Recursos humanos (retribuciones, compatibilidades, procesos selectivos, provisión de puestos de trabajo, bolsas de empleo,etc.)'},
+			{ id: 10, text : 'Relaciones con la ciudadanía y participación (cartas de servicio, sugerencias y reclamaciones, inventario de procedimientos, etc.)'},
+			{ id: 11, text : 'Otros'}
+		   ];
+		
+		$scope.validated = [
+		     { id: 'S', text: 'Publicada' },
+		     { id: 'N', text: 'Pendiente' },
+		     { id: 'R', text: 'No publicada' },
+		   ];
+		$scope.answer_requested = [
+   		     { id: 'S', text: 'Pendiente' },
+   		     { id: 'N', text: 'No solicitada' },
+   		     { id: 'P', text: 'Contestada' },
+   		   ];
+		
+		$scope.priority = [
+			 { id: 2, text: 'Normal' },
+			 { id: 3, text: 'Alta' }
+		   ];
+		
+		$scope.acciones = [
+		   { id: 1, text: 'Resolver', respuestaTipo:'' },
+		   { id: 2, text: 'Contestar', respuestaTipo:'' },
+		   { id: 3, text: 'Archivar', respuestaTipo:'' },
+		   { id: 4, text: 'Eliminar', respuestaTipo:'' },
+		   { id: 5, text: 'Solicitar más información', respuestaTipo:'' },
+		   { id: 6, text: 'Rechazar', respuestaTipo:'' },
+		   { id: 7, text: 'Derivar a Web', respuestaTipo:'' },
+		   { id: 8, text: 'Derivar a Externo', respuestaTipo:'' },
+		   { id: 11, text: 'Derivar a Interno', respuestaTipo:'' },
+		   { id: 9, text: 'Informar al ciudadano', respuestaTipo:'' },
+		   
+		   { id: 13, text: 'Realizada por valoración', respuestaTipo:'' },
+		   { id: 14, text: 'Pendiente por valoración', respuestaTipo:'' },
+		   { id: 20, text: 'Rechazada por externo', respuestaTipo:'' },
+		   { id: 21, text: 'Ampliar información', respuestaTipo:'' },
+		   
+		   { id: 22, text: 'Cambiar categoría', respuestaTipo:'' },
+		   
+		   { id: 10, text: 'Anotar información', respuestaTipo:'' }
+		];
+		
         if (sessionStorage.getItem('datosUsuario') === null) {
             $window.location.href = '/gesweb';
         } else {
@@ -114,7 +109,7 @@ angular.module('app.controllers', [])
             serviciosUsuario = JSON.parse(sessionStorage.getItem('serviciosUsuario'));
             $scope.usuario = datosUsuario;
             $scope.servicios = serviciosUsuario;
-
+            
             clientID = datosUsuario.login;
             secretKey = datosUsuario.secretKey;
 
@@ -122,17 +117,18 @@ angular.module('app.controllers', [])
             $scope.linkInformeOdt = CryptoJS.HmacSHA1("odt-report#" + clientID + "#" + datosUsuario.propiedades.rootcat_ticketing, secretKey, { asBytes: true }).toString();
         }
         $scope.types = [
-            { id: 12812288, text: 'Agradecimiento' },
-            { id: 4587520, text: 'Información' },
-            { id: 1, text: 'Queja' },
-            { id: 2, text: 'Sugerencia' },
-            { id: 240418816, text: 'Aviso' },
-            { id: 244219904, text: 'Planificación' },
-            { id: 245268480, text: 'Inspección contractual' },
-            { id: 244219905, text: 'Aviso planificación' },
-            { id: 250544128, text: 'Solicitud Información Pública' },
-        ];
-
+   			 { id: 12812288, text: 'Agradecimiento' },
+   			 { id: 4587520, text: 'Información' },
+   			 { id: 1, text: 'Queja' },
+   			 { id: 2, text: 'Sugerencia' },
+   			 { id: 240418816, text: 'Aviso' },
+   			 { id:244219904, text: 'Planificación' },
+   			 { id:245268480, text: 'Inspección contractual' },
+   			 { id:244219905, text: 'Aviso planificación'},
+   			 { id:250544128, text: 'Solicitud Información Pública'},
+   			 { id:3, text: 'Cambio de profesional'}
+   		   ];
+        
         for (var i = 0; i < $scope.servicios.length; i++) {
             if ($scope.servicios[i].codigoServicio === 'TICKETING') {
                 $scope.secciones = $scope.servicios[i].secciones;
@@ -141,47 +137,65 @@ angular.module('app.controllers', [])
                     if ($scope.secciones[j].codigoSeccion === 'REQUESTS') {
                         $scope.secc = $scope.secciones[j];
                         if ($scope.secciones[j].permisos.indexOf("REQUERIMIENTO") > 0) {
-                            $scope.types.push({ id: 241532928, text: 'Requerimiento' });
+                        	$scope.types.push({ id: 241532928, text: 'Requerimiento' });
                         }
-
+                        
                     }
                 }
             }
         }
         var serviciosUsuario = JSON.parse(sessionStorage.getItem('serviciosUsuario'));
-        for (var i = 0; i < serviciosUsuario.length; i++) {
-            if (serviciosUsuario[i].codigoServicio === 'TICKETING') {
-                secciones = serviciosUsuario[i].secciones;
-                for (var j = 0; j < secciones.length; j++) {
-                    if (secciones[j].codigoSeccion === 'REQUESTS') {
-                        console.log(secciones[j].permisos);
-
-                        for (var l = 0; l < secciones[j].permisos.length; l++) {
-                            if (secciones[j].permisos[l] === 'ADJ') {
-                                Restangular.all('category-adjacent').getList({
-                                    results_only: false,
-                                }).then(function(data) {
-                                    sessionStorage.setItem('categoryAdjacent', JSON.stringify(data));
-                                }, function(result) {
-                                    Informer.inform('Error categorias adyacentes ' + (result.data.error || result.data.mensaje), "danger");
-                                });
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
+	   	for (var i = 0; i < serviciosUsuario.length; i++) {
+	       if (serviciosUsuario[i].codigoServicio === 'TICKETING') {
+	           secciones = serviciosUsuario[i].secciones;               
+	           for (var j = 0; j < secciones.length; j++) {
+	               if (secciones[j].codigoSeccion === 'REQUESTS') {
+	                   for (var l = 0; l < secciones[j].permisos.length; l++) {
+	                	   if (secciones[j].permisos[l] === 'ADJ') {
+	                		   Restangular.all('category-adjacent').getList({
+	                			   results_only:false, 
+		       					}).then(function(data) {
+		       						sessionStorage.setItem('categoryAdjacent', JSON.stringify(data));
+		       					}, function(result) {
+		       						Informer.inform('Error categorias adyacentes ' + (result.data.error || result.data.mensaje), "danger");
+		       					});
+	                	   }
+	                   }
+	                   
+	                   break;
+	               }
+	           }
+	       }
+	   	}
+	   	
+	   	$scope.estados_internos = [];
+        /*
+        $scope.estados_internos = [
+               { id: 1, text: 'Obra Ejecutada' },
+               { id: 0, text: 'Sin Intervención' }
+        ];*/
+        
         if (sessionStorage.getItem('respuestaTipo') === null) {
-            Restangular.all('quejas-sugerencias/respuestas-tipo').getList({
-                results_only: false,
-            }).then(function(data) {
-                sessionStorage.setItem('respuestaTipo', JSON.stringify(data));
-            }, function(result) {
-                Informer.inform(result.data.error || result.data.mensaje, "danger");
-            });
-        }
+    		Restangular.all('quejas-sugerencias/respuestas-tipo').getList({
+    			results_only:false, 
+				}).then(function(data) {
+					for (i = 0; i < data.length; i++) {
+		    			$scope.estados_internos.push({id: data[i].code, text: data[i].text});
+		    		}
+					sessionStorage.setItem('respuestaTipo', JSON.stringify(data));
+				}, function(result) {
+	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+	            });
+    	} else {
+    		var data = JSON.parse(sessionStorage.getItem('respuestaTipo'));
+    		for (i = 0; i < data.length; i++) {
+    			$scope.estados_internos.push({id: data[i].code, text: data[i].text});
+    		}
+    		console.log($scope.estados_internos);
+    	}
+        
+        
+        
         if (sessionStorage.getItem('reqcategories') === null) {
             if ($scope.usuario.propiedades.rootcat_ticketing) {
                 Restangular.all('quejas-sugerencias/category').getList({
@@ -199,18 +213,31 @@ angular.module('app.controllers', [])
             $scope.categories = JSON.parse(sessionStorage.getItem('reqcategories'));
         }
         if (sessionStorage.getItem('reqentidadexterna') === null) {
-            RestangularEntidades.all('').getList({
-                results_only: false,
-            }).then(function(data) {
-                $scope.entidadExterna = data;
-                sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));
-            }, function(result) {
-                Informer.inform(result.data.error || result.data.mensaje, "danger");
-            });
-        } else {
-            $scope.entidadExterna = JSON.parse(sessionStorage.getItem('reqentidadexterna'));
-        }
-
+        	RestangularEntidades.all('').getList({
+    			results_only:false, 
+    			sort: 'name asc'
+				}).then(function(data) {
+					$scope.entidadExterna = data;
+					sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));    					
+				}, function(result) {
+	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+	            });
+    	} else {
+    		$scope.entidadExterna = JSON.parse(sessionStorage.getItem('reqentidadexterna'));
+    	}
+        if (sessionStorage.getItem('reqentidadinterna') === null) {
+        	RestangularInternos.all('').getList({
+    			results_only:false, 
+    			sort: 'name asc'
+				}).then(function(data) {
+					$scope.entidadInterna = data;
+					sessionStorage.setItem('reqentidadinterna', JSON.stringify(data));    					
+				}, function(result) {
+	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+	            });
+    	} else {
+    		$scope.entidadInterna = JSON.parse(sessionStorage.getItem('reqentidadinterna'));
+    	}
         $scope.listar = function() {
             $location.path('#/');
         };
@@ -273,54 +300,61 @@ angular.module('app.controllers', [])
             if ($scope.busy /*|| (datosListados.length >= 0 && datosListados.length < 40)*/ )
                 return;
             $scope.busy = true;
-            if (angular.isUndefined($scope.query.estado) && busquedaDeOtroControlador === false) {
-                if (datosUsuario.propiedades.usr_ticketing == "2") {
-                    $scope.mostrar010 = false;
-                    $scope.query.estado = [$scope.estados[2].id, $scope.estados[3].id];
-                    $scope.textoQuery = ' Filtro: Pendiente, No Asignada';
-                } else if (datosUsuario.propiedades.usr_ticketing == "4816906") {
-                    // Limpieza publica
-                    $scope.query.estado = [$scope.estados[0].id, $scope.estados[3].id, $scope.estados[6].id];
-                    $scope.textoQuery = ' Filtro: Pendiente, Resuelta, Derivada a externo';
-                } else {
-                    $scope.query.estado = [];
-                    if ($scope.permisos.ADMINOPERADOR) {
-                        $scope.query.group_operator = $scope.usuario.usr_ticketing;
-                        $scope.query.estado = [$scope.estados[2].id];
-                        $scope.textoQuery = ' Filtro: no asignada, introducidas por los operadores';
-                    } else if ($scope.permisos.OPERADOR) {
-                        $scope.query.operator = $scope.usuario.login;
-                        var f = new Date();
-                        $scope.query.start_date = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
-                        $scope.textoQuery = ' Filtro: introducidas por mi hoy';
-                    } else if ($scope.permisos.INSPECTOR) {
-                        $scope.query.estado = [$scope.estados[9].id, $scope.estados[10].id, $scope.estados[6].id];
-                        $scope.textoQuery = ' Filtro: Derivada a inspector, Derivada a externo, Rechazada por exteno';
-                    } else if (datosUsuario.propiedades.externo_ticketing) {
-                        $scope.query.estado = [$scope.estados[6].id];
-                        $scope.textoQuery = ' Filtro: Derivada a externo';
-                    } else {
-                        $scope.query.estado = [$scope.estados[0].id, $scope.estados[3].id];
-                        $scope.textoQuery = ' Filtro: Pendiente, Resuelta';
-                    }
-                }
-            } else {
-                $scope.textoQuery = '';
-                if (angular.isUndefined($scope.query.estado)) {
-                    $scope.query.estado = '';
-                } else {
-                    $scope.query.estado = $scope.query.estado.toString();
-                }
-            }
+            if(angular.isUndefined($scope.query.estado) && busquedaDeOtroControlador === false){
+            	if(angular.isDefined(datosUsuario.junta_ticketing)) {
+            		$scope.query.estado = [$scope.estados[0].id,$scope.estados[2].id, $scope.estados[3].id];
+            		$scope.textoQuery=' Filtro: Pendiente, No Asignada, Resuelta';
+            	} else if(datosUsuario.usr_ticketing=="2") {
+            		$scope.mostrar010 = false;
+                    $scope.query.estado = [$scope.estados[2].id, $scope.estados[3].id, $scope.estados[15].id];
+            		$scope.textoQuery=' Filtro: Pendiente, No Asignada, Recibida información';
+            	} else if (datosUsuario.login=='alperezp') {
+            			$scope.query.estado = [$scope.estados[0].id];
+            			$scope.textoQuery=' Filtro: Pendiente';
+            	} else if (datosUsuario.usr_ticketing=="4816906") {
+            		// Limpieza publica
+            		$scope.query.estado = [$scope.estados[0].id, $scope.estados[3].id, $scope.estados[6].id];
+        			$scope.textoQuery=' Filtro: Pendiente, Resuelta, Derivada a externo';
+            	} else {
+            		$scope.query.estado=[];
+            		if ($scope.permisos.ADMINOPERADOR) {
+            			$scope.query.group_operator=$scope.usuario.usr_ticketing;
+            			$scope.query.estado = [$scope.estados[2].id];
+            			$scope.textoQuery=' Filtro: no asignada, introducidas por los operadores';
+            		} else if ($scope.permisos.OPERADOR) {
+            			$scope.query.operator=$scope.usuario.login;
+            			var f = new Date();
+            			$scope.query.start_date=new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
+            			$scope.textoQuery=' Filtro: introducidas por mi hoy';
+            		} else if ($scope.permisos.INSPECTOR) {
+            			$scope.query.estado = [$scope.estados[10].id,$scope.estados[6].id, $scope.estados[11].id, $scope.estados[7].id];
+            			$scope.textoQuery=' Filtro: Derivada a interno, Derivada a externo, Rechazada por externo, Finalizada por externo';
+            		} else if (datosUsuario.externo_ticketing) {
+            			$scope.query.estado = [$scope.estados[6].id];
+            			$scope.textoQuery=' Filtro: Derivada a externo';
+            		
+            		} else {
+            			$scope.query.estado = [$scope.estados[0].id, $scope.estados[3].id, $scope.estados[7].id];
+            			$scope.textoQuery=' Filtro: Pendiente, Resuelta';
+            		}
+            	}
+        	} else {
+        		$scope.textoQuery='';
+        		if (angular.isUndefined($scope.query.estado)) {
+        			$scope.query.estado='';
+        		} else {
+        			$scope.query.estado = $scope.query.estado.toString();
+        		}
+        	}
 
             var titulo = $scope.query.title;
             if (relacionadas !== null) {
-                titulo = relacionadas;
+            	titulo = relacionadas;
             }
-
+            
             var sort_ticketing = 'status asc,requested_datetime desc';
             if ($scope.usuario.sort_ticketing) {
-                sort_ticketing = $scope.usuario.sort_ticketing;
+            	sort_ticketing = $scope.usuario.sort_ticketing;
             }
 
             if (start < 300 && (datosListados.length == 0 || datosListados.length > 40)) {

@@ -119,7 +119,7 @@
                 <span sede:rdf="${registro.get('requested_datetime')}"></span>
                 <div><pre sede:rdf="${registro.get('description')}" class="shorten"></pre></div>
                 <div th:if="!${#strings.isEmpty(registro.service_notice)}"><span class="label label-danger">Respuesta</span> <span sede:rdf="${registro.get('updated_datetime')}"></span><pre sede:rdf="${registro.get('service_notice')}" class="shorten"></pre></div>
-                <th:block th:utext="${registro.getRdf()}"></th:block>
+                <!--/*<th:block th:utext="${registro.getRdf()}"></th:block>*/-->
             </li>
         </ul>
         <th:block th:utext="${resultado.body.getPaginacion(#httpServletRequest)}" />
