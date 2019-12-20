@@ -6,17 +6,17 @@
             <span class="fa fa-inbox" aria-hidden="true"></span>
             <span class="hidden-xs">Guardar</span>
         </button>
-        <a class="btn btn-default" ng-show="registro.token && permisos.MODMULTIPLE && registro.service_request_id" ng-href="/sede/servicio/quejas-sugerencias/{{registro.service_request_id}}/{{registro.token}}/" target="_blank">
+        <a class="btn btn-default" ng-show="registro.token && permisos.MODMULTIPLE && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/{{registro.token}}/" target="_blank">
             <span class="fa fa-bookmark" aria-hidden="true"></span>
             <span class="hidden-xs">Estado</span>
         </a>
         <boton-copiar ng-show="registro.service_request_id && !usuario.externo_ticketing"></boton-copiar>
         <!-- <button class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-click="informe()">-->
-        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/sede/servicio/quejas-sugerencias/{{registro.service_request_id}}/informe?clientId={{usuario.login}}&ihm={{linkInforme}}" target="_blank">
+        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/informe?clientId={{usuario.login}}&ihm={{linkInforme}}" target="_blank">
             <span class="glyphicon glyphicon-list-alt"></span>
             <span class="hidden-xs">Informe</span>
         </a>
-        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/sede/servicio/quejas-sugerencias/{{registro.service_request_id}}/odt-report?clientId={{usuario.login}}&ihm={{linkInformeOdt}}" target="_blank">
+        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/odt-report?clientId={{usuario.login}}&ihm={{linkInformeOdt}}" target="_blank">
             <span class="glyphicon glyphicon-list-alt"></span>
             <span class="hidden-xs">Informe odt</span>
         </a>

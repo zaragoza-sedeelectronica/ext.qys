@@ -870,20 +870,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     end if;
 
     v_zona_inspeccion := null;
-/*
-    if p_zona_inspeccion is null then
-      if v_address_id is not null then
-        begin
-          select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=v_address_id;
-        EXCEPTION
-        WHEN NO_DATA_FOUND THEN
-          v_zona_inspeccion := null;
-        end;
-      end if;
-    else
-      v_zona_inspeccion := p_zona_inspeccion;
-    end if;
-*/
+
     INSERT INTO hbrequests (rqt_hbid, rqt_hbversion, usr_hbid_requester, 
           usr_hbid_introducer,usr_hbid_manager, rst_id, rog_hbid, rty_hbid, rpt_hbid, 
           sgp_hbid, cat_hbid, 
@@ -1229,15 +1216,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP) 
           values(v_actionnumber,0,'Cambio de identificador de direccion de queja ' || nvl(v_address_id,'vacío') || ' por ' || p_address_id,sysdate,sysdate,0,p_usuarioadmin,v_id,3,0);
           v_address_id := p_address_id;
-
-
-          begin
-            select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=p_address_id;
-            update hbrequests set RQT_ZONAINSPECCIONID=v_zona_inspeccion where rqt_requestnumber=p_requestnumber;
-          EXCEPTION
-          WHEN NO_DATA_FOUND THEN
-            null;
-          end;
 
 
         end if;

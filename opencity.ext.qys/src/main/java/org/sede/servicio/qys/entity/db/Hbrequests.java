@@ -40,6 +40,7 @@ import org.sede.core.geo.Geometria;
 import org.sede.core.geo.Punto;
 import org.sede.core.rest.CheckeoParametros;
 import org.sede.core.utils.Funciones;
+import org.sede.servicio.qys.ConfigQys;
 //import org.sede.servicio.asociacion.entity.Categoria;
 //import org.sede.servicio.callejero.entity.Portalero;
 import org.sede.servicio.qys.QysController;
@@ -50,10 +51,10 @@ import org.sede.servicio.qys.QysController;
 @XmlRootElement(name="request")
 @ResultsOnly(xmlroot="service_requests")
 @Rdf(contexto=Context.OPEN311, propiedad="ServiceRequest")
-@GeoJson(title = "Quejas y sugerencias", description = "Localización", icon = "queja", link = "/sede/servicio/quejas-sugerencias/")
+@GeoJson(title = "Quejas y sugerencias", description = "Localización", icon = "queja", link = "/opencityext/servicio/quejas-sugerencias/")
 @PathId("/" + QysController.MAPPING)
 @Entity
-@Table(name = "HBREQUESTS", schema = "TICKETING")
+@Table(name = "HBREQUESTS", schema = ConfigQys.ESQUEMA)
 public class Hbrequests extends EntidadBase implements java.io.Serializable {
 
 	private BigDecimal service_request_id;

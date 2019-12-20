@@ -76,7 +76,7 @@ var app = angular.module('app', [
         $locationProvider.hashPrefix('');
 
         //RestangularProvider.setBaseUrl('//' + window.sessionStorage.getItem('SERVIDOR') + '/api/recurso/');
-        RestangularProvider.setBaseUrl('/sede/servicio/');
+        RestangularProvider.setBaseUrl('/opencityext/servicio/');
 
         RestangularProvider.setRequestInterceptor(function(elem, operation) {
             if (operation === "remove") {
@@ -91,6 +91,6 @@ var app = angular.module('app', [
     return Restangular.withConfig(function(RestangularConfigurer) {
         // RestangularConfigurer.setBaseUrl('//' + window.sessionStorage.getItem('SERVIDOR') + '/api/recurso/dataset');
         // RestangularConfigurer.setBaseUrl('https://www.zaragoza.es/sede/servicio/catalogo');
-        RestangularConfigurer.setBaseUrl('/sede/servicio/');
+        RestangularConfigurer.setBaseUrl('/opencityext/servicio/');
     });
 });

@@ -33,6 +33,7 @@ import org.sede.core.exception.FormatoNoSoportadoException;
 import org.sede.core.rest.view.TransformadorXml;
 import org.sede.core.utils.ConvertDate;
 import org.sede.core.utils.Funciones;
+import org.sede.servicio.citaprevia.ConfigCitaprevia;
 import org.sede.servicio.citaprevia.entity.Agenda;
 import org.sede.servicio.citaprevia.entity.Cita;
 import org.sede.servicio.citaprevia.entity.CitaPrevia;
@@ -51,11 +52,11 @@ import com.googlecode.genericdao.search.SearchResult;
 
 import oracle.jdbc.OracleTypes;
 @Repository
-@Transactional(Esquema.TMINTRA)
+@Transactional(ConfigCitaprevia.TM)
 public class CitaPreviaGenericDAOImpl extends GenericDAOImpl <CitaPrevia, Integer> implements CitaPreviaGenericDAO {
 	private static final Logger logger = LoggerFactory.getLogger(CitaPreviaGenericDAO.class);
 	
-	@PersistenceContext(unitName=Esquema.INTRA)
+	@PersistenceContext(unitName=ConfigCitaprevia.ESQUEMA)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}

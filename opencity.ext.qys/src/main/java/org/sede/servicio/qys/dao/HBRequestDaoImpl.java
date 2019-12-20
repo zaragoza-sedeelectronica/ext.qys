@@ -11,7 +11,7 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sede.core.anotaciones.Esquema;
-
+import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.Request;
 import org.sede.servicio.qys.entity.UtilsQyS;
 import org.sede.servicio.qys.entity.db.Hbrequests;
@@ -25,10 +25,10 @@ import com.googlecode.genericdao.search.SearchResult;
 
 
 @Repository
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> implements HBRequestDao {
 	
-	@PersistenceContext(unitName=Esquema.TICKETING)
+	@PersistenceContext(unitName=ConfigQys.ESQUEMA)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}

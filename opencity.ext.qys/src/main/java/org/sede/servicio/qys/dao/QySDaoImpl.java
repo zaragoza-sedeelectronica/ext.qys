@@ -109,7 +109,7 @@ import com.googlecode.genericdao.search.SearchResult;
  *
  */
 @Repository
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements QySDao {
 	
 	/**

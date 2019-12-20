@@ -62,7 +62,7 @@ import com.ibm.icu.util.Calendar;
 @Gcz(servicio="CITAPREVIA",seccion="CITAPREVIA")
 @Description("Ayuntamiento: Cita Previa")
 @RequestMapping(value = "/" + CitaPreviaController.MAPPING)
-@Transactional(Esquema.TMINTRA)
+@Transactional(ConfigCitaprevia.TM)
 @PlantillaHTML("portal/tramites-servicios")
 public class CitaPreviaController {
 	public static final String SERVICIO = "cita-previa";

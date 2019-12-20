@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.sede.core.anotaciones.Esquema;
+import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.db.Hbusers;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
  *
  */
 @Repository
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 public class HbUserGenericDaoImpl extends GenericDAOImpl <Hbusers, BigDecimal> implements HbUserGenericDao {
 	
 	/**
@@ -27,7 +28,7 @@ public class HbUserGenericDaoImpl extends GenericDAOImpl <Hbusers, BigDecimal> i
 	 * 
 	 * @param entityManager
 	 */
-	@PersistenceContext(unitName=Esquema.TICKETING)
+	@PersistenceContext(unitName=ConfigQys.ESQUEMA)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}

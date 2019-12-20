@@ -43,7 +43,7 @@ import com.googlecode.genericdao.search.SearchResult;
  */
 @Gcz(servicio="TICKETING",seccion="REQUESTS")
 @Controller
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 @RequestMapping(value = "/" + EntidadInternaController.MAPPING, method = RequestMethod.GET)
 public class EntidadInternaController {
 

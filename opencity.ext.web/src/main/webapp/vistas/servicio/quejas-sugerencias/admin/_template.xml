@@ -15,7 +15,7 @@
                 </button> */-->
                 <th:block th:include="fragmentos/logo" />
                 <div class="pull-left portal-header">
-                    <h1><a href="/sede/servicio/quejas-sugerencias/">Quejas y sugerencias</a></h1>
+                    <h1><a href="/opencityext/servicio/quejas-sugerencias/">Quejas y sugerencias</a></h1>
                       <sede:breadcrumb value="[{'link':'http://www.zaragoza.es', 'text':'zaragoza.es'}, {'link':'/ciudadania/gobierno-abierto/', 'text':'Gobierno Abierto'}]" />
                 </div>
                 <th:block th:include="fragmentos/cabecera" />

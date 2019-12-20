@@ -102,7 +102,7 @@ import com.googlecode.genericdao.search.SearchResult;
  */
 @Gcz(servicio="TICKETING",seccion="REQUESTS")
 @Controller
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 @RequestMapping(value = {"/" + QysController.MAPPING,
 		"/" + QysController.MAPPING_INFORMACIONPUBLICA}, method = RequestMethod.GET)
 @Description("Gobierno Abierto: Solicitudes de Información Pública y Quejas - sugerencias")

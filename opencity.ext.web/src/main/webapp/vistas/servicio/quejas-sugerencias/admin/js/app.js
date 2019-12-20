@@ -93,13 +93,13 @@ var app = angular.module('app', [
         $locationProvider.hashPrefix('');
 
         //RestangularProvider.setBaseUrl('//' + window.sessionStorage.getItem('SERVIDOR') + '/api/recurso/open311');
-        RestangularProvider.setBaseUrl('/sede/servicio/');
+        RestangularProvider.setBaseUrl('/opencityext/servicio/');
     }
 ]).factory('RestangularEntidades', ['Restangular',
     function(Restangular) {
         return Restangular
             .withConfig(function(RestangularConfigurer) {
-            	RestangularConfigurer.setBaseUrl('/sede/servicio/quejas-sugerencias/entidad-externa');
+            	RestangularConfigurer.setBaseUrl('/opencityext/servicio/quejas-sugerencias/entidad-externa');
             });
     }
 ]).factory('RestangularInternos', ['Restangular',
@@ -107,14 +107,14 @@ var app = angular.module('app', [
         return Restangular
             .withConfig(function(RestangularConfigurer) {
                 RestangularConfigurer
-                    .setBaseUrl('/sede/servicio/quejas-sugerencias/entidad-interna');
+                    .setBaseUrl('/opencityext/servicio/quejas-sugerencias/entidad-interna');
             });
     }
 ]).factory('RestangularPortalero', ['Restangular',
     function(Restangular) {
         return Restangular
             .withConfig(function(RestangularConfigurer) {
-            	RestangularConfigurer.setBaseUrl('/sede/servicio/portalero');
+            	RestangularConfigurer.setBaseUrl('/opencityext/servicio/portalero');
             });
     }
 ]).factory('CategoriesService', ['Restangular', function(Restangular) {

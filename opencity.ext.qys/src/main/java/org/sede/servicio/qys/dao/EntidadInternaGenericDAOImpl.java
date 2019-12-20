@@ -11,6 +11,7 @@ import javax.validation.ValidatorFactory;
 
 import org.sede.core.anotaciones.Esquema;
 import org.sede.core.dao.JPAIgnoreTraversableResolver;
+import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.EntidadInterna;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
  *
  */
 @Repository("entidadInternaTicketing")
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 public class EntidadInternaGenericDAOImpl extends GenericDAOImpl <EntidadInterna, String> implements EntidadInternaGenericDAO {
 	
 		
@@ -33,7 +34,7 @@ public class EntidadInternaGenericDAOImpl extends GenericDAOImpl <EntidadInterna
 	 * 
 	 * @param entityManager
 	 */
-	@PersistenceContext(unitName=Esquema.TICKETING)
+	@PersistenceContext(unitName=ConfigQys.ESQUEMA)
 	public void setEntityManager(EntityManager entityManager) {
 		this.setEm(entityManager);
 	}

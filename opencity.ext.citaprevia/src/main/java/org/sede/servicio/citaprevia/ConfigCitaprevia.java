@@ -5,11 +5,15 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ConfigCitaprevia implements PropertyFileInterface {
+	
+	public static final String ESQUEMA = "GENERAL";
+	public static final String TM = "transactionManagerGeneral";
+	
 	public String getSchema() {
-		return "intra";
+		return "general";
 	}
 	public String getJndi() {
-		return "WebIntraDS";
+		return "WebGeneralDS";
 	}
 
 	public String getEntity() {

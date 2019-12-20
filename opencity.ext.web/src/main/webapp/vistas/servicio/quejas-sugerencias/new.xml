@@ -523,10 +523,10 @@ function mostrar(idCapa){
     },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
     remote: {
-        url:'/sede/servicio/portalero/list',
+        url:'/opencityext/servicio/portalero/list',
         replace: function () {
             var consulta = $('#address_string').val();
-            var q = '/sede/servicio/portalero/list?rows=10&fl=id,calle.title,numero,geometry&srsname=utm30n&calle.titleContains=';
+            var q = '/opencityext/servicio/portalero/list?rows=10&fl=id,calle.title,numero,geometry&srsname=utm30n&calle.titleContains=';
             if (consulta.indexOf(',') > 0) {
                 var dat = consulta.split(',');
                 q = q + encodeURIComponent(dat[0]) + '&numero=' + encodeURIComponent(dat[1].trim());

@@ -14,11 +14,12 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.SafeHtml;
 import org.sede.core.anotaciones.Context;
 import org.sede.core.anotaciones.Rdf;
+import org.sede.servicio.qys.ConfigQys;
 
 @XmlRootElement(name = "categoria-sip")
 @Entity(name = "CategoriaSIP")
 @DynamicUpdate
-@Table(name = "CATEGORIA_SIP", schema = "TICKETING")
+@Table(name = "CATEGORIA_SIP", schema = ConfigQys.ESQUEMA)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CategoriaSIP {
 	@Id

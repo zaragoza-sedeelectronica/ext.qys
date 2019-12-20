@@ -37,11 +37,11 @@
 			   <li><a href="/contenidos/CTAR/24_2017.pdf" class="pdf">Resolución 24/2017, de 6 de noviembre de 2017 </a> | El usuario/a no inicio el procedimiento de solicitud a través del Ayuntamiento de Zaragoza</li>
 			   <li><a href="/contenidos/CTAR/12_2018.pdf" class="pdf">Resolución 12/2018, de 12 de marzo de 2018</a> | No existe autorización para mostrar solicitud </li>
 			   <li><a href="/contenidos/CTAR/34_2018.pdf" class="pdf">Resolución 34/2018, de 25 de junio de 2018</a> | El usuario/a no inicio el procedimiento de solicitud a través del Ayuntamiento de Zaragoza </li>
-			   <li><a href="/contenidos/CTAR/35_2018.pdf" class="pdf">Resolución 35/2018, de 25 de junio de 2018</a> | <a href="/sede/servicio/resoluciones-informacion-publica?service_request_id=515615">Ver Solicitud</a></li>
+			   <li><a href="/contenidos/CTAR/35_2018.pdf" class="pdf">Resolución 35/2018, de 25 de junio de 2018</a> | <a href="/opencityext/servicio/resoluciones-informacion-publica?service_request_id=515615">Ver Solicitud</a></li>
                 <li><a href="/contenidos/CTAR/55_2018.pdf" class="pdf">Resolución 55/2018, de 29 de octubre de 2018</a></li>
                 <li><a href="/contenidos/CTAR/68_2018.pdf" class="pdf">Resolución 68/2018, de 3 de diciembre de 2018</a> | El usuario no inicio el procedimiento de solicitud a través del Ayuntamiento de Zaragoza</li>
- <li><a href="/contenidos/CTAR/Ej5_2019.pdf" class="pdf">Ejecución</a> | <a href="/contenidos/CTAR/5_2019.pdf" class="pdf">Resolución 5/2019, de 4 de febrero de 2019</a> | <a href="/sede/servicio/resoluciones-informacion-publica?service_request_id=515615">Ver Solicitud</a></li>
-  <li><a href="/contenidos/CTAR/Ej15_2019.pdf" class="pdf">Ejecución</a> |<a href="/contenidos/CTAR/15_2019.pdf" class="pdf">Resolución 15/2019, de 25 de marzo de 2019</a> | <a href="/sede/servicio/resoluciones-informacion-publica?service_request_id=542951">Ver Solicitud</a></li>
+ <li><a href="/contenidos/CTAR/Ej5_2019.pdf" class="pdf">Ejecución</a> | <a href="/contenidos/CTAR/5_2019.pdf" class="pdf">Resolución 5/2019, de 4 de febrero de 2019</a> | <a href="/opencityext/servicio/resoluciones-informacion-publica?service_request_id=515615">Ver Solicitud</a></li>
+  <li><a href="/contenidos/CTAR/Ej15_2019.pdf" class="pdf">Ejecución</a> |<a href="/contenidos/CTAR/15_2019.pdf" class="pdf">Resolución 15/2019, de 25 de marzo de 2019</a> | <a href="/opencityext/servicio/resoluciones-informacion-publica?service_request_id=542951">Ver Solicitud</a></li>
 			   </ul>
 			   </div>
             </th:block>

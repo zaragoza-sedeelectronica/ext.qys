@@ -59,7 +59,7 @@ import com.ibm.icu.util.Calendar;
  *
  */
 @Controller
-@Transactional(Esquema.TMTICKETING)
+@Transactional(ConfigQys.TM)
 @RequestMapping(value = InformacionPublicaController.MAPPING, method = RequestMethod.GET)
 @PlantillaHTML("portal/transparencia")
 public class InformacionPublicaController {

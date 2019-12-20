@@ -50,7 +50,7 @@
                         <input type="checkbox" ng-model="registro.incluir_orden" />&iquest;Generar e incluir Orden de trabajo?
                     </label>
                     <!-- <button ng-show="incluir_orden" class="btn btn-primary btn-xs" ng-click="ordenTrabajoPreview()">Previsualizar</button>-->
-                    <a ng-show="registro.incluir_orden" class="btn btn-primary btn-xs" ng-href="/sede/servicio/quejas-sugerencias/{{registro.service_request_id}}/preview-orden-trabajo?clientId={{usuario.login}}&externo_name={{accion.entidadExternaSelected.name}}&ihm={{linkOt}}" target="_blank">Previsualizar</a>
+                    <a ng-show="registro.incluir_orden" class="btn btn-primary btn-xs" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/preview-orden-trabajo?clientId={{usuario.login}}&externo_name={{accion.entidadExternaSelected.name}}&ihm={{linkOt}}" target="_blank">Previsualizar</a>
                 </div>
             </div>
 			<div class="form-group" ng-show="accion.id==11">

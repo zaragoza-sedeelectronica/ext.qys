@@ -17,6 +17,7 @@ import org.sede.core.anotaciones.Esquema;
 import org.sede.core.anotaciones.Permisos;
 import org.sede.core.dao.EntidadBase;
 import org.sede.core.utils.Funciones;
+import org.sede.servicio.qys.ConfigQys;
 
 /**
  * Clase EntidadInterna
@@ -26,7 +27,7 @@ import org.sede.core.utils.Funciones;
  */
 @XmlRootElement(name = "entidad-interna")
 @Entity
-@Table(name = "HB_ENTIDADESINTERNAS", schema = Esquema.TICKETING)
+@Table(name = "HB_ENTIDADESINTERNAS", schema = ConfigQys.ESQUEMA)
 @DynamicUpdate
 @XmlAccessorType(XmlAccessType.FIELD)
 @BatchSize(size=100)
