@@ -34,15 +34,15 @@ import org.sede.core.anotaciones.Permisos;
 import org.sede.core.anotaciones.Rdf;
 import org.sede.core.anotaciones.RequiredSinValidacion;
 import org.sede.core.anotaciones.ResultsOnly;
+import org.sede.core.anotaciones.SoloEnDetalle;
 import org.sede.core.anotaciones.SoloEnEstaEntidad;
 import org.sede.core.dao.EntidadBase;
 import org.sede.core.geo.Geometria;
 import org.sede.core.geo.Punto;
 import org.sede.core.rest.CheckeoParametros;
 import org.sede.core.utils.Funciones;
+import org.sede.servicio.callejero.entity.Portalero;
 import org.sede.servicio.qys.ConfigQys;
-//import org.sede.servicio.asociacion.entity.Categoria;
-//import org.sede.servicio.callejero.entity.Portalero;
 import org.sede.servicio.qys.QysController;
 
 /**
@@ -51,7 +51,7 @@ import org.sede.servicio.qys.QysController;
 @XmlRootElement(name="request")
 @ResultsOnly(xmlroot="service_requests")
 @Rdf(contexto=Context.OPEN311, propiedad="ServiceRequest")
-@GeoJson(title = "Quejas y sugerencias", description = "Localización", icon = "queja", link = "/opencityext/servicio/quejas-sugerencias/")
+@GeoJson(title = "Quejas y sugerencias", description = "Localización", icon = "queja", link = "/sede/servicio/quejas-sugerencias/")
 @PathId("/" + QysController.MAPPING)
 @Entity
 @Table(name = "HBREQUESTS", schema = ConfigQys.ESQUEMA)
@@ -78,7 +78,7 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	
 	private String service_notice;
 	
-	private String addressString;
+	private String address_string;
 	
 	private Integer addressId;
 	
@@ -112,15 +112,15 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	private BigDecimal origin;
 	
 	@Permisos(Permisos.DET)
-//	@SoloEnEstaEntidad
 	@BatchSize(size = 50)
 	@OrderBy("rqaCreationdatetime desc")
+	@SoloEnDetalle
 	private List<Hbrequestactions> actions = new ArrayList<Hbrequestactions>();
 	
 	@Permisos(Permisos.DET)
-	@SoloEnEstaEntidad
 	@BatchSize(size = 50)
-	private List<Hbrequestloadfiles> attachments = new ArrayList<Hbrequestloadfiles>();
+	@SoloEnDetalle
+	private List<Hbrequestloadfiles> files = new ArrayList<Hbrequestloadfiles>();
 	
 	@Permisos(Permisos.DET)
 	private Hbrequesttypes type;
@@ -133,7 +133,7 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	private Date rqtRequestdate;
 	
 //	@Interno
-//	private Portalero portal;
+	private Portalero portal;
 	
 	@Interno
 	private BigDecimal x;
@@ -194,13 +194,13 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	
 	
 	@Permisos(Permisos.DET)
-	private String firstName;
+	private String first_name;
 	@Permisos(Permisos.DET)
 	private String email;
 	@Permisos(Permisos.DET)
 	private String phone;
 	@Permisos(Permisos.DET)
-	private String userAddress;
+	private String user_address;
 	
 	public CategoriaSIP catSip;
 	
@@ -234,7 +234,7 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 			String internoCode, BigDecimal rqtZonainspeccionid, BigDecimal internalStatus, String notes,
 			BigDecimal idCita, String token, BigDecimal userId, String description, String title,
 			String firstName, String email, String phone, String userAddress, String addressString,
-			Integer addressId, String serviceNotice, List<Hbrequestactions> actions) {
+			Integer addressId, String serviceNotice, List<Hbrequestactions> actions, List<Hbrequestloadfiles> files) {
 		this.rqtHbid = rqtHbid;
 		this.hbcategories = hbcategories;
 		this.hbEntidadesexternas = hbEntidadesexternas;
@@ -278,14 +278,15 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 		this.userId = userId;
 		this.description = description;
 		this.title = title;
-		this.firstName = firstName;
+		this.first_name = firstName;
 		this.email = email;
 		this.phone = phone;
-		this.userAddress = userAddress;
-		this.addressString = addressString;
+		this.user_address = userAddress;
+		this.address_string = addressString;
 		this.addressId = addressId;
 		this.service_notice = serviceNotice;
 		this.actions = actions;
+		this.files = files;
 	}
 
 	@Id
@@ -696,12 +697,12 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	}
 
 	@Column(name = "FIRST_NAME", length = 600)
-	public String getFirstName() {
-		return this.firstName;
+	public String getFirst_name() {
+		return this.first_name;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setFirst_name(String firstName) {
+		this.first_name = firstName;
 	}
 
 	@Column(name = "EMAIL", length = 300)
@@ -723,27 +724,27 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	}
 
 	@Column(name = "USER_ADDRESS", length = 500)
-	public String getUserAddress() {
-		return this.userAddress;
+	public String getUser_address() {
+		return this.user_address;
 	}
 
-	public void setUserAddress(String userAddress) {
-		this.userAddress = userAddress;
+	public void setUser_address(String userAddress) {
+		this.user_address = userAddress;
 	}
 
 	@Column(name = "ADDRESS_STRING", length = 500)
-	public String getAddressString() {
-		return this.addressString;
+	public String getAddress_string() {
+		return this.address_string;
 	}
 
-	public void setAddressString(String addressString) {
-		this.addressString = addressString;
+	public void setAddress_string(String addressString) {
+		this.address_string = addressString;
 	}
 
-//	@Transient
-//	public Integer getAddressId() {
-//		return this.portal.getId();
-//	}
+	@Transient
+	public Integer getAddressId() {
+		return this.portal.getId();
+	}
 
 	public void setAddressId(Integer addressId) {
 		this.addressId = addressId;
@@ -807,12 +808,12 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 	
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "hbrequests")
-	public List<Hbrequestloadfiles> getAttachments() {
-		return attachments;
+	public List<Hbrequestloadfiles> getFiles() {
+		return files;
 	}
 
-	public void setAttachments(List<Hbrequestloadfiles> attachments) {
-		this.attachments = attachments;
+	public void setFiles(List<Hbrequestloadfiles> attachments) {
+		this.files = attachments;
 	}
 
 	@Transient
@@ -851,17 +852,17 @@ public class Hbrequests extends EntidadBase implements java.io.Serializable {
 		return Funciones.obtenerPath(this.getClass()) + getService_request_id();
 	}
 	
-//	@OneToOne
-//    @JoinColumn(name = "ADDRESS_ID", referencedColumnName="ID_POR", nullable = true)
-//    @NotFound(action=NotFoundAction.IGNORE)
-//    @SoloEnEstaEntidad
-//	public Portalero getPortal() {
-//		return portal;
-//	}
-//
-//	public void setPortal(Portalero portal) {
-//		this.portal = portal;
-//	}
+	@OneToOne
+    @JoinColumn(name = "ADDRESS_ID", referencedColumnName="ID_POR", nullable = true)
+    @NotFound(action=NotFoundAction.IGNORE)
+    @SoloEnEstaEntidad
+	public Portalero getPortal() {
+		return portal;
+	}
+
+	public void setPortal(Portalero portal) {
+		this.portal = portal;
+	}
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "id_cat_sip")

@@ -18,7 +18,7 @@
         <form th:action="@{/servicio/quejas-sugerencias/save}" th:object="${dato}" method="post" id="newForm" enctype="multipart/form-data" class="form-horizontal">
             <div class="fieldset">
                 <fieldset>
-                    <legend><span>Datos del ciudadano</span></legend>
+                    <legend><span>Datos del ciudadano/ciudadana</span></legend>
                     <div class="row-fluid" th:if="${session.sess_ciudadano}">
                       <dl class="dl-horizontal">
                         <dt>Nombre</dt>
@@ -74,7 +74,7 @@
                         <div class="col-sm-9">
                             <select name="service_code" id="service_code" class="dependent-select form-control">
                                 <option value=""></option>
-                                <option th:each="s : ${service.body.result}" th:value="${s.service_code}" th:text="${s.service_name}" />
+                                <option th:each="s : ${service.body.result}" th:value="${s.service_code}" th:text="${s.service_name}" th:selected="${param.service_code} and ${param.service_code[0]} == ${s.service_code}"/>
                             </select>
                         </div>
                     </div>
@@ -96,46 +96,37 @@
                         <div class="col-sm-9">
                             <input type="file" name="file" id="file"/><span class="help-inline">Si desea enviar varios archivos, comprímalos en un sólo fichero (límite 1Mb) en formato ZIP.</span></div>
                     </div>
-                    <div class="tarjeta clearfix"><a class="destacado" href="javascript:mostrar('el0')">Añadir localización</a>
+                    <div class="tarjeta clearfix"><a class="destacado" href="javascript:mostrar('el0');javascript:colocarMarker(4613777.71,676631.86);">Añadir localización</a>
                         <div class="imp" id="el0" style="display: none;">
                             <h2 class="titular">Añadir localización</h2>
                             <div class="row">
-                                <div class="col-md-6 form-group">
-                                    <label class="control-label" for="address_string">
-                                        Selecciona la calle:
-                                    </label>
-                                    <input type="text" name="address_string" id="address_string" th:value="*{address_string}" autocomplete="off" placeholder="Buscar calle" class="form-control" />
-                                    <label for="calle_id" class="control-label col-xs-12 col-md-2 oculto">Calle:</label>
-                                    <input type="hidden" name="srsname" id="srsname" value="utm30n"/>
-                                    <input type="hidden" name="address_id" id="address_id" th:value="*{address_id}"/>
-                                    <input type="hidden" name="x" id="x" th:value="*{x}"/>
-                                    <input type="hidden" name="y" id="y" th:value="*{y}"/>
+                                <div class="col-md-12 mapas">
+                                  <input type="hidden" name="address_string" id="address_string" th:value="*{address_string}"/>
+                                  <input type="hidden" name="srsname" id="srsname" value="utm30n"/>
+                                  <input type="hidden" name="address_id" id="address_id" th:value="*{address_id}"/>
+                                  <input type="hidden" name="x" id="x" th:value="*{x}"/>
+                                  <input type="hidden" name="y" id="y" th:value="*{y}"/>
+                                  <div id="mapa" style="height: 30em">
+                                      <script type="text/javascript">
+                                          var ifrm = document.createElement("iframe");
+                                          ifrm.setAttribute("name", "mapahome");
+                                          ifrm.setAttribute("id", "mapahome");
+                                          ifrm.setAttribute("title", "La Ciudad al Instante");
+                                          ifrm.setAttribute("scrolling", "no");
+                                          ifrm.setAttribute("src", "/cont/vistas/servicio/visores/portada/index.html");
+                                          ifrm.setAttribute("frameBorder", "0");
+                                          ifrm.style.width.value = "100%";
+                                          document.getElementById("mapa").appendChild(ifrm);
+                                      </script>
+                                  </div>  
                                 </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <a class="margin-t2em" href="javascript:colocarMarker(4613777.71,676631.86);">Coloque la ubicación manualmente si no ha sido encontrada</a><br/>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 mapas">
-                                      <div id="mapa" style="height: 30em">
-                                          <script type="text/javascript">
-                                              var ifrm = document.createElement("iframe");
-                                              ifrm.setAttribute("name", "mapahome");
-                                              ifrm.setAttribute("id", "mapahome");
-                                              ifrm.setAttribute("title", "La Ciudad al Instante");
-                                              ifrm.setAttribute("scrolling", "no");
-                                              ifrm.setAttribute("src", "/cont/vistas/servicio/visores/portada/index.html");
-                                              ifrm.setAttribute("frameBorder", "0");
-                                              ifrm.style.width.value = "100%";
-                                              document.getElementById("mapa").appendChild(ifrm);
-                                          </script>
-                                      </div>  
-                                    </div>
-                                </div>
+                            </div>
+                            <div id="resultadoPortales">
+                            </div>
                         </div>
+                        
                     </div>
+                    
                     <div class="control-group">
                         <label for="attribute[public]" class="checkbox inline">
                             <input type="checkbox" id="attribute[public]" value="S" name="attribute[public]"/><strong> Autorizo que la Web Municipal haga público el asunto, la descripción y la fotografía adjunta a mi queja/sugerencia, y haga visible su ubicación en el <a class="enlace" href="https://www.zaragoza.es/ciudadania/gobierno-abierto/transparencia/ver_Mapa?id=35">mapa de quejas y sugerencias.</a>.<br/> * No se publicarán datos personales.</strong></label>
@@ -517,49 +508,12 @@ function mostrar(idCapa){
 
     var marker;
     var pois = [];
-    var addressDataset = new Bloodhound({
-    datumTokenizer: function(countries) {
-        return Bloodhound.tokenizers.whitespace(result.value);
-    },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    remote: {
-        url:'/opencityext/servicio/portalero/list',
-        replace: function () {
-            var consulta = $('#address_string').val();
-            var q = '/opencityext/servicio/portalero/list?rows=10&fl=id,calle.title,numero,geometry&srsname=utm30n&calle.titleContains=';
-            if (consulta.indexOf(',') > 0) {
-                var dat = consulta.split(',');
-                q = q + encodeURIComponent(dat[0]) + '&numero=' + encodeURIComponent(dat[1].trim());
-            } else {
-                q = q + encodeURIComponent(consulta);
-            }
-            return q;
-        },
-        filter: function(response) {      
-            return response.result;
-        },
-        wildcard: '%QUERY'
-    }
-});
-$('#address_string').typeahead(null, {
-    name: 'address',
-    // display: 'item.title',
-    displayKey: function(results) {
-        return results.calle.title.replace(',',' ') + ', ' + results.numero;        
-    },
-    source: addressDataset
-});
-$('#address_string').bind('typeahead:select', function(ev, item) {
-    $('#address_id').val(item.id);
-    $('#x').val(item.geometry.coordinates[0]);
-    $('#y').val(item.geometry.coordinates[1]);
-    colocarMarker(item.geometry.coordinates[1],item.geometry.coordinates[0]);
-});
+    
 function colocarMarker(latitude,longitude) {
   
     var IDEZarOLAPI = frames["mapahome"].IDEZarOLAPI;
     IDEZarOLAPI.defaultProjection = "EPSG:23030";
-
+    
     if (latitude && longitude) {
         IDEZarOLAPI.deletePOIs("editable")
         var poi = IDEZarOLAPI.POI(longitude, latitude);
@@ -567,16 +521,15 @@ function colocarMarker(latitude,longitude) {
     }
 
     if (latitude && longitude) {
-        var zoomLevel = 5;
+        var zoomLevel = 10;
         IDEZarOLAPI.centreMap(longitude, latitude, zoomLevel);
     } else {
         IDEZarOLAPI.centreMapInPOIs();
     }
 
-
     $('#x').val(longitude);
     $('#y').val(latitude);
-    console.log('Se ha colocado marker:' + longitude + ':' + latitude);
+
 }
 mapa();
 function mapa() {
@@ -587,19 +540,50 @@ function mapa() {
     }
 }     
 
-$("#newForm").submit(function(event) {
+var xActual = 0, yActual = 0;
+
+setInterval(function(){ 
   try {
+
     var IDEZarOLAPI = frames["mapahome"].IDEZarOLAPI;
-    
+    IDEZarOLAPI.defaultProjection = "EPSG:23030";    
     var pois = IDEZarOLAPI.getPOIs();
     $('#x').val(pois[0].longitude);
     $('#y').val(pois[0].latitude);
-    
-    
+    if (xActual != pois[0].longitude && yActual != pois[0].latitude) {
+      
+      xActual = pois[0].longitude;
+      yActual = pois[0].latitude;
+      $('#resultadoPortales').html('');
+      $.get("/opencityext/servicio/portalero/list.json?fl=id,calle,numero,geometry&results_only=true&point=" + xActual + "," + yActual + "&rows=5&distance=500&srsname=utm30n", function(data) {
+        var portales = "<ul class=\"list-unstyled\">";
+        for (var i = 0; i < data.length; i++) {          
+          portales = portales + "<li><label><input " + (i==0 ? "checked=\"checked\"" : "") + " type=\"radio\" id=\"localizacion\" name=\"localizacion\" value=\"" + data[i].id + "#" + data[i].calle.title + ", " + data[i].numero + "\"/> " + data[i].calle.title + ", " + data[i].numero + "</label></li>";
+        }
+        portales = portales + "</ul>"
+        $('#resultadoPortales').html(portales);
+        
+
+      });
+    } 
+  } catch (e) {
+      ;
+  }
+}, 5000);
+
+
+
+$("#newForm").submit(function(event) {
+  try {
+    var datLoc = $('#localizacion:checked').val().split('#');
+    $('#address_id').val(datLoc[0]);
+    $('#address_string').val(datLoc[1]);
   } catch (e) {
       ;
   }
 });
+
+
 
 
 

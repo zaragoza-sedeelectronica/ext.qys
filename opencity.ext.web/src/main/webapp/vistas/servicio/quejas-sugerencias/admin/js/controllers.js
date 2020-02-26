@@ -106,15 +106,16 @@ angular.module('app.controllers', [])
             $window.location.href = '/gesweb';
         } else {
             datosUsuario = JSON.parse(sessionStorage.getItem('datosUsuario'));
+            if (!datosUsuario.propiedades) {
+            	datosUsuario.propiedades=[];
+            }
             serviciosUsuario = JSON.parse(sessionStorage.getItem('serviciosUsuario'));
             $scope.usuario = datosUsuario;
             $scope.servicios = serviciosUsuario;
             
             clientID = datosUsuario.login;
             secretKey = datosUsuario.secretKey;
-
-            $scope.linkInforme = CryptoJS.HmacSHA1("informe#" + clientID + "#" + datosUsuario.propiedades.rootcat_ticketing, secretKey, { asBytes: true }).toString();
-            $scope.linkInformeOdt = CryptoJS.HmacSHA1("odt-report#" + clientID + "#" + datosUsuario.propiedades.rootcat_ticketing, secretKey, { asBytes: true }).toString();
+            
         }
         $scope.types = [
    			 { id: 12812288, text: 'Agradecimiento' },
@@ -129,6 +130,10 @@ angular.module('app.controllers', [])
    			 { id:3, text: 'Cambio de profesional'}
    		   ];
         
+        rootcat = (datosUsuario.propiedades != null && datosUsuario.propiedades.rootcat_ticketing != null) 
+    		? datosUsuario.propiedades.rootcat_ticketing 
+    				: null;
+        var permisos = [];
         for (var i = 0; i < $scope.servicios.length; i++) {
             if ($scope.servicios[i].codigoServicio === 'TICKETING') {
                 $scope.secciones = $scope.servicios[i].secciones;
@@ -136,14 +141,21 @@ angular.module('app.controllers', [])
                 for (var j = 0; j < $scope.secciones.length; j++) {
                     if ($scope.secciones[j].codigoSeccion === 'REQUESTS') {
                         $scope.secc = $scope.secciones[j];
+                        permisos = $scope.secciones[j].permisos;
                         if ($scope.secciones[j].permisos.indexOf("REQUERIMIENTO") > 0) {
                         	$scope.types.push({ id: 241532928, text: 'Requerimiento' });
+                        } else if ($scope.secciones[j].permisos.indexOf("PLZ") > 0) {
+                        	rootcat = '3899392';
                         }
                         
                     }
                 }
             }
         }
+        
+        
+     // sino tiene asociada categoria de quejas y es policia se asocia la 2
+        
         var serviciosUsuario = JSON.parse(sessionStorage.getItem('serviciosUsuario'));
 	   	for (var i = 0; i < serviciosUsuario.length; i++) {
 	       if (serviciosUsuario[i].codigoServicio === 'TICKETING') {
@@ -174,18 +186,19 @@ angular.module('app.controllers', [])
                { id: 1, text: 'Obra Ejecutada' },
                { id: 0, text: 'Sin Intervención' }
         ];*/
-        
         if (sessionStorage.getItem('respuestaTipo') === null) {
-    		Restangular.all('quejas-sugerencias/respuestas-tipo').getList({
-    			results_only:false, 
-				}).then(function(data) {
-					for (i = 0; i < data.length; i++) {
-		    			$scope.estados_internos.push({id: data[i].code, text: data[i].text});
-		    		}
-					sessionStorage.setItem('respuestaTipo', JSON.stringify(data));
-				}, function(result) {
-	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
-	            });
+        	if (permisos.ADMIN) {
+	    		Restangular.all('quejas-sugerencias/respuestas-tipo').getList({
+	    			results_only:false, 
+					}).then(function(data) {
+						for (i = 0; i < data.length; i++) {
+			    			$scope.estados_internos.push({id: data[i].code, text: data[i].text});
+			    		}
+						sessionStorage.setItem('respuestaTipo', JSON.stringify(data));
+					}, function(result) {
+		            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+		            });
+        	}
     	} else {
     		var data = JSON.parse(sessionStorage.getItem('respuestaTipo'));
     		for (i = 0; i < data.length; i++) {
@@ -195,9 +208,8 @@ angular.module('app.controllers', [])
     	}
         
         
-        
         if (sessionStorage.getItem('reqcategories') === null) {
-            if ($scope.usuario.propiedades.rootcat_ticketing) {
+            if (rootcat != null) {
                 Restangular.all('quejas-sugerencias/category').getList({
                     results_only: false,
                 }).then(function(data) {
@@ -213,28 +225,32 @@ angular.module('app.controllers', [])
             $scope.categories = JSON.parse(sessionStorage.getItem('reqcategories'));
         }
         if (sessionStorage.getItem('reqentidadexterna') === null) {
-        	RestangularEntidades.all('').getList({
-    			results_only:false, 
-    			sort: 'name asc'
-				}).then(function(data) {
-					$scope.entidadExterna = data;
-					sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));    					
-				}, function(result) {
-	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
-	            });
+        	if (permisos.SENDEXTERNO) {
+	        	RestangularEntidades.all('').getList({
+	    			results_only:false, 
+	    			sort: 'name asc'
+					}).then(function(data) {
+						$scope.entidadExterna = data;
+						sessionStorage.setItem('reqentidadexterna', JSON.stringify(data));    					
+					}, function(result) {
+		            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+		            });
+        	}
     	} else {
     		$scope.entidadExterna = JSON.parse(sessionStorage.getItem('reqentidadexterna'));
     	}
         if (sessionStorage.getItem('reqentidadinterna') === null) {
-        	RestangularInternos.all('').getList({
-    			results_only:false, 
-    			sort: 'name asc'
-				}).then(function(data) {
-					$scope.entidadInterna = data;
-					sessionStorage.setItem('reqentidadinterna', JSON.stringify(data));    					
-				}, function(result) {
-	            	Informer.inform(result.data.error || result.data.mensaje, "danger");
-	            });
+        	if (permisos.SENDINSPECTOR) {
+	        	RestangularInternos.all('').getList({
+	    			results_only:false, 
+	    			sort: 'name asc'
+					}).then(function(data) {
+						$scope.entidadInterna = data;
+						sessionStorage.setItem('reqentidadinterna', JSON.stringify(data));    					
+					}, function(result) {
+		            	Informer.inform(result.data.error || result.data.mensaje, "danger");
+		            });
+        	}
     	} else {
     		$scope.entidadInterna = JSON.parse(sessionStorage.getItem('reqentidadinterna'));
     	}
@@ -260,6 +276,8 @@ angular.module('app.controllers', [])
                 $location.path('/newOperador');
             } else if ($scope.permisos.ZONAINSPECCION) {
                 $location.path('/newParques');
+            } else if ($scope.permisos.PLZ) {
+                $location.path('/newPlz');
             } else {
                 $location.path('/new');
             }
@@ -301,24 +319,24 @@ angular.module('app.controllers', [])
                 return;
             $scope.busy = true;
             if(angular.isUndefined($scope.query.estado) && busquedaDeOtroControlador === false){
-            	if(angular.isDefined(datosUsuario.junta_ticketing)) {
+            	if(angular.isDefined(datosUsuario.propiedades.junta_ticketing)) {
             		$scope.query.estado = [$scope.estados[0].id,$scope.estados[2].id, $scope.estados[3].id];
             		$scope.textoQuery=' Filtro: Pendiente, No Asignada, Resuelta';
-            	} else if(datosUsuario.usr_ticketing=="2") {
+            	} else if(datosUsuario.propiedades.usr_ticketing=="2" || $scope.permisos.PLZ) {
             		$scope.mostrar010 = false;
                     $scope.query.estado = [$scope.estados[2].id, $scope.estados[3].id, $scope.estados[15].id];
             		$scope.textoQuery=' Filtro: Pendiente, No Asignada, Recibida información';
             	} else if (datosUsuario.login=='alperezp') {
             			$scope.query.estado = [$scope.estados[0].id];
             			$scope.textoQuery=' Filtro: Pendiente';
-            	} else if (datosUsuario.usr_ticketing=="4816906") {
+            	} else if (datosUsuario.propiedades.usr_ticketing=="4816906") {
             		// Limpieza publica
             		$scope.query.estado = [$scope.estados[0].id, $scope.estados[3].id, $scope.estados[6].id];
         			$scope.textoQuery=' Filtro: Pendiente, Resuelta, Derivada a externo';
             	} else {
             		$scope.query.estado=[];
             		if ($scope.permisos.ADMINOPERADOR) {
-            			$scope.query.group_operator=$scope.usuario.usr_ticketing;
+            			$scope.query.group_operator=$scope.usuario.propiedades.usr_ticketing;
             			$scope.query.estado = [$scope.estados[2].id];
             			$scope.textoQuery=' Filtro: no asignada, introducidas por los operadores';
             		} else if ($scope.permisos.OPERADOR) {
@@ -363,7 +381,7 @@ angular.module('app.controllers', [])
                     rows: 50,
                     sort: sort_ticketing,
                     start: start,
-                    //            srsname: 'utm30n',
+                    srsname: 'wgs84',
                     title: titulo,
                     service_code: $scope.query.service_code,
                     externo_code: $scope.query_externo_code,
@@ -423,7 +441,7 @@ angular.module('app.controllers', [])
                     rows: 50,
                     sort: sort_ticketing,
                     start: start,
-                    //                    srsname: 'utm30n',
+                    srsname: 'wgs84',
                     title: $scope.query.title,
                     service_code: $scope.query.service_codes,
                     externo_code: $scope.query.externo_code,
@@ -498,7 +516,7 @@ angular.module('app.controllers', [])
 
                 if (angular.isUndefined(elemento.service_code)) {
 
-                    Restangular.one("category", selectedItem.service_code).customPOST(selectedItem, "", "", "").then(function(dato) {
+                    Restangular.one("quejas-sugerencias/category", selectedItem.service_code).customPOST(selectedItem, "", "", "").then(function(dato) {
                         Informer.inform("El registro se ha creado.", "success");
                         $scope.registros.push(dato);
                     }, function(result) {
@@ -507,7 +525,7 @@ angular.module('app.controllers', [])
 
                 } else {
                     selectedItem.service_code = elemento.service_code;
-                    Restangular.one("category", selectedItem.service_code).customPUT(selectedItem, "", "", "").then(function(dato) {
+                    Restangular.one("quejas-sugerencias/category", selectedItem.service_code).customPUT(selectedItem, "", "", "").then(function(dato) {
                         Informer.inform("El registro se ha modificado correctamente.", "success");
                         $scope.registros[index] = dato;
                     }, function(result) {
@@ -525,7 +543,7 @@ angular.module('app.controllers', [])
     }])
     .controller('GroupCtrl', ['$scope', '$filter', 'Restangular', 'Informer', 'Dao', 'Query', '$uibModal', function($scope, $filter, Restangular, Informer, Dao, Query, $uibModal) {
 
-        Restangular.all('group').getList({
+        Restangular.all('quejas-sugerencias/group').getList({
             results_only: false,
         }).then(function(data) {
             $scope.registros = data;
@@ -568,7 +586,7 @@ angular.module('app.controllers', [])
 
                 if (angular.isUndefined(selectedItem.group_code)) {
 
-                    Restangular.one("group", $scope.registros[index]).customPOST(selectedItem, "", "", "").then(function(dato) {
+                    Restangular.one("quejas-sugerencias/group", $scope.registros[index]).customPOST(selectedItem, "", "", "").then(function(dato) {
                         Informer.inform("El registro se ha creado.", "success");
                         $scope.registros.push(dato);
                     }, function(result) {
@@ -576,7 +594,7 @@ angular.module('app.controllers', [])
                     });
 
                 } else {
-                    Restangular.one("group", selectedItem.group_code).customPUT(selectedItem, "", "", "").then(function(dato) {
+                    Restangular.one("quejas-sugerencias/group", selectedItem.group_code).customPUT(selectedItem, "", "", "").then(function(dato) {
                         Informer.inform("El registro se ha modificado correctamente.", "success");
                         $scope.registros[index] = dato;
                     }, function(result) {
@@ -683,6 +701,7 @@ angular.module('app.controllers', [])
                         sort: 'requested_datetime desc',
                         start: 0,
                         //                  srsname: 'utm30n',
+                        srsname: 'wgs84',
                         title: '//' + $scope.registro.address_id,
                         start_date: $filter('date')($scope.query_start_date, 'yyyy-MM-ddTHH:mm:ss\'Z\''),
                         end_date: $filter('date')($scope.query_end_date, 'yyyy-MM-ddTHH:mm:ss\'Z\'')
@@ -723,7 +742,10 @@ angular.module('app.controllers', [])
         } else {
             $scope.registro = {};
         }
-
+        if ($scope.permisos.PLZ) {
+        	$scope.registro.first_name = $scope.usuario.nombre + ' ' + $scope.usuario.apellido1 + ' ' + $scope.usuario.apellido2;
+        	$scope.registro.email = $scope.usuario.email;
+        }
         $scope.seleccionadaCategoria = function(item) {
             $scope.category = item;
             if (angular.isUndefined($scope.registro.title) || $scope.registro.title.length <= 3) {
@@ -807,6 +829,7 @@ angular.module('app.controllers', [])
                         sort: 'requested_datetime desc',
                         start: 0,
                         //            srsname: 'utm30n',
+                        srsname: 'wgs84',
                         title: '//' + $scope.registro.address_id
                         /*, 
                                     start_date:$filter('date')($scope.query.start_date, 'yyyy-MM-ddTHH:mm:ss\'Z\''),

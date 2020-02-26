@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import org.sede.servicio.qys.entity.Request;
+import org.sede.servicio.qys.entity.db.Hbrequestloadfiles;
 import org.sede.servicio.qys.entity.db.Hbrequests;
 
 import com.googlecode.genericdao.dao.jpa.GenericDAO;
@@ -72,4 +73,5 @@ public interface HBRequestDao extends GenericDAO<Hbrequests, BigDecimal> {
 			final Integer id_cat_sip) throws SQLException;
 
 	public Hbrequests findRqtRequestNumber(BigDecimal id);
+	public Hbrequestloadfiles findFile(BigDecimal id, BigDecimal idFile);
 }

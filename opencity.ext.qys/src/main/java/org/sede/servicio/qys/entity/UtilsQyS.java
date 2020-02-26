@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.sede.core.rest.Peticion;
+import org.sede.core.tag.Utils;
+import org.sede.core.utils.Propiedades;
 import org.sede.servicio.qys.entity.db.Hbrequestactions;
 import org.sede.servicio.qys.entity.db.Hbrequests;
 
@@ -28,6 +30,14 @@ public class UtilsQyS {
 	public static final BigDecimal ID_010 = new BigDecimal(235798528);
 	// FIXME extraer a fichero de propiedades
 	public static final int RQT_ID_FROM = 0;//375997;
+	
+	/**
+	 *  variables utilizadas para policias
+	 */
+	public static final String USR_PLZ = "15";
+	public static final BigDecimal ORIGIN_PLZ = BigDecimal.valueOf(233275392);
+	public static final String CATEGORY_PLZ = "3899392";
+	
 	/**
 	 *  variable PROPGCZUSR
 	 */
@@ -199,7 +209,11 @@ public class UtilsQyS {
 		if (peticion.getCredenciales() != null && peticion.getCredenciales().getUsuario().getPropiedades() != null) {
 			return peticion.getCredenciales().getUsuario().getPropiedades().get(UtilsQyS.PROPGCZUSR);
 		} else {
-			return null;
+			if (Utils.tienePermiso(peticion.getCredenciales(), "TICKETING", "REQUESTS", "PLZ")) {
+				return UtilsQyS.USR_PLZ;
+			} else {
+				return null;
+			}
 		}
 				
 	}
@@ -228,7 +242,11 @@ public class UtilsQyS {
 		if (peticion.getCredenciales() != null && peticion.getCredenciales().getUsuario().getPropiedades() != null) {
 			return peticion.getCredenciales().getUsuario().getPropiedades().get(UtilsQyS.PROPGCZROOTCATEGORY);
 		} else {
-			return null;
+			if (Utils.tienePermiso(peticion.getCredenciales(), "TICKETING", "REQUESTS", "PLZ")) {
+				return UtilsQyS.CATEGORY_PLZ;
+			} else {
+				return null;
+			}
 		}	
 	} 
 	/**
@@ -243,7 +261,11 @@ public class UtilsQyS {
 				&& peticion.getCredenciales().getUsuario().getPropiedades().get(UtilsQyS.PROPGCZDEFAULTORIGIN) != null) {
 			return new BigDecimal(peticion.getCredenciales().getUsuario().getPropiedades().get(UtilsQyS.PROPGCZDEFAULTORIGIN));
 		} else {
-			return null;
+			if (Utils.tienePermiso(peticion.getCredenciales(), "TICKETING", "REQUESTS", "PLZ")) {
+				return UtilsQyS.ORIGIN_PLZ;
+			} else {
+				return null;
+			}
 		}	
 	}
 
@@ -257,7 +279,6 @@ public class UtilsQyS {
 
 	public static boolean puedeAccederAQueja(Hbrequests registro, String usuarioTicketing, String externoTicketing) {
 		BigDecimal userTicketing = new BigDecimal(usuarioTicketing);
-		
 		if (externoTicketing == null) {
 			if (userTicketing.equals(registro.getUsrHbidRequester())
 					|| userTicketing.equals(registro.getUsrHbidIntroducer())
@@ -289,6 +310,11 @@ public class UtilsQyS {
 			bd[i] = new BigDecimal(datos[i]);
 		}
 		return bd;
+	}
+	
+	public static String getPathInformes() {
+		
+		return Propiedades.getPathAplicacionesDisk() + "ticketing/informes/";
 	}
 	
 }

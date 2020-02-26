@@ -128,7 +128,7 @@ public class CategoryController {
      * @return
      */
     @Permisos(Permisos.CATEGORY)
-	@RequestMapping(path = "/{id}", method = RequestMethod.POST, consumes = { MimeTypes.JSON, MimeTypes.XML }, produces = { MimeTypes.JSON, MimeTypes.XML })
+	@RequestMapping(path = "/{id}", method = RequestMethod.PUT, consumes = { MimeTypes.JSON, MimeTypes.XML }, produces = { MimeTypes.JSON, MimeTypes.XML })
 	@Description("Crear una categoria")
 	@ResponseClass(value = Category.class)
 	public @ResponseBody ResponseEntity<?> apiModificar(@PathVariable BigDecimal id, @RequestBody Category registro) {

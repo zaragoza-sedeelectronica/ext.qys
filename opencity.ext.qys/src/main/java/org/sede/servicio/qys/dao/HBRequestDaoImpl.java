@@ -2,7 +2,6 @@ package org.sede.servicio.qys.dao;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
@@ -10,10 +9,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sede.core.anotaciones.Esquema;
 import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.Request;
 import org.sede.servicio.qys.entity.UtilsQyS;
+import org.sede.servicio.qys.entity.db.Hbrequestloadfiles;
 import org.sede.servicio.qys.entity.db.Hbrequests;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -215,6 +214,13 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
 		Query q = em().createQuery("from Hbrequests where service_request_id=:id", Hbrequests.class)
 				.setParameter("id", id);
 		return (Hbrequests)q.getSingleResult();
+	}
+		
+	public Hbrequestloadfiles findFile(BigDecimal id, BigDecimal idFile) {
+		Query q = em().createQuery("from Hbrequestloadfiles where hbrequests.rqtHbid=:id and rlfHbid=:idFile", Hbrequestloadfiles.class)
+			.setParameter("id", id)
+			.setParameter("idFile", idFile);
+		return (Hbrequestloadfiles)q.getSingleResult();
 	}
 	
 }

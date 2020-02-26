@@ -12,9 +12,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.hibernate.annotations.BatchSize;
 import org.sede.core.anotaciones.Interno;
+import org.sede.core.utils.Propiedades;
 import org.sede.servicio.qys.ConfigQys;
 
 /**
@@ -23,17 +26,20 @@ import org.sede.servicio.qys.ConfigQys;
 @XmlRootElement(name="attachment")
 @Entity
 @Table(name = "HBREQUESTLOADFILES", schema = ConfigQys.ESQUEMA)
+@BatchSize(size = 50)
 public class Hbrequestloadfiles implements java.io.Serializable {
 
 	private BigDecimal rlfHbid;
 	private BigDecimal rlfHbversion;
-	private String rlfDescription;
-	private String rlfFilename;
+	private String description;
+	private String filename;
 	@Interno
 	private Hbrequests hbrequests;
 	private BigDecimal usrHbidUserloadfile;
 	private Date rlfIntrodutiondatetime;
 
+	private String media_url;
+	
 	public Hbrequestloadfiles() {
 	}
 
@@ -41,8 +47,8 @@ public class Hbrequestloadfiles implements java.io.Serializable {
 			Hbrequests hbrequests, Date rlfIntrodutiondatetime) {
 		this.rlfHbid = rlfHbid;
 		this.rlfHbversion = rlfHbversion;
-		this.rlfDescription = rlfDescription;
-		this.rlfFilename = rlfFilename;
+		this.description = rlfDescription;
+		this.filename = rlfFilename;
 		this.hbrequests = hbrequests;
 		this.rlfIntrodutiondatetime = rlfIntrodutiondatetime;
 	}
@@ -51,8 +57,8 @@ public class Hbrequestloadfiles implements java.io.Serializable {
 			Hbrequests hbrequests, BigDecimal usrHbidUserloadfile, Date rlfIntrodutiondatetime) {
 		this.rlfHbid = rlfHbid;
 		this.rlfHbversion = rlfHbversion;
-		this.rlfDescription = rlfDescription;
-		this.rlfFilename = rlfFilename;
+		this.description = rlfDescription;
+		this.filename = rlfFilename;
 		this.hbrequests = hbrequests;
 		this.usrHbidUserloadfile = usrHbidUserloadfile;
 		this.rlfIntrodutiondatetime = rlfIntrodutiondatetime;
@@ -78,21 +84,21 @@ public class Hbrequestloadfiles implements java.io.Serializable {
 	}
 
 	@Column(name = "RLF_DESCRIPTION", nullable = false, length = 30)
-	public String getRlfDescription() {
-		return this.rlfDescription;
+	public String getDescription() {
+		return this.description;
 	}
 
-	public void setRlfDescription(String rlfDescription) {
-		this.rlfDescription = rlfDescription;
+	public void setDescription(String rlfDescription) {
+		this.description = rlfDescription;
 	}
 
 	@Column(name = "RLF_FILENAME", nullable = false)
-	public String getRlfFilename() {
-		return this.rlfFilename;
+	public String getFilename() {
+		return this.filename;
 	}
 
-	public void setRlfFilename(String rlfFilename) {
-		this.rlfFilename = rlfFilename;
+	public void setFilename(String rlfFilename) {
+		this.filename = rlfFilename;
 	}
 	
 	@Column(name = "USR_HBID_USERLOADFILE", precision = 22, scale = 0)
@@ -122,4 +128,14 @@ public class Hbrequestloadfiles implements java.io.Serializable {
 	public void setHbrequests(Hbrequests hbrequests) {
 		this.hbrequests = hbrequests;
 	}
+	
+	@Transient
+	public String getMedia_url() {
+		return Propiedades.getContexto() + "/servicio/quejas-sugerencias/" + this.hbrequests.getRqtHbid() + "/file/" + this.getRlfHbid();
+	}
+
+	public void setMedia_url(String media_url) {
+		this.media_url = media_url;
+	}
+	
 }

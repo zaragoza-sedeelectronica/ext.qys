@@ -63,7 +63,6 @@ angular.module('Gesweb.directives', [])
         });
     }
 }])
-
 .directive('botonVisibilidad', ['Dao', 'Restangular', '$route', '$location', 'Informer', 
     function(Dao, Restangular, $route, $location, Informer) {
         return {
@@ -75,6 +74,7 @@ angular.module('Gesweb.directives', [])
                 + '<span class="fa fa-eye-slash" aria-hidden="true"></span>'
                 + '</button>',
             link: function(scope, elem, attrs) {
+
                 // Si no viene definida...
                 if (angular.isUndefined(scope.registro)) {
                     scope.registro = {};
@@ -115,26 +115,133 @@ angular.module('Gesweb.directives', [])
                                     Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
                                 });
                             };
-                        } else {
+                        }
+                         }else {
                             // Establecemos route de detalle de registro
-                            Restangular.restangularizeElement('', scope.registro, scope.registro.route.replace('/admin/list', ''));
-                            Dao.actualizar(scope.registro).then(function() {
-                                scope.visibilidad.valor = !val;
-                                Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
-                            }, function(err){
-                                // En caso de error volvemos al estado anterior
-                                scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S'
-                                Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
-                            });
-                        };     
-                    };
+                              Restangular.restangularizeElement('', scope.registro, scope.registro.route.replace('/admin/listado', ''));
+                                                        Dao.actualizar(scope.registro).then(function() {
+                                                            scope.visibilidad.valor = !val;
+                                                            Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
+                                                        }, function(err){
+                                                            // En caso de error volvemos al estado anterior
+                                                            scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S'
+                                                            Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
+                                                        });
+                                                    };
+                            }
+                        }
+
 
                 };
 
             }
-        };
-    }
-])
+
+
+]).directive('botonVisibilidadQuery', ['Dao', 'Restangular', '$route', '$location', 'Informer',
+      function(Dao, Restangular, $route, $location, Informer) {
+
+console.log("LLEGO.....");
+          return {
+              restrict: 'E',
+              template: '<button ng-show="permisos.PUB && location !== \'/new\'" type="button" class="btn btn-default" ng-click="setVisibilidad(visibilidad.valor);" ng-disabled="registro.visible === \'S\'" title="Publicar">'
+                  + '<span class="fa fa-eye" aria-hidden="true"></span>'
+                  + '</button> '
+                  + '<button ng-show="permisos.PUB && location !== \'/new\'" type="button" class="btn btn-default" ng-click="setVisibilidad(visibilidad.valor);" ng-disabled="registro.visible === \'N\'" title="Ocultar">'
+                  + '<span class="fa fa-eye-slash" aria-hidden="true"></span>'
+                  + '</button>',
+              link: function(scope, elem, attrs) {
+
+                  // Si no viene definida...
+                  if (angular.isUndefined(scope.registro)) {
+                      scope.registro = {};
+                      scope.registro.visible = '';
+                  };
+                  // Creando un nuevo registro en /new
+                  if(angular.isUndefined(scope.registro.visible)){
+                      scope.registro.visible = 'S';
+                  };
+
+                  scope.visibilidad = {
+                      valor: scope.registro.visible === 'S' ? true : false,
+                      // texto: scope.registro.visible === 'S' ? ' Ocultar' : ' Mostrar'
+                  }
+                  scope.setVisibilidad = function(val) {
+                        console.log(scope.registro.visible);
+                      if(angular.isDefined(scope.checkList) && scope.checkList.length > 0){
+                          for(var i = 0; i < scope.checkList.length; i++){
+                              scope.checkList[i].visible = scope.checkList[i].visible === 'S' ? 'N' : 'S';
+                          };
+                      } else {
+                          scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S';
+                      };
+
+                      // Si $location.path === '/new' solo hacemos set de gcz_pub
+                      if($location.path() !== '/new'){
+                          // Multiples registros del listado seleccionados
+                          if(angular.isDefined(scope.checkList) && scope.checkList.length > 0){
+                           console.log("LLEGO..... no new");
+
+                              for(var i = 0; i < scope.checkList.length; i++){
+                                  // Establecemos route de detalle de registro
+                                       Restangular.restangularizeElement('', scope.checkList[i], scope.checkList[i].route.replace('/admin/list', ''));
+                                         Dao.actualizar(scope.checkList[i]).then(function() {
+                                             scope.visibilidad.valor = !val;
+                                             Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
+                                         }, function(err){
+                                             // En caso de error volvemos al estado anterior
+                                             scope.checkList[i].visible = scope.checkList[i].visible === 'S' ? 'N' : 'S'
+                                             Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
+                                         });
+                                     };
+
+                           }else{
+                            if(scope.registro.visible=='S'){
+                                       Restangular.all('/admin/'+scope.registro.id +'/unlock').customGET().then(function() {
+                                           scope.visibilidad.valor = !val;
+                                           Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
+                                       }, function(err){
+                                           // En caso de error volvemos al estado anterior
+                                           scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S'
+                                           Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
+                                       });
+                                       Restangular.restangularizeElement('', scope.registro, scope.registro.route.replace('/admin/list', ''));
+                           }else{
+                           Restangular.all('/admin/'+scope.registro.id +'/lock').customGET().then(function() {
+                               scope.visibilidad.valor = !val;
+                               Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
+                           }, function(err){
+                               // En caso de error volvemos al estado anterior
+                               scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S'
+                               Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
+                                       });
+
+                             }
+                           }
+
+
+
+
+                          } else {
+                              // Establecemos route de detalle de registro
+                              console.log("LLEGO.....  new");
+                              Restangular.restangularizeElement('', scope.registro, scope.registro.route.replace('/admin/listado', ''));
+                              Dao.actualizar(scope.registro).then(function() {
+                                  scope.visibilidad.valor = !val;
+                                  Informer.inform('Registro ' + (scope.registro.visible === 'S' ? '' : 'des') + 'publicado correctamente.', "success");
+                              }, function(err){
+                                  // En caso de error volvemos al estado anterior
+                                  scope.registro.visible = scope.registro.visible === 'S' ? 'N' : 'S'
+                                  Informer.inform('Error al ' + (scope.registro.visible === 'S' ? 'des' : '') + 'publicar: ' + err.data.error, "danger");
+                              });
+                          };
+                      }
+
+                  }
+
+
+          };
+      }
+  ])
 .directive('botonVisibilidad10', ['Dao', 'Restangular', '$route', '$location', 'Informer', 
     function(Dao, Restangular, $route, $location, Informer) {
         return {
@@ -210,7 +317,7 @@ angular.module('Gesweb.directives', [])
     function(Restangular, $location) {
         return {
             restrict: 'E',
-            template: '<button ng-show="permisos.NEW && location !== \'/new\'" type="button" class="btn btn-default" ng-click="copiarRegistro()">' + '<span class="fa fa-clone" aria-hidden="true"></span><span class="hidden-xs">' + ' Copiar' + '</span></button>',
+            template: '<button title="Copiar" ng-show="permisos.NEW && location !== \'/new\'" type="button" class="btn btn-default" ng-click="copiarRegistro()">' + '<span class="fa fa-clone" aria-hidden="true"></span><span class="sr-only">' + ' Copiar' + '</span></button>',
             link: function(scope, elem, attrs) {
                 scope.copiarRegistro = function() {
                     copiaRegistro = Restangular.copy(scope.registro.originalElement);
@@ -241,13 +348,24 @@ angular.module('Gesweb.directives', [])
                 scope.ordenarCabecera = function() {
                     var field = attrs.order.replace(/("|')/g, ''); // Eliminamos '' de las cadenas
                     // La primera ordenacion en cada cabecera, siempre son diferentes
-                    if (scope.order !== scope.by) {
-                        orden = ' asc'; //TODO: No utilizar variable global. Pensar otra solución. 
-                    } else {
-                        orden = orden === ' desc' ? ' asc' : ' desc';
+                    var value = field;
+                    if (typeof orden !== 'undefined') {
+	                    if (scope.order !== scope.by) {
+	                        orden = ' asc';
+	                    } else {
+	                        orden = orden === ' desc' ? ' asc' : ' desc';
+	                    }
+	                    value += orden;
+                    }
+                    else {
+	                    if (scope.order !== scope.by) {
+	                    	value += ' asc';
+	                    }
+	                    else {
+	                    	value += scope.reverse ? ' asc' : ' desc';
+	                    }
                     }
 
-                    var value = field + orden;
                     var param = Dao.getFiltros(); // Obtenemos los qparams del servicio Dao || {}
                     param.start = 0; // Forzamos que devuelva de nuevo desde el primer registro.
                     param.sort = value;
@@ -255,6 +373,11 @@ angular.module('Gesweb.directives', [])
                     var route = scope.$parent.registros[0].route; // Obtenemos la ruta de un registro cualquiera
                     Dao.listar(route, param).then(function(data) {
                         scope.$parent.registros = data;
+                        
+                        scope.$parent.filtrosParaListado.start = 50;
+                        
+                        scope.$parent.currentPage = 1;
+                        
                         scope.$parent.busy = false;
                         // Ordenamos los resultados
                         if (scope.order === scope.by) {
@@ -401,7 +524,7 @@ angular.module('Gesweb.directives', [])
         template: '<input class="form-control" type="text" ng-model="modelo" typeahead="registro as (registro.{{filtro}} +\',\'+ registro.numero) for registro in obtenerListado($viewValue)">',
         link: function(scope, element, attrs) {
 
-            var uri = attrs.uri || '/sede/servicio/portalero/';
+            var uri = attrs.uri || '/opencityext/servicio/portalero/';
             var url = uri;
             //var uri = attrs.uri || "/api/recurso/urbanismo-infraestructuras/portalero";
             //var url = 'http://' + window.sessionStorage.getItem('SERVIDOR') + uri;
@@ -634,9 +757,13 @@ angular.module('Gesweb.directives', [])
                         "SMS": false,
                         "IMP": false,
                         "PUB": false,
+                        "CONTESTAR": false,
+                        "ADJ": false,
+                        "SENDINSPECTOR": false,
                         "SENDEXTERNO": false,
                         "MOD": false,
                         "MODRESTRICTED": false,
+                        "MODMULTIPLE": false,
                         "ORD": false,
                         "ADMINOPERADOR": false,
                         "ANSWERREQUESTED": false,
@@ -665,11 +792,11 @@ angular.module('Gesweb.directives', [])
             controller: function($scope, $element, $attrs, $transclude) {
 
                 var templatePath = $location.absUrl().split('#')[0];
-                templatePath = '/cont/vistas/' + templatePath.split('/sede/')[1];
+                templatePath = '/cont/vistas/' + templatePath.split('/opencityext/')[1];
 
                 $scope.lanzarModalBorrar = function() {
                     var modalInstance = $uibModal.open({
-                        templateUrl: templatePath + 'templates/borrarModal.html',
+                        templateUrl: templatePath + '/templates/borrarModal.html',
                         controller: function($scope, $uibModalInstance, arrayInterno) {
                             //console.log(arrayInterno);
                             $scope.registros = arrayInterno;
@@ -732,11 +859,11 @@ angular.module('Gesweb.directives', [])
        link: function($scope, elem, attrs, controller) {
 
             var templatePath = $location.absUrl().split('#')[0];
-            templatePath = '/cont/vistas/' + templatePath.split('/sede/')[1];
+            templatePath = '/cont/vistas/' + templatePath.split('/opencityext/')[1];
 
             $scope.modalBusqueda = function() {
                 var modalInstance = $uibModal.open({
-                    templateUrl: templatePath + 'templates/modalBusqueda.html',
+                    templateUrl: templatePath + '/templates/modalBusqueda.html',
                     controller: function($scope, $uibModalInstance) {
                         $scope.query = {};
                         // console.log($route);
@@ -1043,11 +1170,7 @@ angular.module('Gesweb.directives', [])
                     }
                 };
             } else { // $scope.registro === array de registros
-                $scope.center = {
-                    lat: 41.64718195751736,
-                    lng: -0.8856546878814697,
-                    zoom: 13
-                };
+            	console.log($scope.registro);
                 $scope.markers = [];
                 for(var i=0; i < $scope.registro.length; i++){
                     if (angular.isDefined($scope.registro[i].geometry)){
@@ -1059,26 +1182,18 @@ angular.module('Gesweb.directives', [])
                         longitud = $scope.registro[i].long;
                         latitud = $scope.registro[i].lat;
                     }
-                    $scope.markers.push({
-                        lat: latitud,
-                        lng: longitud,
-                        focus: true,
-                        message: titulo,
-                        draggable: false
-                    });
-                };
-            };
+                    if (longitud && latitud) {
+	                    $scope.markers.push({
+	                        lat: latitud,
+	                        lng: longitud,
+	                        
+	                        message: titulo,
+	                        draggable: false
+	                    });
+                    }
+                }
+            }
 
-            // var crs23030 = new L.Proj.CRS('EPSG:23030','+proj=utm +zone=30 +ellps=intl +towgs84=-131,-100.3,-163.4,-1.244,-0.020,-1.144,9.39 +units=m +no_defs',
-            //         {
-            //             origin: [longitud, latitud],
-            //             resolutions: [53.125201382285255,26.562600691142627,14.062553307075499,
-            //                   6.718775468936064,3.7500142152201517,1.7187565153092277,
-            //                   0.9375035538050343,0.5000018953626857,0.26375099980381617,
-            //                   0.131875499901908]
-            //         }
-            //     );
-            // alert(JSON.stringify(crs23030));
             $scope.defaults = {
         			center: {
         						lat:41.65597, 
@@ -1212,7 +1327,7 @@ angular.module('Gesweb.directives', [])
             };
 
             if(attrs.buscador === 'S') {
-                var uri = attrs.uri || "/sede/servicio/portalero/list";
+                var uri = attrs.uri || "/opencityext/servicio/portalero/list";
                 var url = uri;
                 var filtro = attrs.filtro || 'calle.title'; // Si no ha filtro asignado buscamos por defecto con title
 
@@ -1277,11 +1392,11 @@ angular.module('Gesweb.directives', [])
             controller: function($scope, $element, $attrs, $transclude) {
 
                 var templatePath = $location.absUrl().split('#')[0];
-                templatePath = '/cont/vistas/' + templatePath.split('/sede/')[1];
+                templatePath = '/cont/vistas/' + templatePath.split('/opencityext/')[1];
 
                 $scope.lanzarModalLocalizacion = function() {
                     var modalInstance = $uibModal.open({
-                        templateUrl: templatePath + 'templates/localizacionModal.html',
+                        templateUrl: templatePath + '/templates/localizacionModal.html',
                         controller: function($scope, $uibModalInstance, reg) {
                             $scope.title = $attrs.title || 'registros';
 
@@ -1383,10 +1498,10 @@ angular.module('Gesweb.directives', [])
             $scope.lanzarModalLugar = function(mediaFile, imgOriginalSrc) {
 
                 var templatePath = $location.absUrl().split('#')[0];
-                templatePath = '/cont/vistas/' + templatePath.split('/sede/')[1];
+                templatePath = '/cont/vistas/' + templatePath.split('/opencityext/')[1];
 
                 var modalInstance = $uibModal.open({
-                    templateUrl: templatePath + 'templates/modalRecortadorImagen.html',
+                    templateUrl: templatePath + '/templates/modalRecortadorImagen.html',
                     controller: function($scope, $uibModalInstance, mediaFile, imgOriginalSrc) {
 
                         $scope.imageCrop = {

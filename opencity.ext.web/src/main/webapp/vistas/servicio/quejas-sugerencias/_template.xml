@@ -2,6 +2,13 @@
 
 <th:block th:fragment="cssjs">
     <th:block th:include="fragmentos/cssjs" />
+    <link rel="stylesheet" href="//www.zaragoza.es/cont/plantillas/mapa/css/claro.css" type="text/css"/>
+    <script type="text/javascript" xml:space="preserve">
+         ocultarArbolCapas = false;
+         var i = 0;
+         
+         treeOrderDataList = [];
+    </script>
 </th:block>
 
 <body>
@@ -15,8 +22,7 @@
                 </button> */-->
                 <th:block th:include="fragmentos/logo" />
                 <div class="pull-left portal-header">
-                    <h1><a href="/ciudad/ticketing/verNuevaQuejaAnonima_Ticketing">Quejas y sugerencias</a></h1>
-                      <sede:breadcrumb value="[{'link':'https://www.zaragoza.es', 'text':'zaragoza.es'}, {'link':'/ciudadania/gobierno-abierto/', 'text':'Gobierno Abierto'}]" />
+                      <sede:breadcrumb title="Quejas y sugerencias" link="/opencityext/servicio/quejas-sugerencias/" value="[{'link':'https://www.zaragoza.es', 'text':'zaragoza.es'}, {'link':'/ciudadania/gobierno-abierto/', 'text':'Gobierno Abierto'}]" />
                 </div>
                 <th:block th:include="fragmentos/cabecera" />
                 <!-- <th:block th:include="fragmentos/readspeaker"></th:block> -->
@@ -36,6 +42,7 @@
     <th:block th:fragment="footer">
         <th:block th:include="fragmentos/pie" />
         <th:block th:include="fragmentos/js" />
+        <script type="text/javascript" src="/cont/vistas/servicio/visores/js/homeMapa.js" xml:space="preserve"></script>
     </th:block>
 </body>
 

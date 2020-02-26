@@ -18,6 +18,7 @@ import org.sede.core.rest.Peticion;
 import org.sede.servicio.qys.dao.consulta.ServiceConsulta;
 import org.sede.servicio.qys.dao.consulta.ServiceDatos;
 import org.sede.servicio.qys.entity.Category;
+import org.sede.servicio.qys.entity.Group;
 import org.sede.servicio.qys.entity.Request;
 import org.sede.servicio.qys.entity.RespuestaTipo;
 import org.sede.servicio.qys.entity.Service;
@@ -289,5 +290,10 @@ public interface QySDao extends GenericDAO<Request, BigDecimal> {
 	public String enviarCapaz(Request registro, String diaCita, String horaCita, String expediente);
 	
 	public String obtenerNifDeRequest(Request registro);
+	
+	public SearchResult<Group> getGroups() throws SQLException;
+	public ResponseEntity<?> crearGroup(Group registro);
+	public ResponseEntity<?> saveGroup(Group registro);
+	public SearchResult<ServiceDatos> datosCategorias(Date start_date, Date end_date, int rootCategoria, String grupo_operador, String usuarioTicketing);
 	
 }

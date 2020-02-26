@@ -1,45 +1,42 @@
 <div class="row" ng-init="init()">
-
     <div class="col-md-12">
-
-        <button class="btn btn-default" ng-click="guardar()" ng-show="permisos.NEW">
-            <span class="fa fa-inbox" aria-hidden="true"></span>
-            <span class="hidden-xs">Guardar</span>
+        <button title="Guardar" class="btn btn-default" ng-click="guardar()" ng-show="permisos.NEW">
+            <span class="fa fa-save" aria-hidden="true"></span>
+            <span class="sr-only">Guardar</span>
         </button>
         <a class="btn btn-default" ng-show="registro.token && permisos.MODMULTIPLE && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/{{registro.token}}/" target="_blank">
             <span class="fa fa-bookmark" aria-hidden="true"></span>
             <span class="hidden-xs">Estado</span>
         </a>
         <boton-copiar ng-show="registro.service_request_id && !usuario.externo_ticketing"></boton-copiar>
-        <!-- <button class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-click="informe()">-->
-        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/informe?clientId={{usuario.login}}&ihm={{linkInforme}}" target="_blank">
-            <span class="glyphicon glyphicon-list-alt"></span>
-            <span class="hidden-xs">Informe</span>
+        <a title="Informe PDF" class="btn btn-default" ng-show="(usuario.propiedades.rootcat_ticketing || permisos.PLZ) && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/informe" target="_blank">
+            <span class="fa fa-file-pdf"></span>
+            <span class="sr-only">Informe</span>
         </a>
-        <a class="btn btn-default" ng-show="usuario.rootcat_ticketing && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/odt-report?clientId={{usuario.login}}&ihm={{linkInformeOdt}}" target="_blank">
+        <a title="Informe ODT" class="btn btn-default" ng-show="(usuario.propiedades.rootcat_ticketing || permisos.PLZ) && permisos.DOC && registro.service_request_id" ng-href="/opencityext/servicio/quejas-sugerencias/{{registro.service_request_id}}/odt-report" target="_blank">
             <span class="glyphicon glyphicon-list-alt"></span>
-            <span class="hidden-xs">Informe odt</span>
+            <span class="sr-only">Informe odt</span>
         </a>
         <modal-accion accion="1" title="Resolver" icon="fa-check" ayuda="Marca la queja como resuelta, no contesta al ciudadano" ng-show="permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
         <modal-accion accion="2" title="Contestar" icon="fa-envelope" ayuda="Contesta al ciudadano y cierra la queja" ng-show="permisos.CONTESTAR && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0 || registro.status == 'closed']}}"></modal-accion>
-        <a class="btn btn-default" ng-show="usuario.sup_service_code && registro.service_request_id" ng-click="derivarAServicio()">
+        <a class="btn btn-default" ng-show="usuario.propiedades.sup_service_code && registro.service_request_id" ng-click="derivarAServicio()">
             <span class="glyphicon glyphicon-arrow-up"></span>
             <span class="hidden-xs">Poner categor&iacute;a padre</span>
         </a>
         <modal-accion accion="22" title="Cambiar categoría" icon="fa-arrow-right" ng-show="permisos.ADJ && registro.service_request_id"></modal-accion>
-        <modal-accion accion="7" title="Derivar a web" icon="fa-arrow-left" ng-show="permisos.MOD && registro.service_request_id && usuario.usr_ticketing!='2' && !usuario.externo_ticketing"></modal-accion>
+        <modal-accion accion="7" title="Derivar a web" icon="fa-arrow-left" ng-show="permisos.MOD && registro.service_request_id && usuario.propiedades.usr_ticketing!='2' && !usuario.propiedades.externo_ticketing"></modal-accion>
         <modal-accion accion="8" title="Derivar a Externo" icon="fa-arrow-right" ng-show="permisos.SENDEXTERNO && registro.service_request_id"></modal-accion>
-        <modal-accion accion="11" title="Derivar a Inspector" icon="fa-screenshot" ng-show="permisos.SENDINSPECTOR && registro.service_request_id"></modal-accion>
+        <modal-accion accion="11" title="Derivar a Inspector" icon="fa-address-book" ng-show="permisos.SENDINSPECTOR && registro.service_request_id"></modal-accion>
         <modal-accion accion="9" title="Informar" icon="fa-envelope" ayuda="Envia un correo al ciudadano" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0]}}"></modal-accion>
         <modal-accion accion="5" title="Solicitar" icon="fa-tag" ayuda="Envia un acceso temporal al usuario para que aporte informacion" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.email === 'anonymous@anonymous.es' || registro.email.length <= 0]}}"></modal-accion>
-        <modal-accion accion="6" title="Rechazar" icon="glyphicon-remove-circle" ayuda="Contesta al ciudadano, cierra la queja marcandola como Rechazada" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
-        <modal-accion accion="3" title="Archivar" icon="glyphicon-folder-close" ayuda="Cierra la queja, marcandola como Archivada" ng-show="permisos.MOD && registro.service_request_id && !usuario.externo_ticketing" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
+        <modal-accion accion="6" title="Rechazar" icon="fas fa-ban" ayuda="Contesta al ciudadano, cierra la queja marcandola como Rechazada" ng-show="permisos.CONTESTAR && permisos.MOD && registro.service_request_id" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
+        <modal-accion accion="3" title="Archivar" icon="fas fa-archive" ayuda="Cierra la queja, marcandola como Archivada" ng-show="permisos.MOD && registro.service_request_id && !usuario.externo_ticketing" desactivar="{{{true:'true', false:'false'}[registro.status == 'closed']}}"></modal-accion>
         <modal-accion accion="4" title="Borrar" icon="fa-trash" ayuda="Cierra la queja, marcandola como Borrada" ng-show="permisos.DEL && registro.service_request_id"></modal-accion>
         
-        <modal-accion accion="13" title="Realizada por valoraci&oacute;n" icon="glyphicon-folder-close" ayuda="" ng-show="usuario.externo_ticketing"></modal-accion>
-        <modal-accion accion="14" title="Pendiente por valoraci&oacute;n" icon="glyphicon-folder-open" ayuda="" ng-show="usuario.externo_ticketing || permisos.SENDEXTERNO"></modal-accion>
-        <modal-accion accion="21" title="Ampliar informaci&oacute;n" icon="fa-tag" ayuda="Pide al gestor municipal mas informacion" ng-show="usuario.externo_ticketing"></modal-accion>
-        <modal-accion accion="20" title="Rechazar" icon="fa-remove" ayuda="" ng-show="usuario.externo_ticketing"></modal-accion>
+        <modal-accion accion="13" title="Realizada por valoraci&oacute;n" icon="fas fa-clipboard-check" ayuda="" ng-show="usuario.propiedades.externo_ticketing"></modal-accion>
+        <modal-accion accion="14" title="Pendiente por valoraci&oacute;n" icon="fas fa-clipboard" ayuda="" ng-show="usuario.propiedades.externo_ticketing || permisos.SENDEXTERNO"></modal-accion>
+        <modal-accion accion="21" title="Ampliar informaci&oacute;n" icon="fa-tag" ayuda="Pide al gestor municipal mas informacion" ng-show="usuario.propiedades.externo_ticketing"></modal-accion>
+        <modal-accion accion="20" title="Rechazar" icon="fa-remove" ayuda="" ng-show="usuario.propiedades.externo_ticketing"></modal-accion>
         
         <boton-validacion></boton-validacion>
         <!-- Ventana modal confirmacion borrado registro -->
@@ -84,11 +81,9 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <div class="control-group form-inline clearfix" ng-show="categories.length>0">
-                        <div class="control-group">
-                            <label for="" class="control-label" style="float:left">Categor&iacute;a:</label>
-                            <!-- <select class="form-control" id="categories" ng-model="category" ng-options="obj as obj.service_name for obj in categories">
-                            </select> -->
+                    <div class="form-group" ng-show="categories.length>0">
+	                       <label for="" class="col-sm-2 control-label" style="float:left">Categor&iacute;a:</label>
+	                       <div class="col-sm-10">
                             <ui-select ng-model="category" style="width:550px;float:left" on-select="seleccionadaCategoria($item)">
 								<ui-select-match class="ui-select-match" placeholder="Selecciona categoria...">
 									{{$select.selected.service_name}} 
@@ -261,7 +256,7 @@
                             </div>
                         </uib-tab>
                         <uib-tab heading="Acciones ({{registro.actions.length}})" ng-show="registro.service_request_id">
-                        	<modal-accion accion="10" title="Anotar informacion" icon="glyphicon-edit" ayuda="Anota informacion relacionada" ng-show="permisos.MOD && registro.service_request_id"></modal-accion>
+                        	<modal-accion accion="10" title="Anotar informacion" icon="fas fa-edit" ayuda="Anota informacion relacionada" ng-show="permisos.MOD && registro.service_request_id"></modal-accion>
                             <table class="table table-striped table-condensed table-bordered">
                                 <tr>
                                     <th class="col-sm-2">Fecha/hora</th>
@@ -274,7 +269,7 @@
                                     <td>{{action.creation_date | date:'dd-MM-yyyy HH:mm'}}</td>
                                     <!-- <td>{{action.elapsed_time}}</td> -->
                                     <td>{{action.description}}</td>
-                                    <td>{{action.agency_responsible ? action.agency_responsible : action.agent_name }} <span ng-show="usuario.usr_ticketing=='2' || (usuario.usr_ticketing == action.agent_id && action.operator != usuario.login)" class="badge">{{action.operator}}</span></td>
+                                    <td>{{action.agency_responsible ? action.agency_responsible : action.agent_name }} <span ng-show="usuario.propiedades.usr_ticketing=='2' || (usuario.propiedades.usr_ticketing == action.agent_id && action.operator != usuario.login)" class="badge">{{action.operator}}</span></td>
                                     <td>{{action.type_name}}</td>
                                 </tr>
                             </table>

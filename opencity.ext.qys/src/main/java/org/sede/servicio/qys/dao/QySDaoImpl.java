@@ -37,15 +37,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.xml.bind.DatatypeConverter;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
-import net.sf.jasperreports.engine.util.JRLoader;
-import oracle.jdbc.OracleTypes;
-
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -81,6 +72,7 @@ import org.sede.servicio.qys.dao.consulta.ServiceDatos;
 import org.sede.servicio.qys.entity.Accion;
 import org.sede.servicio.qys.entity.Adjunto;
 import org.sede.servicio.qys.entity.Category;
+import org.sede.servicio.qys.entity.Group;
 import org.sede.servicio.qys.entity.Request;
 import org.sede.servicio.qys.entity.RespuestaTipo;
 import org.sede.servicio.qys.entity.Service;
@@ -98,9 +90,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
-import com.googlecode.genericdao.search.Filter;
-import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
+import oracle.jdbc.OracleTypes;
 
 /**
  * Clase que implementa la interfaz Quejas y sugerencias
@@ -758,7 +757,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @return
 	 * @throws SQLException
 	 */
-	
+	@Override
 	public ResponseEntity<?> findByToken(BigDecimal identifier, String token) throws SQLException {
 		try {
 			Query q = em().createNativeQuery("SELECT RQT_REQUESTNUMBER FROM hbrequests where RQT_REQUESTNUMBER=? and token=?").setParameter(1, identifier).setParameter(2, token);
@@ -883,7 +882,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws FormatoNoSoportadoException
 	 * @throws ParseException
 	 */
-	
+	@Override
 	public void enviarCapaz(SolicitudInformacionPublica registro) throws SQLException, FormatoNoSoportadoException, ParseException {
 		String json = generarJson(registro);
 		
@@ -1025,7 +1024,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param type
 	 * @return
 	 */
-	
+	@Override
 	public SearchResult<ServiceDatos> statistics(String serviceCode, Integer year, BigDecimal type) {
 		try {
 			StringBuilder sql = new StringBuilder();
@@ -1194,7 +1193,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param datos
 	 * @return
 	 */
-	
+	@Override
 	public ServiceDatos obtenerTotal(SearchResult<ServiceDatos> datos) {
 		
 		ServiceDatos d = new ServiceDatos();
@@ -1214,16 +1213,16 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param year
 	 * @return
 	 */
-	
+	@Override
 	public List<ServiceConsulta> obtenerCategoriasConTotal(boolean onlyPublic, String year) {
 		Query query = this.em().createNativeQuery("select count(*), s.id, nvl2(r.rqt_closedate, 'Cerrada', 'Abierta') FROM hbrequests r, categoria_sip s "
 				+ "WHERE " 
-			    + "  r.id_cat_sip=s.id(+) AND "
-				+ "  r.rty_hbid=" + SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION.toString() + " AND " 
-				+ "  r.rst_id<>5 and "
-				+ "  r.cat_hbid not in(" + EXCLUDEDCATEGORYES + ") "
+			    + "  r.id_cat_sip=s.id AND "
+				+ "  r.rty_hbid=" + SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION.toString()  
+//				+ " AND r.rst_id<>5 and "
+//				+ "  r.cat_hbid not in(" + EXCLUDEDCATEGORYES + ") "
 				+ (year == null ? "" : " and extract(YEAR from r.rqt_requestdate) = " + year + " ")
-			    + (onlyPublic ? "  AND r.rqt_public='S' AND r.rqt_validated='S' AND r.cat_hbid<>1 AND r.cat_hbid<>2 " : "")
+			    + (onlyPublic ? "  AND r.rqt_public='S' AND r.rqt_validated='S' " : "")
 			+ "group by s.id,nvl2(r.rqt_closedate, 'Cerrada', 'Abierta') order by s.id asc");
 		
 		HashMap<Integer, ServiceConsulta> resultado = new HashMap<Integer, ServiceConsulta>();
@@ -1294,7 +1293,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param rootCategory
 	 * @return
 	 */
-	
+	@Override
 	public SearchResult<Category> getAdjacentCategories(BigDecimal rootCategory) {
 		try {
 			Query queryPermisosGrupo = this.em().createNativeQuery("select " 
@@ -1356,7 +1355,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param registro
 	 * @return
 	 */
-	
+	@Override
 	public ResponseEntity<?> crearCategory(Category registro) {
 		registro.setService_code(obtenerIdCategoria());
 		
@@ -1369,15 +1368,13 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 		update.setParameter(++i, registro.getService_name());
 		update.setParameter(++i, registro.getAutoassign());
 		if (update.executeUpdate() > 0) {
-			
 			Query descripcion = this.em().createNativeQuery("insert into hbcategories (CAT_HBID,CAT_TEMPLATEREQUESTDESCRIPTION) values (?, ?)");
 			i = 0;
 			descripcion.setParameter(++i, registro.getService_code());
 			descripcion.setParameter(++i, registro.getService_description() == null ? " " : registro.getService_description());
 			if (descripcion.executeUpdate() > 0) {
-				
 				Query grupo = this.em().createNativeQuery("insert into HBCATEGORYSCALINGGROUPS(CAT_HBID,SGP_HBID,CSG_PRIORITY) values(?,?,0)");
-				i = -1;
+				i = 0;
 				grupo.setParameter(++i, registro.getService_code());
 				grupo.setParameter(++i, registro.getGroup_code());
 				if (grupo.executeUpdate() > 0) {
@@ -1413,7 +1410,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param registro
 	 * @return
 	 */
-	
+	@Override
 	public ResponseEntity<?> saveCategory(Category registro) {
 		try {
 			
@@ -1460,7 +1457,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param req
 	 * @throws IOException
 	 */
-	
+	@Override
 	public void almacenarAdjunto(Request req) throws IOException {
 		if (req.getMedia_body() != null && req.getMedia_name() != null) {
 			
@@ -1484,7 +1481,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws SQLException
 	 * @throws FormatoNoSoportadoException
 	 */
-	
+	@Override
 	public Request guardar(Request req, String usuarioAdmin) throws SQLException, FormatoNoSoportadoException {
 		return crear(req, UtilsQyS.OPGUARDAR, usuarioAdmin, "GUARDAR", null);
 	}
@@ -1498,7 +1495,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param parseInt
 	 * @return
 	 */
-	
+	@Override
 	public ResponseEntity<?> asociar(final BigDecimal id, final Integer service_code,
 			final Integer agency_responsible_code, final int user_id) {
 		
@@ -1529,7 +1526,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param id
 	 * @return
 	 */
-	
+	@Override
 	public Value obtenerEstadoDeQueja(BigDecimal id) {
 		
 		String sql = "SELECT r.rst_id,s.RST_NAME from hbrequests r,HBREQUESTSTATES s "
@@ -1557,7 +1554,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @param clientId
 	 * @return
 	 */
-	
+	@Override
 	public ResponseEntity<?> devolverEstadoAnteriorQueja(final BigDecimal id,
 			final Value estadoAnterior, final String mensaje, final String usuarioAdmin,
 			final String clientId) {
@@ -1607,7 +1604,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	
+	@Override
 	public void almacenarInforme(JasperPrint informe, String fileName) throws IOException, JRException {
 		JasperExportManager.exportReportToPdfFile(informe, Propiedades.getString("datos") + "/aplicaciones/ticketing/" + fileName);
 	}
@@ -1622,14 +1619,14 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 * @return
 	 * @throws JRException
 	 */
-	
+	@Override
 	public JasperPrint generarInformeOrdenTrabajo(Request req, String externo, String rootCategory, Peticion peticion) throws JRException {
 		
 		@SuppressWarnings("deprecation")
-		JasperReport reporte = (JasperReport) JRLoader.loadObject(peticion.getPathInformes("ot-" + rootCategory + ".jasper"));
+		JasperReport reporte = (JasperReport) JRLoader.loadObject(UtilsQyS.getPathInformes() + "ot-" + rootCategory + ".jasper");
 		
 		Map<String, Object> parametros = new HashMap<String, Object>();
-		parametros.put("LOGO", peticion.getPathInformes("logo.gif"));
+		parametros.put("LOGO", UtilsQyS.getPathInformes() + "logo.gif");
 		parametros.put("EXTERNO", externo);
 		if (req.getX() != null) {
 			int tamanyo = 350;
@@ -1650,7 +1647,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 				}
 			}
 		}
-		parametros.put("SUBREPORT_DIR", peticion.getPathInformes("queja_acciones.jasper"));
+		parametros.put("SUBREPORT_DIR", UtilsQyS.getPathInformes() + "queja_acciones.jasper");
 		Funciones.setProxy();
 		return JasperFillManager.fillReport(reporte, parametros,new JRBeanArrayDataSource(new Request[]{req}));
 	}
@@ -1764,7 +1761,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 			method.releaseConnection();
 		}
 	}
-	
+	@Override
 	public String obtenerNifDeRequest(Request registro) {
 		String[] lines = registro.getNotes().split(System.getProperty("line.separator"));
 		for (int i = 0; i < lines.length; i++) {
@@ -1773,5 +1770,190 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 			}
 		}
 		return null;
+	}
+	
+	
+	public SearchResult<Group> getGroups() throws SQLException {
+		Query queryPermisosGrupo = this.em().createNativeQuery("select SGP_HBID,SGP_NAME,SGP_EMAILGROUP from HBSCALINGGROUPS");
+		@SuppressWarnings("unchecked")
+		List<Object> permisos = queryPermisosGrupo.getResultList();
+		ArrayList<Group> grupos = new ArrayList<Group>();
+		for (Iterator<Object> iterador = permisos.iterator(); iterador.hasNext();) {
+			Object row[] = (Object[])iterador.next();
+			grupos.add(new Group(row[0].toString(), row[1].toString(), row[2].toString()));
+		}
+		SearchResult<Group> resultado = new SearchResult<Group>();
+		resultado.setResult(grupos);
+		resultado.setStart(0);
+		resultado.setRows(grupos.size());
+		resultado.setTotalCount(grupos.size());
+		return resultado;
+	}
+
+	@Override
+	public ResponseEntity<?> crearGroup(Group registro) {
+		try {
+			registro.setGroup_code(obtenerIdGroup());
+			Query update = this.em().createNativeQuery("insert into HBSCALINGGROUPS (SGP_HBID,SGP_NAME,SGP_HBVERSION,SGP_EMAILGROUP,SGP_AUTONOTIFICATION) "
+					+ "values (?,?,0,?,1)");
+			int i = 0;
+			update.setParameter(++i, registro.getGroup_code());
+			update.setParameter(++i, registro.getGroup_name());
+			update.setParameter(++i, registro.getEmail());
+			if (update.executeUpdate() > 0) {
+				return ResponseEntity.ok(registro);
+			} else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningun registro"));	
+			}
+			
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
+
+	private BigDecimal obtenerIdGroup() {
+		try {
+			BigDecimal id=new BigDecimal(0);
+			Query query = this.em().createNativeQuery("select max(SGP_HBID)+1 from HBSCALINGGROUPS where SGP_HBID<3000000");
+			id = (BigDecimal) query.getSingleResult();
+			return id;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new BigDecimal(0);
+		}
+	}
+
+	@Override
+	public ResponseEntity<?> saveGroup(Group registro) {
+		try {
+			Query update = this.em().createNativeQuery("update HBSCALINGGROUPS SET SGP_NAME = ?, SGP_EMAILGROUP = ?, SGP_HBVERSION=SGP_HBVERSION+1  "
+					+ "where SGP_HBID=?");
+			int i = 0;
+			update.setParameter(++i, registro.getGroup_name());
+			update.setParameter(++i, registro.getEmail());
+			update.setParameter(++i, registro.getGroup_code());
+			if (update.executeUpdate() > 0) {
+				return ResponseEntity.ok(registro);
+			} else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningun registro"));	
+			}
+			
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		} finally {
+
+		}
+	}
+
+	@Override
+	public SearchResult<ServiceDatos> datosCategorias(final Date start_date, final Date end_date, final int rootCategoria, final String grupo_operador, final String usuarioTicketing) {
+		
+		return em().unwrap(Session.class).doReturningWork(new ReturningWork<SearchResult<ServiceDatos>>() {					
+			public SearchResult<ServiceDatos> execute(Connection connection) throws SQLException {
+		
+				Statement st = null;
+				ResultSet rs = null;
+				try {
+					
+					StringBuffer sql = new StringBuffer();   
+					
+					sql.append("SELECT c.cal_hbid,c.cal_name, c.cal_parent "
+								+ "FROM HBCATEGORYLEVELS c");
+		
+					st = connection.createStatement();
+					rs = st.executeQuery(sql.toString());
+					HashMap<Integer, ServiceDatos> listado = new HashMap<Integer, ServiceDatos>();
+					while (rs.next()) {
+						ServiceDatos s = new ServiceDatos();
+						s.setId(rs.getBigDecimal(1));
+						s.setTitle(rs.getString(2));
+						s.setTotal(BigDecimal.valueOf(-1));
+						s.setParent(rs.getBigDecimal(3));
+						listado.put(rs.getInt(1), s);
+					}
+					
+					sql = new StringBuffer();
+					
+					sql.append("SELECT c.cal_hbid,c.cal_name, count(*) as total, c.cal_parent "
+								+ "FROM HBCATEGORYLEVELS c, hbrequests r "
+								+ "where r.cat_hbid=c.cal_hbid "
+								+ ("2".equals(usuarioTicketing) ? "" : "and (r.USR_HBID_INTRODUCER=" + usuarioTicketing + " or r.USR_HBID_MANAGER=" + usuarioTicketing + ")"));
+		          
+					if (start_date != null) {
+						sql.append("and r.rqt_requestdate>=to_date('" + ConvertDate.date2String(start_date, ConvertDate.DATE_FORMAT) + "','dd-mm-yyyy')");
+					}
+					if (end_date != null) {
+						sql.append("and r.rqt_requestdate<=to_date('" + ConvertDate.date2String(end_date, ConvertDate.DATE_FORMAT) + "','dd-mm-yyyy')");
+					}
+					if (grupo_operador != null) {
+						sql.append("and OPERADOR like '" + grupo_operador + "%'");
+					}
+					sql.append(" group by c.cal_hbid,c.cal_name,c.cal_parent");
+					st.close();
+					rs.close();
+					st = connection.createStatement();
+					rs = st.executeQuery(sql.toString());
+					while (rs.next()) {
+						ServiceDatos s = new ServiceDatos();
+						s.setId(rs.getBigDecimal(1));
+						s.setTitle(rs.getString(2));
+						s.setTotal(rs.getBigDecimal(3));
+						s.setParent(rs.getBigDecimal(4));
+						listado.put(rs.getInt(1), s);
+					}
+					listado = addLevel(listado, rootCategoria);
+					listado = addLevel(listado, rootCategoria);
+					return generarResultado(listado);
+				} catch(Exception e) {
+					e.printStackTrace();
+					return null;
+				} finally {
+					if (rs != null) {
+						rs.close();
+					}
+					if (st != null) {
+						st.close();
+					}
+				}
+			}
+		});
+	}
+	private SearchResult<ServiceDatos> generarResultado(HashMap<Integer, ServiceDatos> listado) {
+		List<ServiceDatos> retorno = new ArrayList<ServiceDatos>();
+		Iterator<Integer> it1 = listado.keySet().iterator();
+		while (it1.hasNext()) {
+			int key = it1.next();
+			ServiceDatos dato = listado.get(key);
+			if (dato != null && dato.getTotal().intValue() > 0 && dato.getId().intValue() != 3899392 && dato.getId().intValue() != 1) {
+				retorno.add(dato);
+			}
+		}
+		SearchResult<ServiceDatos> resultado = new SearchResult<ServiceDatos>();
+		resultado.setResult(retorno);
+		resultado.setStart(0);
+		resultado.setRows(retorno.size());
+		resultado.setTotalCount(retorno.size());
+		return resultado;
+	}
+	private HashMap<Integer, ServiceDatos> addLevel(HashMap<Integer, ServiceDatos> listado, int rootCategory) {
+		Iterator<Integer> it1 = listado.keySet().iterator();
+		HashMap<Integer, ServiceDatos> retorno = new HashMap<Integer, ServiceDatos>();
+		while (it1.hasNext()) {
+			int key = it1.next();
+			ServiceDatos dato = listado.get(key);
+
+			if (dato.getParent() != null 
+					&& dato.getParent().intValue() != rootCategory 
+					&& listado.containsKey(dato.getParent().intValue())) {
+				ServiceDatos padre = listado.get(dato.getParent().intValue());
+				if (dato.getTotal().intValue() > 0) {
+					padre.setTotal(padre.getTotal().add(dato.getTotal()));
+				}
+				retorno.put(padre.getId().intValue(), padre);
+			} else {
+				retorno.put(dato.getId().intValue(), dato);
+			}
+		}
+		return retorno;
 	}
 }

@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.BatchSize;
@@ -29,14 +30,22 @@ public class Hbrequestactions implements java.io.Serializable {
 
 	private BigDecimal rqaHbid;
 	private BigDecimal rqaHbversion;
-	private String rqaDescription;
-	private Date rqaCreationdatetime;
+	private String description;
+	private Date creation_date;
 	private Date rqaRequestactiondatetime;
 	private BigDecimal rqaElapsedseconds;
 	private BigDecimal usrHbidAgent;
 	@Interno
 	private Hbrequests hbrequests;
-	private BigDecimal ratHbidType;
+	
+	private BigDecimal type;
+	
+	private String type_name;
+	
+	@Interno
+	private Hbrequestactiontypes ratHbidType;
+	
+	
 	private BigDecimal rssHbidSubstate;
 	private BigDecimal rssSlaStop;
 	private String operador;
@@ -49,8 +58,8 @@ public class Hbrequestactions implements java.io.Serializable {
 			BigDecimal usrHbidAgent, Hbrequests hbrequests, BigDecimal rssHbidSubstate, BigDecimal rssSlaStop) {
 		this.rqaHbid = rqaHbid;
 		this.rqaHbversion = rqaHbversion;
-		this.rqaDescription = rqaDescription;
-		this.rqaCreationdatetime = rqaCreationdatetime;
+		this.description = rqaDescription;
+		this.creation_date = rqaCreationdatetime;
 		this.rqaRequestactiondatetime = rqaRequestactiondatetime;
 		this.rqaElapsedseconds = rqaElapsedseconds;
 		this.usrHbidAgent = usrHbidAgent;
@@ -61,12 +70,12 @@ public class Hbrequestactions implements java.io.Serializable {
 
 	public Hbrequestactions(BigDecimal rqaHbid, BigDecimal rqaHbversion, String rqaDescription,
 			Date rqaCreationdatetime, Date rqaRequestactiondatetime, BigDecimal rqaElapsedseconds,
-			BigDecimal usrHbidAgent, Hbrequests hbrequests, BigDecimal ratHbidType, BigDecimal rssHbidSubstate,
+			BigDecimal usrHbidAgent, Hbrequests hbrequests, Hbrequestactiontypes ratHbidType, BigDecimal rssHbidSubstate,
 			BigDecimal rssSlaStop, String operador) {
 		this.rqaHbid = rqaHbid;
 		this.rqaHbversion = rqaHbversion;
-		this.rqaDescription = rqaDescription;
-		this.rqaCreationdatetime = rqaCreationdatetime;
+		this.description = rqaDescription;
+		this.creation_date = rqaCreationdatetime;
 		this.rqaRequestactiondatetime = rqaRequestactiondatetime;
 		this.rqaElapsedseconds = rqaElapsedseconds;
 		this.usrHbidAgent = usrHbidAgent;
@@ -78,7 +87,6 @@ public class Hbrequestactions implements java.io.Serializable {
 	}
 
 	@Id
-
 	@Column(name = "RQA_HBID", unique = true, nullable = false, precision = 22, scale = 0)
 	public BigDecimal getRqaHbid() {
 		return this.rqaHbid;
@@ -98,22 +106,22 @@ public class Hbrequestactions implements java.io.Serializable {
 	}
 
 	@Column(name = "RQA_DESCRIPTION", nullable = false, length = 4000)
-	public String getRqaDescription() {
-		return this.rqaDescription;
+	public String getDescription() {
+		return this.description;
 	}
 
-	public void setRqaDescription(String rqaDescription) {
-		this.rqaDescription = rqaDescription;
+	public void setDescription(String rqaDescription) {
+		this.description = rqaDescription;
 	}
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "RQA_CREATIONDATETIME", nullable = false, length = 7)
-	public Date getRqaCreationdatetime() {
-		return this.rqaCreationdatetime;
+	public Date getCreation_date() {
+		return this.creation_date;
 	}
 
-	public void setRqaCreationdatetime(Date rqaCreationdatetime) {
-		this.rqaCreationdatetime = rqaCreationdatetime;
+	public void setCreation_date(Date rqaCreationdatetime) {
+		this.creation_date = rqaCreationdatetime;
 	}
 
 	@Temporal(TemporalType.DATE)
@@ -144,16 +152,7 @@ public class Hbrequestactions implements java.io.Serializable {
 		this.usrHbidAgent = usrHbidAgent;
 	}
 
-	@Column(name = "RAT_HBID_TYPE", precision = 22, scale = 0)
-	public BigDecimal getRatHbidType() {
-		return this.ratHbidType;
-	}
-
-	public void setRatHbidType(BigDecimal ratHbidType) {
-		this.ratHbidType = ratHbidType;
-	}
-
-	@Column(name = "RSS_HBID_SUBSTATE", nullable = false, precision = 22, scale = 0)
+		@Column(name = "RSS_HBID_SUBSTATE", nullable = false, precision = 22, scale = 0)
 	public BigDecimal getRssHbidSubstate() {
 		return this.rssHbidSubstate;
 	}
@@ -169,6 +168,34 @@ public class Hbrequestactions implements java.io.Serializable {
 
 	public void setRssSlaStop(BigDecimal rssSlaStop) {
 		this.rssSlaStop = rssSlaStop;
+	}
+
+	@Transient
+	public String getType_name() {
+		return this.ratHbidType.getRatName();
+	}
+
+	public void setType_name(String type_name) {
+		this.type_name = type_name;
+	}
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "RAT_HBID_TYPE")
+	public Hbrequestactiontypes getRatHbidType() {
+		return ratHbidType;
+	}
+
+	public void setRatHbidType(Hbrequestactiontypes ratHbidType) {
+		this.ratHbidType = ratHbidType;
+	}
+
+	@Transient
+	public BigDecimal getType() {
+		return this.ratHbidType.getRatHbid();
+	}
+
+	public void setType(BigDecimal type) {
+		this.type = type;
 	}
 
 	@Column(name = "OPERADOR", length = 200)

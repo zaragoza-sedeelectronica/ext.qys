@@ -9,7 +9,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.sede.core.anotaciones.Esquema;
 import org.sede.core.dao.JPAIgnoreTraversableResolver;
 import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.EntidadInterna;

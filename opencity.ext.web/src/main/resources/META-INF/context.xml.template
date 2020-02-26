@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context>
-<Resource name="jdbc/TicketingDS" auth="Container"
+<!-- <Resource name="jdbc/TicketingDS" auth="Container"
               type="javax.sql.DataSource" driverClassName="oracle.jdbc.OracleDriver"
               url="jdbc:oracle:thin:@//server:port/SID"
               username="ticketing" password="password" maxActive="20" maxIdle="10"
@@ -19,6 +19,6 @@
               type="javax.sql.DataSource" driverClassName="oracle.jdbc.OracleDriver"
               url="jdbc:oracle:thin:@altarf.dia.fi.upm.es:1521/ORCL"
               username="noticias" password="password" maxActive="20" maxIdle="10"
-              maxWait="-1"/>
+              maxWait="-1"/> -->
  
 </Context>

@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.sede.core.anotaciones.Esquema;
 import org.sede.servicio.qys.ConfigQys;
 import org.sede.servicio.qys.entity.db.Hbusers;
 import org.springframework.stereotype.Repository;

@@ -28,6 +28,11 @@ public class ServiceDatos {
 	 *  variable closed
 	 */
     private BigDecimal closed;
+    
+    /**
+	 *  variable closed
+	 */
+    private BigDecimal total;
     /**
 	 *  variable parent
 	 */
@@ -62,6 +67,13 @@ public class ServiceDatos {
 	}
 	public void setParent(BigDecimal parent) {
 		this.parent = parent;
+	}
+	
+	public BigDecimal getTotal() {
+		return total;
+	}
+	public void setTotal(BigDecimal total) {
+		this.total = total;
 	}
 	@Override
 	public String toString() {

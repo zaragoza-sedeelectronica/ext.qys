@@ -1,5 +1,7 @@
 package org.sede.servicio.qys;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -12,23 +14,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import net.sf.jasperreports.engine.JasperPrint;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.search.SearchParseException;
 import org.sede.core.anotaciones.Cache;
 import org.sede.core.anotaciones.Description;
-import org.sede.core.anotaciones.Esquema;
 import org.sede.core.anotaciones.Fiql;
 import org.sede.core.anotaciones.Gcz;
+import org.sede.core.anotaciones.NoCache;
 import org.sede.core.anotaciones.OpenData;
 import org.sede.core.anotaciones.Permisos;
 import org.sede.core.anotaciones.PermisosUser;
@@ -66,14 +65,15 @@ import org.sede.servicio.qys.entity.ServiceDefinition;
 import org.sede.servicio.qys.entity.SolicitudInformacionPublica;
 import org.sede.servicio.qys.entity.UtilsQyS;
 import org.sede.servicio.qys.entity.Value;
+import org.sede.servicio.qys.entity.db.Hbrequestloadfiles;
 import org.sede.servicio.qys.entity.db.Hbrequests;
-import org.sede.servicio.qys.entity.db.Hbusers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +93,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.googlecode.genericdao.search.Filter;
 import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
+
+import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * Controlador quejas y sugerencias
@@ -596,23 +598,31 @@ public class QysController {
 			@RequestParam(name = "service_code", required = false) BigDecimal serviceCode,
 			@RequestParam(name = "service_name", required = false) String serviceName,
 			Model model, HttpServletRequest request) {
+		String mapping = MAPPING + "/index";
 		try {
-			
+			 
 			if (servicioResolucionInformacionPublica()) {
-				model.addAttribute("title", "Resoluciones procedimiento de solicitud de información pública");
 				request.setAttribute(LayoutInterceptor.PLANTILLA_SALIDA, MAPPING_INFORMACIONPUBLICA);
-				model.addAttribute("resoluciones", true);
 				model.addAttribute("categorias", dao.obtenerCategoriasConTotal(true, null));
+				mapping = mapping + "-resoluciones";
 			} else {
-				model.addAttribute("title", "Quejas y sugerencias");
+				model.addAttribute("categorias", apiServiceListar());
 			}
-			
-			model.addAttribute(ModelAttr.RESULTADO, apiListar(search, status, startDate, endDate, barrioCode,idCatSip, serviceCode, serviceName));
+			if (StringUtils.isNotEmpty(status) 
+					|| startDate != null
+					|| endDate != null
+					|| barrioCode != null
+					|| idCatSip != null
+					|| serviceCode != null
+					|| StringUtils.isNotEmpty(serviceName)
+					) {
+				model.addAttribute(ModelAttr.RESULTADO, apiListar(search, status, startDate, endDate, barrioCode,idCatSip, serviceCode, serviceName));
+			}
 		} catch (Exception e) {
 			logger.error("ERROR", e);
 			model.addAttribute("message", e.getMessage());
 		}
-		return MAPPING + "/index";
+		return mapping;
 	}
 	
 	/**
@@ -958,7 +968,26 @@ public class QysController {
 		}
 	}
 
-	
+	@Permisos(Permisos.ESTADISTICA)
+	@ResponseClass(RespuestaTipo.class)
+	@RequestMapping(value = "/datos", method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
+	public @ResponseBody ResponseEntity<?> apiDatos(
+		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despúes de esta fecha") Date start_date,
+		@RequestParam(name = "end_date", required = false) @Description("Quejas introducidas antes de esta fecha") Date end_date) {
+		try {
+			
+			int rootCategoria = Integer.parseInt(UtilsQyS.obtenerRootCategory(Funciones.getPeticion()));
+			
+			String grupo_operador = null;
+			if (Funciones.getPeticion().getPermisosEnSeccion().contains(Permisos.ADMINOPERADOR)) {
+				grupo_operador = UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion());
+			}
+			
+			return ResponseEntity.ok(dao.datosCategorias(start_date, end_date, rootCategoria, grupo_operador, UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion())));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
 	
 	/**
 	 * Metodo realizar acciones sobre una queja
@@ -1014,10 +1043,10 @@ public class QysController {
 				if (original instanceof Request) {
 					Request req = (Request) original;
 					if (externoTicketing == null) {
-						Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
+						Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
 					} else {
 						if (req.getExterno_code() == new BigDecimal(externoTicketing)) {
-							Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
+							Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
 						} else {
 							return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
 						}
@@ -1100,7 +1129,7 @@ public class QysController {
 							textoMsg = descripcion + linkOrdenTrabajo;
 						}
 						
-						Funciones.sendMail(id + ": Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias.", textoMsg, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
+						Funciones.sendMail(id + ": OpenCityExt. Sistema de quejas y sugerencias.", textoMsg, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 						descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
 					}
 				}
@@ -1137,7 +1166,7 @@ public class QysController {
 				idExterno = new BigDecimal(params.get("idExterno"));
 				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				if (!StringUtils.isEmpty(mailExterno)) {
-					Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias.", descripcion, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
+					Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias.", descripcion, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 					descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
 				}
 				return ResponseEntity.ok(obj);
@@ -1186,7 +1215,7 @@ public class QysController {
 		if (barrioCode != null) {
 			busqueda.addFilter(Filter.equal("portal.junta.id", barrioCode));	
 		}
-		if (barrioCode != null) {
+		if (idCatSip != null) {
 			busqueda.addFilter(Filter.equal("catSip.id", idCatSip));	
 		}
 		
@@ -1203,6 +1232,7 @@ public class QysController {
 		}
 		if (servicioResolucionInformacionPublica()) {
 			busqueda.addFilter(Filter.equal("type.rtyHbid", SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION));
+			busqueda.addFilterNotEmpty("catSip");
 		}
 		
 		if (startDate != null || endDate != null) {
@@ -1232,6 +1262,47 @@ public class QysController {
 		return ResponseEntity.ok(daoRequest.searchAndCount(busqueda));
     }
 
+	@OpenData
+	@NoCache
+	@ResponseClass(value = Hbrequestloadfiles.class, entity = SearchResult.class)
+	@RequestMapping(value="/{id}/file/{idFile}", method = RequestMethod.GET, produces = { MimeTypes.XLS })
+    public @ResponseBody ResponseEntity<?> apiGetFile(
+    		@PathVariable BigDecimal id,
+    		@PathVariable BigDecimal idFile
+    		) throws IOException {
+
+		Hbrequestloadfiles f = daoRequest.findFile(id, idFile);
+		HttpHeaders headers = new HttpHeaders();
+		String fileName = f.getFilename();		
+		if (fileName.toLowerCase().indexOf(".gif") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType(MimeTypes.GIF));
+	    } else if (fileName.toLowerCase().indexOf(".png") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType(MimeTypes.PNG));
+	    } else if (fileName.toLowerCase().indexOf(".jpg") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType("image/jpg"));
+	    } else if (fileName.toLowerCase().indexOf(".jpeg") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType(MimeTypes.JPEG));
+	    } else if (fileName.toLowerCase().indexOf(".pdf") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType(MimeTypes.PDF));
+	    } else if (fileName.toLowerCase().indexOf(".zip") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType("application/zip"));
+	    } else if (fileName.toLowerCase().indexOf(".doc") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType("application/vnd.ms-word"));
+	    } else if (fileName.toLowerCase().indexOf(".odt") > 0) {
+	    	headers.setContentType(MediaType.parseMediaType("application/vnd.oasis.opendocument.text"));
+	    } else {
+	    	headers.setContentType(MediaType.parseMediaType("application/octet-stream"));
+	    }
+		headers.set("Content-Disposition", "inline; filename=\"" + fileName + "\"");
+		
+		FileInputStream archivo = new FileInputStream(Propiedades.getPathAplicacionesDisk() + "ticketing/" + fileName);
+		int longitud = archivo.available();
+	    byte[] datos = new byte[longitud];
+	    archivo.read(datos);
+	    archivo.close(); 
+		return new ResponseEntity<byte[]>(datos, headers, HttpStatus.OK);
+    }
+	
 // TODO BORRAR	@Permisos(Permisos.ADMIN)
 //	@Cache(Cache.DURACION_30MIN)
 //	@RequestMapping(value = "/change-all-pass", method = RequestMethod.GET, produces = {MimeTypes.GEOJSON, MimeTypes.GEORSS, MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})

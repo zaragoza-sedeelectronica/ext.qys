@@ -101,10 +101,10 @@
 	        <property name="entityManagerFactory" ref="NOTICIAS" />  
 	    </bean>
 	    
-	     <bean id="osMovil" class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">  
+	    <!--  <bean id="osMovil" class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">  
 	        <property name="entityManagerFactory" ref="MOVIL" />  
 		</bean>
-	    <!-- <bean id="osIntra" class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">  
+	    <bean id="osIntra" class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">  
 	        <property name="entityManagerFactory" ref="INTRA" />  
 	    </bean>
 	    <bean id="osActividades" class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">  

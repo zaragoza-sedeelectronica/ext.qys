@@ -870,7 +870,20 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     end if;
 
     v_zona_inspeccion := null;
-
+/*
+    if p_zona_inspeccion is null then
+      if v_address_id is not null then
+        begin
+          select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=v_address_id;
+        EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+          v_zona_inspeccion := null;
+        end;
+      end if;
+    else
+      v_zona_inspeccion := p_zona_inspeccion;
+    end if;
+*/
     INSERT INTO hbrequests (rqt_hbid, rqt_hbversion, usr_hbid_requester, 
           usr_hbid_introducer,usr_hbid_manager, rst_id, rog_hbid, rty_hbid, rpt_hbid, 
           sgp_hbid, cat_hbid, 
@@ -903,41 +916,9 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         WHEN NO_DATA_FOUND THEN
           v_gestor := NULL;
         END;
-    if p_zona_inspeccion is not null then
-    --asociamos al inspector correspondiente y la marcamos como pendiente
-
-        CASE 
-            WHEN p_zona_inspeccion=1 THEN v_inspectorname := 'sbandres';
-            WHEN p_zona_inspeccion=2 THEN v_inspectorname := 'mbarnola';
-            WHEN p_zona_inspeccion=3 THEN v_inspectorname := 'jbenedictoc';
-            WHEN p_zona_inspeccion=4 THEN v_inspectorname := 'bbenito';
-            WHEN p_zona_inspeccion=5 THEN v_inspectorname := 'jbuisan';
-            WHEN p_zona_inspeccion=6 THEN v_inspectorname := 'adelaserna';
-            WHEN p_zona_inspeccion=7 THEN v_inspectorname := 'afranco';
-            WHEN p_zona_inspeccion=8 THEN v_inspectorname := 'jhernandezt';
-            WHEN p_zona_inspeccion=9 THEN v_inspectorname := 'jaherrero';
-            WHEN p_zona_inspeccion=10 THEN v_inspectorname := 'vhuetehuerta';
-            WHEN p_zona_inspeccion=11 THEN v_inspectorname := 'aincausa';
-            WHEN p_zona_inspeccion=12 THEN v_inspectorname := 'rjaime';
-            WHEN p_zona_inspeccion=13 THEN v_inspectorname := 'jlazaro';
-            WHEN p_zona_inspeccion=14 THEN v_inspectorname := 'pmarin';
-            WHEN p_zona_inspeccion=15 THEN v_inspectorname := 'mvmarquina';
-            WHEN p_zona_inspeccion=16 THEN v_inspectorname := 'tmartinalbo';
-            WHEN p_zona_inspeccion=17 THEN v_inspectorname := 'cmartinezl';
-            WHEN p_zona_inspeccion=18 THEN v_inspectorname := 'rmartinezm';
-            WHEN p_zona_inspeccion=19 THEN v_inspectorname := 'lmateo';
-            WHEN p_zona_inspeccion=20 THEN v_inspectorname := 'mjmir';
-            WHEN p_zona_inspeccion=21 THEN v_inspectorname := 'fmiravete';
-            WHEN p_zona_inspeccion=22 THEN v_inspectorname := 'jlopezr';
-            WHEN p_zona_inspeccion=23 THEN v_inspectorname := 'cpalomero';
-            WHEN p_zona_inspeccion=24 THEN v_inspectorname := 'fppellicer';
-            WHEN p_zona_inspeccion=25 THEN v_inspectorname := 'dperezm';
-            WHEN p_zona_inspeccion=26 THEN v_inspectorname := 'msantolaria';
-            
-            ELSE v_inspectorname := '';
-          END CASE;
-          ASOCIAR(v_requestnumber, v_service_code, 4816905, p_usuarioadmin);
-          update hbrequests set rst_id=10, RQT_INSPECTORDATE=sysdate, RQT_INSPECTORID=v_inspectorname, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
+    -- para parques y jardines al crear desde la gestion se asocia a si mismo como interno
+    if p_usuarioadmin = '4816905' then
+        update hbrequests set RQT_INSPECTORID=p_operator where RQT_HBID=v_id;
     end if;
     if v_x is not null and v_y is not null then
       update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(v_x,v_y, NULL), NULL, NULL), x=v_x, y=v_y where rqt_hbid=v_id;
@@ -1216,6 +1197,15 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP) 
           values(v_actionnumber,0,'Cambio de identificador de direccion de queja ' || nvl(v_address_id,'vacío') || ' por ' || p_address_id,sysdate,sysdate,0,p_usuarioadmin,v_id,3,0);
           v_address_id := p_address_id;
+
+
+          begin
+            select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=p_address_id;
+            update hbrequests set RQT_ZONAINSPECCIONID=v_zona_inspeccion where rqt_requestnumber=p_requestnumber;
+          EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+            null;
+          end;
 
 
         end if;
@@ -1876,7 +1866,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             --xmlsal := xmlsal || '<resueltas>'|| numero ||'</resueltas>';
             dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
             -- Pendientes de mas de un anyo
-            numero := GET_ROWS('FROM hbrequests hb_re where hb_re.cat_hbid='|| l_values(indx).cal_hbid ||' AND hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)');
+            numero := GET_ROWS('FROM hbrequests hb_re where hb_re.cat_hbid='|| l_values(indx).cal_hbid ||' AND hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12) and (hb_re.USR_HBID_INTRODUCER='||usuarioTicketing ||' or hb_re.USR_HBID_MANAGER='||usuarioTicketing ||' or '||usuarioTicketing ||'=2)');
             --xmlsal := xmlsal || '<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>';
             dbms_lob.writeappend(xmlsal,length('<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>'),'<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>');
             
@@ -1886,6 +1876,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where c.id=p.id and hb_re.rst_id in (2,4) and j.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
+              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by j.nombre
               )
             LOOP
@@ -1899,6 +1890,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where c.id=p.id and hb_re.rst_id in (1,3,6,7) and b.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
+              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1912,6 +1904,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where hb_re.RQT_EXTERNOID=b.id and hb_re.rst_id in (2,4) 
               and CAT_HBID=l_values(indx).cal_hbid 
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
+              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1924,6 +1917,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where hb_re.RQT_EXTERNOID=b.id and hb_re.rst_id in (1,3,6,7) 
               and CAT_HBID=l_values(indx).cal_hbid 
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
+              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1952,7 +1946,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
         
         -- Pendientes de mas de un anyo
-        numero := GET_ROWS('FROM hbrequests hb_re where hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)');
+        numero := GET_ROWS('FROM hbrequests hb_re where hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)and (hb_re.USR_HBID_INTRODUCER='||usuarioTicketing ||' or hb_re.USR_HBID_MANAGER='||usuarioTicketing ||' or '||usuarioTicketing ||'=2)');
         --xmlsal := xmlsal || '<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>';
         dbms_lob.writeappend(xmlsal,length('<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>'),'<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>');
         
