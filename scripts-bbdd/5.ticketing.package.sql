@@ -15,224 +15,6 @@ END LOOP;
 RETURN SUBSTR(v_string,1,INSTR(v_string,p_separator)-1);
 END split;
 /
-create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
-    PROCEDURE DETALLE(
-    v_id in numeric,
-    usuarioTicketing in numeric default null,
-		xmlsal OUT CLOB);
-    PROCEDURE GET(v_filas IN number, v_inicio IN number,
-    v_orden in varchar2, 
-    v_ids in varchar2 default null, 
-    v_title in varchar2 default null,
-    v_notes in varchar2 default null,
-		v_service_code in varchar2 default null, 
-    v_externo_code in numeric default null,
-    v_internal_status in numeric default null,
-    v_agency_responsible in numeric default null, 
-    v_account_id in numeric default null, 
-    v_user_id in numeric default null, 
-		v_start_date in date default null, 
-		v_end_date in date default null, 
-    v_type in varchar2 default null,
-		v_status in varchar2 default null,
-    v_public in varchar2 default null,
-    usuarioTicketing in numeric default null,
-    p_groupoperator varchar2 default null,
-    p_operator varchar2 default null,
-    p_answer_requested varchar2 default null,
-    p_barrio varchar2 default null,
-    origin in numeric default null,
-    inspector in varchar2 default null,
-    operadorget in varchar2 default null,
-    v_id_cat_sip in numeric default null,
-    xmlsal OUT clob, total OUT number);
-
-    PROCEDURE GETACCIONES(v_filas IN number, v_inicio IN number,
-    v_orden in varchar2, 
-    v_ids in varchar2 default null, 
-    v_title in varchar2 default null,
-    v_notes in varchar2 default null,
-		v_service_code in varchar2 default null, 
-    v_externo_code in numeric default null,
-    v_internal_status in numeric default null,
-    v_agency_responsible in numeric default null, 
-    v_account_id in numeric default null, 
-		v_start_date in date default null, 
-		v_end_date in date default null, 
-    v_type in varchar2 default null,
-		v_status in varchar2 default null,
-    v_public in varchar2 default null,
-    usuarioTicketing in numeric default null,
-    p_groupoperator varchar2 default null,
-    p_operator varchar2 default null,
-    p_answer_requested varchar2 default null,
-    p_barrio varchar2 default null,
-    origin in numeric default null,
-    inspector in varchar2 default null,
-    xmlsal OUT clob, total OUT number);
-
-
-    PROCEDURE CREAR(
-        v_service_code numeric default null,
-				p_email hbusers.cli_email%type default null, 
-				v_address_string hbusers.per_address%type default null, 
-        v_address_id varchar2 default null,
-				p_account_id varchar2 default null, 
-				p_first_name varchar2 default null, 
-				p_last_name varchar2 default null, 
-				p_user_address hbusers.per_address%type default null, 
-				p_phone varchar2 default null, 
-				v_title varchar2 default null, 
-        v_notes varchar2 default null, 
-				v_description in hbrequests.rqt_creationdescription%type default null,
-				v_media_name hbrequestloadfiles.rlf_filename%type default null, 
-        v_media_description hbrequestloadfiles.rlf_description%type default null, 
-				p_publico varchar2 default null, 
-				v_x number default null, 
-				v_y number default null,
-
-        p_agency_code numeric default null,
-        p_type numeric default 1,
-        p_priority numeric default 2,
-        p_origin numeric default 3,
-        p_validated varchar2 default null,
-        --p_visible varchar2 default null,
-        p_zona_inspeccion numeric default null,
-        p_fecha_prevista date default null,
-
-        p_usuarioadmin varchar2 default null,
-        p_operator varchar2 default null,
-        p_answer_requested varchar2 default null,
-        p_id_cita numeric default null,
-        p_user_id numeric default null,
-
-        xmlsal OUT CLOB
-    );
-
-    PROCEDURE GUARDAR(
-        p_requestnumber number,
-        p_service_code numeric default null,
-				p_email hbusers.cli_email%type default null, 
-				p_address_string hbusers.per_address%type default null, 
-        p_address_id varchar2 default null,
-				p_account_id varchar2 default null, 
-				p_first_name varchar2 default null, 
-				p_last_name varchar2 default null, 
-				p_user_address hbusers.per_address%type default null, 
-				p_phone varchar2 default null, 
-				p_title varchar2 default null, 
-        p_notes varchar2 default null, 
-				p_description in hbrequests.rqt_creationdescription%type default null,  
-				p_media_name hbrequestloadfiles.rlf_filename%type default null, 
-        p_media_description hbrequestloadfiles.rlf_description%type default null, 
-				p_publico varchar2 default null, 
-				p_x number default null, 
-				p_y number default null,
-
-        p_agency_code numeric default null,
-        p_type numeric default null,
-        p_priority numeric default null,
-        p_origin numeric default null,
-        p_validated varchar2 default null,
-       -- p_visible varchar2 default null,
-
-        p_zona_inspeccion numeric default null,
-        p_fecha_prevista date default null,
-
-        p_usuarioadmin varchar2 default null,
-        p_answer_requested varchar2 default null,
-
-        p_id_cita numeric default null,
-        p_id_cat_sip numeric default null,
-
-        xmlsal OUT CLOB
-    );
-
-    PROCEDURE ACCIONES(
-        v_requestnumber number,
-        p_accion numeric default null,
-				v_texto hbrequestactions.rqa_description%type default null, 
-
-        v_fecha date default null,
-
-        v_idexterno numeric default null,
-        v_idinterno varchar2 default null,
-
-        p_usuarioadmin varchar2 default null,
-        p_usuariogcz varchar2 default null,
-        p_uuid varchar2 default null,
-        p_estadointerno number default null,
-
-        xmlsal OUT CLOB
-    );
-
-     PROCEDURE ESTADOANTERIORQUEJA(
-        v_requestnumber number,
-        v_accion numeric default null,
-				v_texto hbrequestactions.rqa_description%type default null,        
-        p_usuarioadmin varchar2 default null,
-        p_usuariogcz varchar2 default null
-    );
-
-     PROCEDURE TOKEN(
-        v_token varchar2 default null,
-				v_texto hbrequestactions.rqa_description%type default null, 
-        xmlsal OUT CLOB
-    );
-
-    PROCEDURE ASOCIAR(
-        v_id numeric default null,
-        v_service_code numeric default null,
-        v_agency_responsible numeric default null,
-        v_user_id numeric
-    );
-
-    PROCEDURE CATEGORIA(
-        rootCategory number default null,
-        xmlsal OUT CLOB
-    );
-
-     PROCEDURE INFORMES(
-        v_start_date in date default null, 
-        v_end_date in date default null,
-        v_ids_categoria in varchar2 default null,
-       /* v_distrito in numeric default null,
-        v_barrio in numeric default null,*/
-				v_texto varchar2 default null, 
-        usuarioTicketing in numeric default null,
-        xmlsal OUT CLOB
-    );
-
-    FUNCTION generarWhere(v_ids in varchar2 default null, 
-    v_title in varchar2 default null,
-    v_notes in varchar2 default null,
-		v_service_code in varchar2 default null, 
-    v_externo_code in numeric default null,
-    v_internal_status in numeric default null,
-    v_agency_responsible in numeric default null, 
-    v_account_id in numeric default null, 
-    v_user_id in numeric default null,
-		v_start_date in date default null, 
-		v_end_date in date default null, 
-    v_type in varchar2 default null,
-		v_status in varchar2 default null,
-    v_public in varchar2 default null,
-    usuarioTicketing in numeric default null,
-    p_groupoperator varchar2 default null,
-    p_operator varchar2 default null,
-    p_answer_requested varchar2 default null,
-    p_barrio varchar2 default null,
-    origin in numeric default null,
-    inspector in varchar2 default null,
-    operadorget in varchar2 default null,
-    v_id_cat_sip in numeric default null
-    ) RETURN string;
-
-
-    FUNCTION GET_ROWS(pString IN varchar2) return integer;
-
-END PCK_QYS_REQUESTS;
-/
 create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
    
    PROCEDURE DETALLE(
@@ -916,9 +698,41 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         WHEN NO_DATA_FOUND THEN
           v_gestor := NULL;
         END;
-    -- para parques y jardines al crear desde la gestion se asocia a si mismo como interno
-    if p_usuarioadmin = '4816905' then
-        update hbrequests set RQT_INSPECTORID=p_operator where RQT_HBID=v_id;
+    if p_zona_inspeccion is not null then
+    --asociamos al inspector correspondiente y la marcamos como pendiente
+
+        CASE 
+            WHEN p_zona_inspeccion=1 THEN v_inspectorname := 'sbandres';
+            WHEN p_zona_inspeccion=2 THEN v_inspectorname := 'mbarnola';
+            WHEN p_zona_inspeccion=3 THEN v_inspectorname := 'jbenedictoc';
+            WHEN p_zona_inspeccion=4 THEN v_inspectorname := 'bbenito';
+            WHEN p_zona_inspeccion=5 THEN v_inspectorname := 'jbuisan';
+            WHEN p_zona_inspeccion=6 THEN v_inspectorname := 'adelaserna';
+            WHEN p_zona_inspeccion=7 THEN v_inspectorname := 'afranco';
+            WHEN p_zona_inspeccion=8 THEN v_inspectorname := 'jhernandezt';
+            WHEN p_zona_inspeccion=9 THEN v_inspectorname := 'jaherrero';
+            WHEN p_zona_inspeccion=10 THEN v_inspectorname := 'vhuetehuerta';
+            WHEN p_zona_inspeccion=11 THEN v_inspectorname := 'aincausa';
+            WHEN p_zona_inspeccion=12 THEN v_inspectorname := 'rjaime';
+            WHEN p_zona_inspeccion=13 THEN v_inspectorname := 'jlazaro';
+            WHEN p_zona_inspeccion=14 THEN v_inspectorname := 'pmarin';
+            WHEN p_zona_inspeccion=15 THEN v_inspectorname := 'mvmarquina';
+            WHEN p_zona_inspeccion=16 THEN v_inspectorname := 'tmartinalbo';
+            WHEN p_zona_inspeccion=17 THEN v_inspectorname := 'cmartinezl';
+            WHEN p_zona_inspeccion=18 THEN v_inspectorname := 'rmartinezm';
+            WHEN p_zona_inspeccion=19 THEN v_inspectorname := 'lmateo';
+            WHEN p_zona_inspeccion=20 THEN v_inspectorname := 'mjmir';
+            WHEN p_zona_inspeccion=21 THEN v_inspectorname := 'fmiravete';
+            WHEN p_zona_inspeccion=22 THEN v_inspectorname := 'jlopezr';
+            WHEN p_zona_inspeccion=23 THEN v_inspectorname := 'cpalomero';
+            WHEN p_zona_inspeccion=24 THEN v_inspectorname := 'fppellicer';
+            WHEN p_zona_inspeccion=25 THEN v_inspectorname := 'dperezm';
+            WHEN p_zona_inspeccion=26 THEN v_inspectorname := 'msantolaria';
+            
+            ELSE v_inspectorname := '';
+          END CASE;
+          ASOCIAR(v_requestnumber, v_service_code, 4816905, p_usuarioadmin);
+          update hbrequests set rst_id=10, RQT_INSPECTORDATE=sysdate, RQT_INSPECTORID=v_inspectorname, RQT_HBVERSION=RQT_HBVERSION + 1 where RQT_HBID=v_id;
     end if;
     if v_x is not null and v_y is not null then
       update hbrequests set RQT_GEOLOCATION=MDSYS.SDO_GEOMETRY(2001, 23030, MDSYS.SDO_POINT_TYPE(v_x,v_y, NULL), NULL, NULL), x=v_x, y=v_y where rqt_hbid=v_id;
@@ -1197,16 +1011,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
           insert into HBREQUESTACTIONS (RQA_HBID, RQA_HBVERSION, RQA_DESCRIPTION, RQA_CREATIONDATETIME, RQA_REQUESTACTIONDATETIME, RQA_ELAPSEDSECONDS, USR_HBID_AGENT, RQT_HBID_REQUEST, RSS_HBID_SUBSTATE, RSS_SLA_STOP) 
           values(v_actionnumber,0,'Cambio de identificador de direccion de queja ' || nvl(v_address_id,'vacío') || ' por ' || p_address_id,sysdate,sysdate,0,p_usuarioadmin,v_id,3,0);
           v_address_id := p_address_id;
-
-
-          begin
-            select id_zona into v_zona_inspeccion from portal_zona_inspeccion_parques where id_portal=p_address_id;
-            update hbrequests set RQT_ZONAINSPECCIONID=v_zona_inspeccion where rqt_requestnumber=p_requestnumber;
-          EXCEPTION
-          WHEN NO_DATA_FOUND THEN
-            null;
-          end;
-
 
         end if;
         
@@ -1866,7 +1670,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             --xmlsal := xmlsal || '<resueltas>'|| numero ||'</resueltas>';
             dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
             -- Pendientes de mas de un anyo
-            numero := GET_ROWS('FROM hbrequests hb_re where hb_re.cat_hbid='|| l_values(indx).cal_hbid ||' AND hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12) and (hb_re.USR_HBID_INTRODUCER='||usuarioTicketing ||' or hb_re.USR_HBID_MANAGER='||usuarioTicketing ||' or '||usuarioTicketing ||'=2)');
+            numero := GET_ROWS('FROM hbrequests hb_re where hb_re.cat_hbid='|| l_values(indx).cal_hbid ||' AND hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)');
             --xmlsal := xmlsal || '<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>';
             dbms_lob.writeappend(xmlsal,length('<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>'),'<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>');
             
@@ -1876,7 +1680,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where c.id=p.id and hb_re.rst_id in (2,4) and j.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
-              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by j.nombre
               )
             LOOP
@@ -1890,7 +1693,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where c.id=p.id and hb_re.rst_id in (1,3,6,7) and b.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
-              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1904,7 +1706,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where hb_re.RQT_EXTERNOID=b.id and hb_re.rst_id in (2,4) 
               and CAT_HBID=l_values(indx).cal_hbid 
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
-              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1917,7 +1718,6 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
               where hb_re.RQT_EXTERNOID=b.id and hb_re.rst_id in (1,3,6,7) 
               and CAT_HBID=l_values(indx).cal_hbid 
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
-              and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
               group by b.nombre
               )
             LOOP
@@ -1946,7 +1746,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         dbms_lob.writeappend(xmlsal,length('<resueltas>'|| numero ||'</resueltas>'),'<resueltas>'|| numero ||'</resueltas>');
         
         -- Pendientes de mas de un anyo
-        numero := GET_ROWS('FROM hbrequests hb_re where hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)and (hb_re.USR_HBID_INTRODUCER='||usuarioTicketing ||' or hb_re.USR_HBID_MANAGER='||usuarioTicketing ||' or '||usuarioTicketing ||'=2)');
+        numero := GET_ROWS('FROM hbrequests hb_re where hb_re.rst_id in (1,3,6,7) AND hb_re.rqt_introductiondatetime < add_months(sysdate,-12)');
         --xmlsal := xmlsal || '<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>';
         dbms_lob.writeappend(xmlsal,length('<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>'),'<pendientes_mas_1y>'|| numero ||'</pendientes_mas_1y>');
         
