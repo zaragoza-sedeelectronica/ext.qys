@@ -656,7 +656,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     end if;
     
     if p_barrio is not null then
-      consulta := consulta || 'hb_re.address_id in (select p.id_por from intra.portalero p where p.id_jun='||p_barrio||') AND ';      
+      consulta := consulta || 'hb_re.address_id in (select p.id_por from portalero p where p.id_jun='||p_barrio||') AND ';      
     end if;
 
     if v_public is not null then
@@ -874,7 +874,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
     if p_zona_inspeccion is null then
       if v_address_id is not null then
         begin
-          select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=v_address_id;
+          select id_zona into v_zona_inspeccion from portal_zona_inspeccion_parques where id_portal=v_address_id;
         EXCEPTION
         WHEN NO_DATA_FOUND THEN
           v_zona_inspeccion := null;
@@ -1200,7 +1200,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
 
 
           begin
-            select id_zona into v_zona_inspeccion from intra.portal_zona_inspeccion_parques where id_portal=p_address_id;
+            select id_zona into v_zona_inspeccion from portal_zona_inspeccion_parques where id_portal=p_address_id;
             update hbrequests set RQT_ZONAINSPECCIONID=v_zona_inspeccion where rqt_requestnumber=p_requestnumber;
           EXCEPTION
           WHEN NO_DATA_FOUND THEN
@@ -1872,7 +1872,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             
             /* POR JUNTA CERRADAS*/
             FOR i IN (
-              select j.nombre,count(*) as numero FROM intra.calle c, intra.junta j, intra.portalero p, hbrequests hb_re 
+              select j.nombre,count(*) as numero FROM calle c, junta j, portalero p, hbrequests hb_re 
               where c.id=p.id and hb_re.rst_id in (2,4) and j.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
@@ -1886,7 +1886,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
             
             /* POR BARRIO PENDIENTES*/
             FOR i IN (
-              select b.nombre,count(*) as numero FROM intra.calle c, intra.junta b, intra.portalero p, hbrequests hb_re 
+              select b.nombre,count(*) as numero FROM calle c, junta b, portalero p, hbrequests hb_re 
               where c.id=p.id and hb_re.rst_id in (1,3,6,7) and b.id_junta=p.id_jun and p.id_por=address_id 
               and CAT_HBID=l_values(indx).cal_hbid
               and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
@@ -1953,7 +1953,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         
         /* POR BARRIO CERRADAS*/
         FOR i IN (
-          select b.nombre,count(*) as numero FROM intra.calle c, intra.junta b, intra.portalero p, hbrequests hb_re 
+          select b.nombre,count(*) as numero FROM calle c, junta b, portalero p, hbrequests hb_re 
           where c.id=p.id and hb_re.rst_id in (2,4) and b.id_junta=p.id_jun and p.id_por=address_id 
           and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
           and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
@@ -1966,7 +1966,7 @@ create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
         
         /* POR BARRIO PENDIENTES*/
         FOR i IN (
-          select b.nombre,count(*) as numero FROM intra.calle c, intra.junta b, intra.portalero p, hbrequests hb_re 
+          select b.nombre,count(*) as numero FROM calle c, junta b, portalero p, hbrequests hb_re 
           where c.id=p.id and hb_re.rst_id in (1,3,6,7,10) and b.id_junta=p.id_jun and p.id_por=address_id 
           and hb_re.rqt_introductiondatetime between p_start_date and p_end_date
           and (hb_re.USR_HBID_INTRODUCER=usuarioTicketing or hb_re.USR_HBID_MANAGER=usuarioTicketing or usuarioTicketing=2)
