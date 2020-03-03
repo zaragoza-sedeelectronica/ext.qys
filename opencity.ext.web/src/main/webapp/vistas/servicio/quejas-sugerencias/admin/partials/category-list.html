@@ -1,8 +1,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="repeat-item alert alert-{{alert.type}}" ng-repeat="alert in allInfos()" close="remove(alert)">{{alert.msg}}</div>
-        <p class="alert alert-danger">PENDIENTE: <br/>select con categorías para el padre, <br/>select con grupos <br/>guardar los cambios en la variable de sesión</p>
+        <div class="repeat-item alert alert-{{alert.type}}" ng-repeat="alert in allInfos()" close="remove(alert)">{{alert.msg}}</div>       
         <div infinite-scroll="loadMore()" infinite-scroll-disabled="busy" infinite-scroll-distance="0" ng-show="permisos.DET">
  			<button type="button" class="btn btn-default" ng-click="gestion()">
 				<span class="glyphicon glyphicon-plus"></span>A&ntilde;adir Categor&iacute;a 

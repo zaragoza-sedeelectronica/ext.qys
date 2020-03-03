@@ -1,15 +1,21 @@
   CREATE TABLE "TEMAS" 
    (	"COD_TEMA" NUMBER, 
-	"TEMA" VARCHAR2(255 BYTE), 
+	"TEMA" VARCHAR2(510 BYTE), 
 	"IMAGEN" VARCHAR2(30 BYTE), 
 	"IMAGEN2" VARCHAR2(80 BYTE), 
 	"ORDEN" NUMBER(2,0), 
-	"TEMAEN" VARCHAR2(255 BYTE), 
-	"TEMAFR" VARCHAR2(255 BYTE), 
-	"TEMAIT" VARCHAR2(255 BYTE), 
+	"TEMAEN" VARCHAR2(510 BYTE), 
+	"TEMAFR" VARCHAR2(510 BYTE), 
+	"TEMAIT" VARCHAR2(510 BYTE), 
 	"COD_TEMAAJ" NUMBER
    ) ;
-   
+
+/* TEMAS */
+Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (1,'Música','imagen/musica.gif',12,'Music','Musique',null,12);
+Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (2,'Formación','imagen/cursos-talleres.gif',6,'Cours et ateliers','Courses and workshops',null,7);
+Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (3,'Teatro y Artes Escénicas','imagen/teatro.gif',13,'Theatre','Théâtre',null,3);
+Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (4,'Conferencias y Congresos','act_congresos_gr.jpg',5,'Conferences and seminars','Congrès et journées',null,6);
+
 --------------------------------------------------------
 --  DDL for Trigger CODTEMA_AUTOINC
 --------------------------------------------------------
@@ -29,11 +35,6 @@ ALTER TRIGGER "CODTEMA_AUTOINC" ENABLE;
   ALTER TABLE "TEMAS" ADD CONSTRAINT "pk_TEMAS" PRIMARY KEY ("COD_TEMA");
 
 
-/* TEMAS */
-Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (1,'Música','imagen/musica.gif',12,'Music','Musique',null,12);
-Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (2,'Formación','imagen/cursos-talleres.gif',6,'Cours et ateliers','Courses and workshops',null,7);
-Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (3,'Teatro y Artes Escénicas','imagen/teatro.gif',13,'Theatre','Théâtre',null,3);
-Insert into TEMAS (COD_TEMA,TEMA,IMAGEN,ORDEN,TEMAEN,TEMAFR,TEMAIT,COD_TEMAAJ) values (4,'Conferencias y Congresos','act_congresos_gr.jpg',5,'Conferences and seminars','Congrès et journées',null,6);
 
   
    CREATE TABLE "ACTO_VALORES" 
