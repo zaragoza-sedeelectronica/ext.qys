@@ -1,8 +1,13 @@
 contexto=/opencityext
 
-thymeleaf.view=
-path.i18n=
-datasource.prefix=
+thymeleaf.view=<path-opencity.ext.web>/src/main/webapp/vistas/
+path.i18n=<path-opencity.ext.web>/src/main/webapp/i18n/messages
+datasource.prefix=java:/comp/env/
+
+path.aplicaciones.disk=/home/temp/
+mail.server=localhost
+mail.user=user
+mail.pass=pass
 
 path=
 path.allowed=
