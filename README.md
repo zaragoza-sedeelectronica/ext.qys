@@ -165,11 +165,11 @@ path.i18n=<path-opencity.ext.web>/src/main/webapp/i18n/messages
 datasource.prefix=java:/comp/env/
 ```
 
-Hay que sustituir el valor del campo "<path-opencity.ext.web>" por la localización completa del proyecto en el sistema de ficheros. Por ejemplo, si el proyecto está en "/home/contratacion/opencity.ext.web", el fichero tendría los siguientes valores:
+Hay que sustituir el valor del campo "<path-opencity.ext.web>" por la localización completa del proyecto en el sistema de ficheros. Por ejemplo, si el proyecto está en "/home/qys/opencity.ext.web", el fichero tendría los siguientes valores:
 
 ```
-thymeleaf.view=/home/contratacion/opencity.ext.web/src/main/webapp/vistas/
-path.i18n=/home/contratacion/opencity.ext.web/src/main/webapp/i18n/messages
+thymeleaf.view=/home/qys/opencity.ext.web/src/main/webapp/vistas/
+path.i18n=/home/qys/opencity.ext.web/src/main/webapp/i18n/messages
 datasource.prefix=java:/comp/env/
 ```
 
@@ -196,7 +196,7 @@ A continuación se indica como se ha realizado durante las pruebas de manera ilu
 
 La carpeta `cont` se sirve mediante un servidor Apache Tomcat arrancado en el puerto 8080. Por lo tanto, todo el contenido de la carpeta está disponible en la dirección http://localhost:8080/cont
 
-El módulo contratación pública, como se ha indicado, cuando se arranca está disponible en http://localhost:8888/opencityext
+El módulo de Quejas y Sugerencias, como se ha indicado, cuando se arranca está disponible en http://localhost:8888/opencityext
 
 Por lo tanto, para servir ambas direcciones sin el puerto, se configura el servidor Apache para que pueda servir contenidos estáticos y se configuraca un proxy de la siguiente manera:
 ```
