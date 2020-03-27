@@ -42,7 +42,7 @@ public class Accion extends EntidadBase {
 	/**
 	 *  variable elapsed_seconds
 	 */
-	private Integer elapsed_seconds;
+	private BigDecimal elapsed_seconds;
 	/**
 	 *  variable elapsed_time
 	 */
@@ -66,7 +66,7 @@ public class Accion extends EntidadBase {
 	/**
 	 *  variable type
 	 */
-	private Integer type;
+	private BigDecimal type;
 	/**
 	 *  variable type_name
 	 */
@@ -74,7 +74,7 @@ public class Accion extends EntidadBase {
 	/**
 	 *  variable substate
 	 */
-	private Integer substate;
+	private BigDecimal substate;
 	//RSS_SLA_STOP siempre es igual a 0
 	public BigDecimal getId() {
 		return id;
@@ -100,10 +100,10 @@ public class Accion extends EntidadBase {
 	public void setCreation_date(Date creation_date) {
 		this.creation_date = creation_date;
 	}
-	public Integer getElapsed_seconds() {
+	public BigDecimal getElapsed_seconds() {
 		return elapsed_seconds;
 	}
-	public void setElapsed_seconds(Integer elapsed_seconds) {
+	public void setElapsed_seconds(BigDecimal elapsed_seconds) {
 		this.elapsed_seconds = elapsed_seconds;
 	}
 	
@@ -120,10 +120,10 @@ public class Accion extends EntidadBase {
 	public void setAgent_name(String agent_name) {
 		this.agent_name = agent_name;
 	}
-	public Integer getType() {
+	public BigDecimal getType() {
 		return type;
 	}
-	public void setType(Integer type) {
+	public void setType(BigDecimal type) {
 		this.type = type;
 	}
 	public String getType_name() {
@@ -132,10 +132,10 @@ public class Accion extends EntidadBase {
 	public void setType_name(String type_name) {
 		this.type_name = type_name;
 	}
-	public Integer getSubstate() {
+	public BigDecimal getSubstate() {
 		return substate;
 	}
-	public void setSubstate(Integer substate) {
+	public void setSubstate(BigDecimal substate) {
 		this.substate = substate;
 	}
 	public String getElapsed_time() {

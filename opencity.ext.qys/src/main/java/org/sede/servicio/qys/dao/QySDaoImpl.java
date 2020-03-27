@@ -79,6 +79,7 @@ import org.sede.servicio.qys.entity.Service;
 import org.sede.servicio.qys.entity.SolicitudInformacionPublica;
 import org.sede.servicio.qys.entity.UtilsQyS;
 import org.sede.servicio.qys.entity.Value;
+import org.sede.servicio.qys.entity.db.Hbrequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1320,7 +1321,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 						+ "and (grupo1.sgp_hbid != 1 or grupo1.sgp_hbid is null) "
 						+ "order by c1.cal_name");
 			@SuppressWarnings("unchecked")
-			List<Object> permisos = queryPermisosGrupo.setParameter(0, rootCategory).getResultList();
+			List<Object> permisos = queryPermisosGrupo.setParameter(1, rootCategory).getResultList();
 			ArrayList<Category> categorias = new ArrayList<Category>();
 			for (Iterator<Object> iterador = permisos.iterator(); iterador.hasNext();) {
 				Object[] row = (Object[])iterador.next();
@@ -1368,11 +1369,13 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 		update.setParameter(++i, registro.getService_name());
 		update.setParameter(++i, registro.getAutoassign());
 		if (update.executeUpdate() > 0) {
+			
 			Query descripcion = this.em().createNativeQuery("insert into hbcategories (CAT_HBID,CAT_TEMPLATEREQUESTDESCRIPTION) values (?, ?)");
 			i = 0;
 			descripcion.setParameter(++i, registro.getService_code());
 			descripcion.setParameter(++i, registro.getService_description() == null ? " " : registro.getService_description());
 			if (descripcion.executeUpdate() > 0) {
+				
 				Query grupo = this.em().createNativeQuery("insert into HBCATEGORYSCALINGGROUPS(CAT_HBID,SGP_HBID,CSG_PRIORITY) values(?,?,0)");
 				i = 0;
 				grupo.setParameter(++i, registro.getService_code());
@@ -1955,5 +1958,56 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 			}
 		}
 		return retorno;
+	}
+
+	@Override
+	public List<Accion> getAcciones(Hbrequests registro) {
+		
+		Query queryAcciones = this.em().createNativeQuery("SELECT RQA_HBID, " + 
+				"RQA_HBVERSION, " + 
+				"RQA_ELAPSEDSECONDS, " + 
+				"TO_CHAR(TRUNC(RQA_ELAPSEDSECONDS/3600),'FM9900') || ':' || TO_CHAR(TRUNC(MOD(RQA_ELAPSEDSECONDS,3600)/60),'FM00') || ':' || TO_CHAR(MOD(RQA_ELAPSEDSECONDS,60),'FM00'), " + 
+				"USR_HBID_AGENT, " + 
+				"PER_FIRSTNAME || ' ' || PER_LASTNAME, " + 
+				"RAT_HBID_TYPE, " + 
+				"RAT_NAME, " + 
+				"RSS_HBID_SUBSTATE, " + 
+				"OPERADOR, " + 
+				"RQA_DESCRIPTION, " + 
+				"grs.sgp_name, " + 
+				"RQA_CREATIONDATETIME AS TIMESTAMP " + 
+				"FROM HBREQUESTACTIONS ac, HBUSERS us, HBREQUESTACTIONTYPES tipo,HBSCALINGGROUPS grs,HBSCALINGGROUPUSERS usr_gr " + 
+				"WHERE RQT_HBID_REQUEST = ? and USR_HBID_AGENT=us.usr_hbid and RAT_HBID_TYPE=tipo.RAT_HBID(+) and " + 
+				"usr_gr.usr_hbid(+)=us.usr_hbid and grs.sgp_hbid(+)=usr_gr.sgp_hbid " + 
+				"order by RQA_CREATIONDATETIME desc");
+		@SuppressWarnings("unchecked")
+		List<Object> acc = queryAcciones.setParameter(1, registro.getRqtHbid())
+			.getResultList();
+		List<Accion> lista = new ArrayList<Accion>();
+		for (Iterator<Object> iterador = acc.iterator(); iterador.hasNext();) {
+			Object row[] = (Object[])iterador.next();
+			Accion a = new Accion();
+			int i = -1;
+			a.setId((BigDecimal) row[++i]);
+			a.setVersion((BigDecimal) row[++i]);
+			a.setElapsed_seconds((BigDecimal) row[++i]);
+			a.setElapsed_time((String) row[++i]);
+			a.setAgent_id((BigDecimal) row[++i]);
+			a.setAgent_name((String) row[++i]);
+			a.setType((BigDecimal) row[++i]);
+			a.setType_name((String) row[++i]);
+			a.setSubstate((BigDecimal) row[++i]);
+			a.setOperator((String) row[++i]);
+			a.setDescription((String) row[++i]);
+			a.setAgency_responsible((String) row[++i]);
+			a.setCreation_date((Date) row[++i]);
+			
+			
+			lista.add(a);
+		}
+		
+		return lista;
+		
+		
 	}
 }

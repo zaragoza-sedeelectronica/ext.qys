@@ -17,6 +17,7 @@ import org.sede.core.exception.FormatoNoSoportadoException;
 import org.sede.core.rest.Peticion;
 import org.sede.servicio.qys.dao.consulta.ServiceConsulta;
 import org.sede.servicio.qys.dao.consulta.ServiceDatos;
+import org.sede.servicio.qys.entity.Accion;
 import org.sede.servicio.qys.entity.Category;
 import org.sede.servicio.qys.entity.Group;
 import org.sede.servicio.qys.entity.Request;
@@ -24,6 +25,7 @@ import org.sede.servicio.qys.entity.RespuestaTipo;
 import org.sede.servicio.qys.entity.Service;
 import org.sede.servicio.qys.entity.SolicitudInformacionPublica;
 import org.sede.servicio.qys.entity.Value;
+import org.sede.servicio.qys.entity.db.Hbrequests;
 import org.springframework.http.ResponseEntity;
 
 import com.googlecode.genericdao.dao.jpa.GenericDAO;
@@ -295,5 +297,6 @@ public interface QySDao extends GenericDAO<Request, BigDecimal> {
 	public ResponseEntity<?> crearGroup(Group registro);
 	public ResponseEntity<?> saveGroup(Group registro);
 	public SearchResult<ServiceDatos> datosCategorias(Date start_date, Date end_date, int rootCategoria, String grupo_operador, String usuarioTicketing);
+	public List<Accion> getAcciones(Hbrequests registro);
 	
 }

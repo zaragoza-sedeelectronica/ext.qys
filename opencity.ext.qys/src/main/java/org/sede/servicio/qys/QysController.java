@@ -1,5 +1,6 @@
 package org.sede.servicio.qys;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.search.SearchParseException;
 import org.sede.core.anotaciones.Cache;
 import org.sede.core.anotaciones.Description;
+import org.sede.core.anotaciones.Esquema;
 import org.sede.core.anotaciones.Fiql;
 import org.sede.core.anotaciones.Gcz;
 import org.sede.core.anotaciones.NoCache;
@@ -94,7 +97,12 @@ import com.googlecode.genericdao.search.Filter;
 import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
 
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 /**
  * Controlador quejas y sugerencias
@@ -347,6 +355,7 @@ public class QysController {
     		if (registro == null || !UtilsQyS.puedeAccederAQueja(registro, usuarioTicketing, externoTicketing)) {
     			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
     		} else {
+    			registro.setActions(dao.getAcciones(registro));
 	        	return ResponseEntity.ok(registro);
     		}
         } else {
@@ -518,10 +527,10 @@ public class QysController {
 			req = dao.guardar(req, UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion()));
 	    	return ResponseEntity.ok(tratarCoordenada((Request)req));
 		} catch (SQLException ex) {
-			logger.error(ex.getMessage());
+			logger.error(Funciones.getStackTrace(ex));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), ex.getMessage().substring(ex.getMessage().indexOf(':') + 2, ex.getMessage().indexOf("\n"))));
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error(Funciones.getStackTrace(e));
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
 		}
 	}
@@ -533,17 +542,27 @@ public class QysController {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private String obtenerErroresValidacion(Request entidad) {
-		ValidatorFactory factory = Validation.byDefaultProvider().configure().traversableResolver(new JPAIgnoreTraversableResolver()).buildValidatorFactory();
-		Validator validator = factory.getValidator();
 		StringBuilder respuesta = new StringBuilder();
-		Set<ConstraintViolation<Request>> constraintViolations = validator.validate(entidad);
-		if (!constraintViolations.isEmpty()) {
-			for (Iterator iterator = constraintViolations.iterator(); iterator.hasNext();) {
-				ConstraintViolation<Object> constraintViolation = (ConstraintViolation<Object>) iterator.next();
-				respuesta.append(constraintViolation.getPropertyPath().toString() + ": " + constraintViolation.getMessage() + ". ");
-			}
+		boolean error = false;
+		respuesta.append("<ul>");
+		if (StringUtils.isEmpty(entidad.getTitle())) {
+			error = true;
+			respuesta.append("<li>Debe introducir un asunto.</li>");
 		}
-		return respuesta.toString();
+		if (StringUtils.isEmpty(entidad.getDescription())) {
+			error = true;
+			respuesta.append("<li>Debe describir la queja/sugerencia.</li>");
+		}
+		if (StringUtils.isNotEmpty(entidad.getEmail()) && !Funciones.isValidEmail(entidad.getEmail())) {
+			error = true;
+			respuesta.append("<li>Correo electrónico no válido.</li>");
+		}
+		respuesta.append("</ul>");
+		if (error) {
+			return respuesta.toString();
+		} else {
+			return "";
+		}
 	}
 	
 	/**
@@ -616,6 +635,9 @@ public class QysController {
 					|| serviceCode != null
 					|| StringUtils.isNotEmpty(serviceName)
 					) {
+				if ("all".equals(status)) {
+					status = "";
+				}
 				model.addAttribute(ModelAttr.RESULTADO, apiListar(search, status, startDate, endDate, barrioCode,idCatSip, serviceCode, serviceName));
 			}
 		} catch (Exception e) {
@@ -1209,7 +1231,7 @@ public class QysController {
 			@RequestParam(name = "service_name", required = false) String serviceName) throws SearchParseException, ParseException {
 		search.setExcludeFields("status", "barrio_code", "id_cat_sip", "service_code", "service_name", "start_date", "end_date");
 		Search busqueda = search.getConditions(Hbrequests.class);
-		busqueda.addFilter(Filter.equal("rqtPublic", "S"));
+		busqueda.addFilter(Filter.equal("visible", "S"));
 		busqueda.addFilter(Filter.equal("validated", "S"));
 		busqueda.addFilter(Filter.greaterThan("service_request_id", UtilsQyS.RQT_ID_FROM));
 		if (barrioCode != null) {
@@ -1231,7 +1253,7 @@ public class QysController {
 			busqueda.addFilterNotEmpty("updated_datetime");
 		}
 		if (servicioResolucionInformacionPublica()) {
-			busqueda.addFilter(Filter.equal("type.rtyHbid", SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION));
+			busqueda.addFilter(Filter.equal("type", SolicitudInformacionPublica.TIPOSOLICITUDINFORMACION));
 			busqueda.addFilterNotEmpty("catSip");
 		}
 		
@@ -1303,23 +1325,144 @@ public class QysController {
 		return new ResponseEntity<byte[]>(datos, headers, HttpStatus.OK);
     }
 	
-// TODO BORRAR	@Permisos(Permisos.ADMIN)
-//	@Cache(Cache.DURACION_30MIN)
-//	@RequestMapping(value = "/change-all-pass", method = RequestMethod.GET, produces = {MimeTypes.GEOJSON, MimeTypes.GEORSS, MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
-//	public @ResponseBody ResponseEntity<?> apiChangePass() {
-//		List<Hbusers> usr = daoUser.findAll();
-//		
-//		Query update = daoUser.em().createNativeQuery("Update HBUSERS set PASSWORD=? where USR_HBID = ? ");
-//		
-//		for (Hbusers u : usr) {
-//			update.setParameter(1, Funciones.calculateUserPassword(u.getUsrPassword()));
-//			update.setParameter(2, u.getUsrHbid());
-//			System.out.println(u.getUsrHbid() + ":" + u.getUsrPassword() + ":" + update.executeUpdate() + ":" + Funciones.calculateUserPassword(u.getUsrPassword()));
-//			
-//			
-//		}
-//		System.out.println("OKKK");
-//		return ResponseEntity.ok(new Mensaje(200, "Actualizacion realizada"));
-//    }
+	@Permisos(Permisos.DOC)
+	@NoCache
+	@ResponseClass(byte[].class)
+	@RequestMapping(value = "/{id}/informe", method = RequestMethod.GET, produces = { MimeTypes.PDF })
+	public @ResponseBody ResponseEntity<?> apiInforme(
+			@PathVariable BigDecimal id) throws IOException {
+		try {
+			
+			Object obj = dao.detalle(id, UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion()));
+			if (obj instanceof Request) {
+				Request req = (Request) obj;
+				logger.info("Informe: " + UtilsQyS.getPathInformes() + "queja-" + UtilsQyS.obtenerRootCategory(Funciones.getPeticion()) + ".jasper");
+				JasperReport reporte = (JasperReport) JRLoader.loadObject(new File(UtilsQyS.getPathInformes() + "queja-" + UtilsQyS.obtenerRootCategory(Funciones.getPeticion()) + ".jasper"));
+				Map<String, Object> parametros = new HashMap<String, Object>();
+				parametros.put("LOGO", UtilsQyS.getPathInformes() + "logo.gif");
+				if (req.getX() != null) {
+//					String bbox = "676363.13,4613502.28,677063.13,4614202.28";
+					int tamanyo = 350;
+					int escala = 4000;
+					double tamMapa = tamanyo * 0.00028 * escala;
+					String bbox = "" + ((req.getX() - (tamMapa / 2)) + "," + (req.getY() - (tamMapa / 2) + "," + (req.getX() + (tamMapa / 2)) + "," + (req.getY() + (tamMapa / 2))));
+					parametros.put("IMAGE_SRC", "http://idezar.zaragoza.es/wms/IDEZar_base/IDEZar_base?TRANSPARENT=true&FORMAT=image%2Fpng&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=XML&LAYERS=base&BGCOLOR=0xFFFFFF&CRS=EPSG%3A23030&BBOX=" + bbox + "&WIDTH=" + tamanyo + "&HEIGHT=" + tamanyo);
+				}
+				if (req.getFiles() != null) {
+					for (Adjunto a: req.getFiles()) {
+						if (a.getFile_name().toLowerCase().indexOf(".gif") > 0 
+								|| a.getFile_name().toLowerCase().indexOf(".jpg") > 0
+								|| a.getFile_name().toLowerCase().indexOf(".jpeg") > 0
+								|| a.getFile_name().toLowerCase().indexOf(".png") > 0) {
+							parametros.put("MEDIA_URL", a.getMedia_url());
+//							parametros.put("MEDIA_URL", "http://www.zaragoza.es/aytocasa/ver.jsp?id=2147477609,2147430069,fuenclarap3120006cfr.jpg");
+							break;
+						}
+					}
+				}
+				parametros.put("CREATION_DATE", req.getRequested_datetime() == null ? "" : ConvertDate.date2String(req.getRequested_datetime(), ConvertDate.DATETIME_FORMAT));
+				parametros.put("ANSWER_DATE", req.getResolved_datetime() == null ? "" : ConvertDate.date2String(new Date(), ConvertDate.DATETIME_FORMAT));
+				parametros.put("SUBREPORT_DIR", UtilsQyS.getPathInformes() + "queja_acciones.jasper");
+				Funciones.setProxy();
+				JasperPrint informe = (JasperPrint) JasperFillManager.fillReport(reporte, parametros,new JRBeanArrayDataSource(new Request[]{req}));
+				
+				byte[] baos = JasperExportManager.exportReportToPdf(informe);
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.parseMediaType(MimeTypes.PDF));
+				headers.set("Content-Disposition", "inline; filename=\"informe-" + id + ".pdf\"");
+
+				return new ResponseEntity<byte[]>(baos, headers, HttpStatus.OK);
+			} else {
+				Mensaje mensaje = (Mensaje) obj;
+				throw new Exception(mensaje.getMensaje());
+			}
+		} catch (Exception e) {
+			logger.error(Funciones.getStackTrace(e));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
 	
+	
+	@Permisos(Permisos.DOC)
+	@NoCache
+	@ResponseClass(byte[].class)
+	@RequestMapping(value = "/{id}/odt-report", method = RequestMethod.GET, produces = { MimeTypes.PDF })
+	public @ResponseBody ResponseEntity<?> apiInformeOdt(
+			@PathVariable BigDecimal id) throws IOException {
+		try {
+			
+			Object obj = dao.detalle(id, UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion()));
+			if (obj instanceof Request) {
+				Request req = (Request) obj;
+				logger.info("Informe: " + UtilsQyS.getPathInformes() + "queja-" + UtilsQyS.obtenerRootCategory(Funciones.getPeticion()) + ".jasper");
+				JasperReport reporte = (JasperReport) JRLoader.loadObject(new File(UtilsQyS.getPathInformes() + "odt-" + UtilsQyS.obtenerRootCategory(Funciones.getPeticion()) + ".jasper"));
+				Map<String, Object> parametros = new HashMap<String, Object>();
+				parametros.put("LOGO", UtilsQyS.getPathInformes() + "logo.gif");
+				if (req.getX() != null) {
+//					String bbox = "676363.13,4613502.28,677063.13,4614202.28";
+					int tamanyo = 350;
+					int escala = 4000;
+					double tamMapa = tamanyo * 0.00028 * escala;
+					String bbox = "" + ((req.getX() - (tamMapa / 2)) + "," + (req.getY() - (tamMapa / 2) + "," + (req.getX() + (tamMapa / 2)) + "," + (req.getY() + (tamMapa / 2))));
+					parametros.put("IMAGE_SRC", "http://idezar.zaragoza.es/wms/IDEZar_base/IDEZar_base?TRANSPARENT=true&FORMAT=image%2Fpng&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=XML&LAYERS=base&BGCOLOR=0xFFFFFF&CRS=EPSG%3A23030&BBOX=" + bbox + "&WIDTH=" + tamanyo + "&HEIGHT=" + tamanyo);
+				}
+				if (req.getFiles() != null) {
+					for (Adjunto a: req.getFiles()) {
+						if (a.getFile_name().toLowerCase().indexOf(".gif") > 0 
+								|| a.getFile_name().toLowerCase().indexOf(".jpg") > 0
+								|| a.getFile_name().toLowerCase().indexOf(".jpeg") > 0
+								|| a.getFile_name().toLowerCase().indexOf(".png") > 0) {
+							parametros.put("MEDIA_URL", a.getMedia_url());
+//							parametros.put("MEDIA_URL", "http://www.zaragoza.es/aytocasa/ver.jsp?id=2147477609,2147430069,fuenclarap3120006cfr.jpg");
+							break;
+						}
+					}
+				}
+				parametros.put("CREATION_DATE", req.getRequested_datetime() == null ? "" : ConvertDate.date2String(req.getRequested_datetime(), ConvertDate.DATETIME_FORMAT));
+				parametros.put("ANSWER_DATE", req.getResolved_datetime() == null ? "" : ConvertDate.date2String(new Date(), ConvertDate.DATETIME_FORMAT));
+				parametros.put("SUBREPORT_DIR", UtilsQyS.getPathInformes() + "queja_acciones.jasper");
+				Funciones.setProxy();
+				JasperPrint informe = (JasperPrint) JasperFillManager.fillReport(reporte, parametros,new JRBeanArrayDataSource(new Request[]{req}));
+				
+				byte[] baos = JasperExportManager.exportReportToPdf(informe);
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.parseMediaType("application/vnd.oasis.opendocument.text"));
+				headers.set("Content-Disposition", "inline; filename=\"informe-" + id + ".odt\"");
+
+				return new ResponseEntity<byte[]>(baos, headers, HttpStatus.OK);
+			} else {
+				Mensaje mensaje = (Mensaje) obj;
+				throw new Exception(mensaje.getMensaje());
+			}
+		} catch (Exception e) {
+			logger.error(Funciones.getStackTrace(e));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
+	
+	@RequestMapping(value = "/acceso", method = RequestMethod.GET, produces = {
+			MediaType.TEXT_HTML_VALUE, "*/*" })
+	public String acceso(HttpServletRequest request) {
+		Ciudadano user = Funciones.getUser(request);
+		if (user == null) {
+			return MAPPING + "/acceso";
+		} else {
+			return "redirect:/" + MAPPING + "/user";
+		}
+	}
+	
+	@PermisosUser
+	@RequestMapping(value = "/import", method = RequestMethod.POST, produces = {
+			MediaType.TEXT_HTML_VALUE, "*/*" })
+	public String importar(@RequestParam(name = "email", required = false) String email,
+    		@RequestParam(name = "password", required = false) String pass, Model model, HttpServletRequest request) {
+		if (StringUtils.isNotEmpty(email) && StringUtils.isNotEmpty(pass)) {
+			Ciudadano user = Funciones.getUser(request);
+			Mensaje mensaje = daoUser.importData(user, email, pass);
+			model.addAttribute(ModelAttr.MENSAJE, mensaje);
+		}
+		return MAPPING + "/import";	
+	}
 }

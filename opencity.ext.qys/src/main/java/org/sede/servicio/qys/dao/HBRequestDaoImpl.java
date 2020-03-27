@@ -2,7 +2,9 @@ package org.sede.servicio.qys.dao;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,6 +23,7 @@ import com.googlecode.genericdao.dao.jpa.GenericDAOImpl;
 import com.googlecode.genericdao.search.Filter;
 import com.googlecode.genericdao.search.Search;
 import com.googlecode.genericdao.search.SearchResult;
+import com.googlecode.genericdao.search.Sort;
 
 
 @Repository
@@ -202,20 +205,24 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
     }
     
     if (StringUtils.isNotEmpty(type)) {
-    	busqueda.addFilterIn("type.rtyHbid", UtilsQyS.asBigDecimalArray(type));
+    	busqueda.addFilterIn("type", UtilsQyS.asBigDecimalArray(type));
     }
+   	List<Sort> sorts = new ArrayList<Sort>();
+    sorts.add(new Sort("requested_datetime", true));
+    busqueda.setSorts(sorts);
     
     return this.searchAndCount(busqueda);
 		
 	}
 
-
+	@Override
 	public Hbrequests findRqtRequestNumber(BigDecimal id) {
 		Query q = em().createQuery("from Hbrequests where service_request_id=:id", Hbrequests.class)
 				.setParameter("id", id);
 		return (Hbrequests)q.getSingleResult();
 	}
-		
+	
+	@Override
 	public Hbrequestloadfiles findFile(BigDecimal id, BigDecimal idFile) {
 		Query q = em().createQuery("from Hbrequestloadfiles where hbrequests.rqtHbid=:id and rlfHbid=:idFile", Hbrequestloadfiles.class)
 			.setParameter("id", id)

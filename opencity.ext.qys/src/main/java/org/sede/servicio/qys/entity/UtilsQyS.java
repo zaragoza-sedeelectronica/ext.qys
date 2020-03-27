@@ -7,7 +7,6 @@ import java.util.Date;
 import org.sede.core.rest.Peticion;
 import org.sede.core.tag.Utils;
 import org.sede.core.utils.Propiedades;
-import org.sede.servicio.qys.entity.db.Hbrequestactions;
 import org.sede.servicio.qys.entity.db.Hbrequests;
 
 /**
@@ -289,8 +288,8 @@ public class UtilsQyS {
 									|| userTicketing.equals(ID_010)))) {
 				return true;
 			} else {
-				for (Hbrequestactions accion : registro.getActions()) {
-					if (accion.getUsrHbidAgent().equals(userTicketing)) {
+				for (Accion accion : registro.getActions()) {
+					if (accion.getAgent_id().equals(userTicketing)) {
 						return true;
 					}
 				}
@@ -311,7 +310,7 @@ public class UtilsQyS {
 		}
 		return bd;
 	}
-	
+
 	public static String getPathInformes() {
 		
 		return Propiedades.getPathAplicacionesDisk() + "ticketing/informes/";

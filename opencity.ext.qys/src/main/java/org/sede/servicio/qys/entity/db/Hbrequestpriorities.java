@@ -28,9 +28,7 @@ public class Hbrequestpriorities implements java.io.Serializable {
 	private BigDecimal rptPriority;
 	private BigDecimal rptHbversion;
 	private BigDecimal rptDefault;
-	@Interno
-	private Set<Hbrequests> hbrequestses = new HashSet<Hbrequests>(0);
-
+	
 	public Hbrequestpriorities() {
 	}
 
@@ -43,18 +41,7 @@ public class Hbrequestpriorities implements java.io.Serializable {
 		this.rptDefault = rptDefault;
 	}
 
-	public Hbrequestpriorities(BigDecimal rptHbid, String rptName, BigDecimal rptPriority, BigDecimal rptHbversion,
-			BigDecimal rptDefault, Set<Hbrequests> hbrequestses) {
-		this.rptHbid = rptHbid;
-		this.rptName = rptName;
-		this.rptPriority = rptPriority;
-		this.rptHbversion = rptHbversion;
-		this.rptDefault = rptDefault;
-		this.hbrequestses = hbrequestses;
-	}
-
 	@Id
-
 	@Column(name = "RPT_HBID", unique = true, nullable = false, precision = 22, scale = 0)
 	public BigDecimal getRptHbid() {
 		return this.rptHbid;
@@ -100,13 +87,5 @@ public class Hbrequestpriorities implements java.io.Serializable {
 		this.rptDefault = rptDefault;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "hbrequestpriorities")
-	public Set<Hbrequests> getHbrequestses() {
-		return this.hbrequestses;
-	}
-
-	public void setHbrequestses(Set<Hbrequests> hbrequestses) {
-		this.hbrequestses = hbrequestses;
-	}
 
 }

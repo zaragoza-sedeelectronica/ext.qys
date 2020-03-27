@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ibm.icu.util.Calendar;
+import java.util.Calendar;
 
 /**
  * Controlador informacion publica
