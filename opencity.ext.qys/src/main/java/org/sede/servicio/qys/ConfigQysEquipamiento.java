@@ -6,14 +6,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ConfigQysEquipamiento implements PropertyFileInterface {
-	public static final String ESQUEMA = "GENERAL";
-	public static final String TM = "transactionManagerGeneral";
+	public static final String ESQUEMA = Esquema.TICKETING;
+	public static final String TM = Esquema.TMTICKETING;
 	
 	public String getSchema() {
-		return "general";
+		return ESQUEMA.toLowerCase();
 	}
 	public String getJndi() {
-		return "WebGeneralDS";
+		return "TicketingDS";
 	}
 
 	public String getEntity() {

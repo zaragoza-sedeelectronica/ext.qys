@@ -1065,10 +1065,10 @@ public class QysController {
 				if (original instanceof Request) {
 					Request req = (Request) original;
 					if (externoTicketing == null) {
-						Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
+						Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
 					} else {
 						if (req.getExterno_code() == new BigDecimal(externoTicketing)) {
-							Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
+							Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias. Solicitud: " + req.getService_request_id() + ". Asunto: " + req.getTitle(), descripcion + UtilsQyS.TEXTONOCONTESTAR, req.getEmail(), "", "text/plain");
 						} else {
 							return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje(HttpStatus.NOT_FOUND.value(), messageSource.getMessage("generic.notfound", null, LocaleContextHolder.getLocale())));
 						}
@@ -1151,7 +1151,7 @@ public class QysController {
 							textoMsg = descripcion + linkOrdenTrabajo;
 						}
 						
-						Funciones.sendMail(id + ": OpenCityExt. Sistema de quejas y sugerencias.", textoMsg, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
+						Funciones.sendMail(id + ": Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias.", textoMsg, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 						descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
 					}
 				}
@@ -1188,7 +1188,7 @@ public class QysController {
 				idExterno = new BigDecimal(params.get("idExterno"));
 				obj = dao.acciones(id, accion, descripcion, fecha, idExterno, idInterno, usuarioTicketing, uuid, peticion.getClientId(), null);
 				if (!StringUtils.isEmpty(mailExterno)) {
-					Funciones.sendMail("OpenCityExt. Sistema de quejas y sugerencias.", descripcion, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
+					Funciones.sendMail("Ayuntamiento de Zaragoza. Sistema de quejas y sugerencias.", descripcion, mailExterno, peticion.getCredenciales().getUsuario().getEmail(), "text/plain");
 					descripcion = "Correo a " + mailExterno + ": Descripcion: " + descripcion;
 				}
 				return ResponseEntity.ok(obj);

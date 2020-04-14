@@ -15,7 +15,7 @@ public class RestriccionMailDireccionValidator implements ConstraintValidator<Re
 	 * Metodo initialize
 	 * 
 	 */
-	
+	@Override
     public void initialize(RestriccionMailDireccion constraintAnnotation) {
     }
 
@@ -23,7 +23,7 @@ public class RestriccionMailDireccionValidator implements ConstraintValidator<Re
 	 * Metodo isValid
 	 * 
 	 */
-    
+    @Override
     public boolean isValid(SolicitudInformacionPublica solicitud, ConstraintValidatorContext context) {
         if (solicitud == null) {
             return true;
