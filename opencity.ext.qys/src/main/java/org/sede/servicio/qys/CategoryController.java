@@ -5,7 +5,6 @@ import java.sql.SQLException;
 
 import org.sede.core.anotaciones.Cache;
 import org.sede.core.anotaciones.Description;
-import org.sede.core.anotaciones.Esquema;
 import org.sede.core.anotaciones.Fiql;
 import org.sede.core.anotaciones.Gcz;
 import org.sede.core.anotaciones.Permisos;
