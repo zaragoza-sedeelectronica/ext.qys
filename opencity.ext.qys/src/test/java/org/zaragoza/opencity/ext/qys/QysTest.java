@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.sede.core.TestPeticion;
 import org.sede.core.db.DataSourceRule;
+import org.sede.core.filter.GZipFilter;
 import org.sede.core.utils.Funciones;
 import org.sede.servicio.qys.QysController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class QysTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(context).addFilters(new GZipFilter()).build();
 		peticion.setMock(mockMvc);
 	}
 	
