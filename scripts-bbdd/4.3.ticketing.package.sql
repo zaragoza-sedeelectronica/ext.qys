@@ -15,6 +15,226 @@ END LOOP;
 RETURN SUBSTR(v_string,1,INSTR(v_string,p_separator)-1);
 END split;
 /
+
+create or replace PACKAGE PCK_QYS_REQUESTS AS TYPE cursorRetorno IS REF CURSOR;
+    PROCEDURE DETALLE(
+    v_id in numeric,
+    usuarioTicketing in numeric default null,
+		xmlsal OUT CLOB);
+    PROCEDURE GET(v_filas IN number, v_inicio IN number,
+    v_orden in varchar2, 
+    v_ids in varchar2 default null, 
+    v_title in varchar2 default null,
+    v_notes in varchar2 default null,
+		v_service_code in varchar2 default null, 
+    v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
+    v_agency_responsible in numeric default null, 
+    v_account_id in numeric default null, 
+    v_user_id in numeric default null, 
+		v_start_date in date default null, 
+		v_end_date in date default null, 
+    v_type in varchar2 default null,
+		v_status in varchar2 default null,
+    v_public in varchar2 default null,
+    usuarioTicketing in numeric default null,
+    p_groupoperator varchar2 default null,
+    p_operator varchar2 default null,
+    p_answer_requested varchar2 default null,
+    p_barrio varchar2 default null,
+    origin in numeric default null,
+    inspector in varchar2 default null,
+    operadorget in varchar2 default null,
+    v_id_cat_sip in numeric default null,
+    xmlsal OUT clob, total OUT number);
+
+    PROCEDURE GETACCIONES(v_filas IN number, v_inicio IN number,
+    v_orden in varchar2, 
+    v_ids in varchar2 default null, 
+    v_title in varchar2 default null,
+    v_notes in varchar2 default null,
+		v_service_code in varchar2 default null, 
+    v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
+    v_agency_responsible in numeric default null, 
+    v_account_id in numeric default null, 
+		v_start_date in date default null, 
+		v_end_date in date default null, 
+    v_type in varchar2 default null,
+		v_status in varchar2 default null,
+    v_public in varchar2 default null,
+    usuarioTicketing in numeric default null,
+    p_groupoperator varchar2 default null,
+    p_operator varchar2 default null,
+    p_answer_requested varchar2 default null,
+    p_barrio varchar2 default null,
+    origin in numeric default null,
+    inspector in varchar2 default null,
+    xmlsal OUT clob, total OUT number);
+
+
+    PROCEDURE CREAR(
+        v_service_code numeric default null,
+				p_email hbusers.cli_email%type default null, 
+				v_address_string hbusers.per_address%type default null, 
+        v_address_id varchar2 default null,
+				p_account_id varchar2 default null, 
+				p_first_name varchar2 default null, 
+				p_last_name varchar2 default null, 
+				p_user_address hbusers.per_address%type default null, 
+				p_phone varchar2 default null, 
+				v_title varchar2 default null, 
+        v_notes varchar2 default null, 
+				v_description in hbrequests.rqt_creationdescription%type default null,
+				v_media_name hbrequestloadfiles.rlf_filename%type default null, 
+        v_media_description hbrequestloadfiles.rlf_description%type default null, 
+				p_publico varchar2 default null, 
+				v_x number default null, 
+				v_y number default null,
+
+        p_agency_code numeric default null,
+        p_type numeric default 1,
+        p_priority numeric default 2,
+        p_origin numeric default 3,
+        p_validated varchar2 default null,
+        --p_visible varchar2 default null,
+        p_zona_inspeccion numeric default null,
+        p_fecha_prevista date default null,
+
+        p_usuarioadmin varchar2 default null,
+        p_operator varchar2 default null,
+        p_answer_requested varchar2 default null,
+        p_id_cita numeric default null,
+        p_user_id numeric default null,
+
+        xmlsal OUT CLOB
+    );
+
+    PROCEDURE GUARDAR(
+        p_requestnumber number,
+        p_service_code numeric default null,
+				p_email hbusers.cli_email%type default null, 
+				p_address_string hbusers.per_address%type default null, 
+        p_address_id varchar2 default null,
+				p_account_id varchar2 default null, 
+				p_first_name varchar2 default null, 
+				p_last_name varchar2 default null, 
+				p_user_address hbusers.per_address%type default null, 
+				p_phone varchar2 default null, 
+				p_title varchar2 default null, 
+        p_notes varchar2 default null, 
+				p_description in hbrequests.rqt_creationdescription%type default null,  
+				p_media_name hbrequestloadfiles.rlf_filename%type default null, 
+        p_media_description hbrequestloadfiles.rlf_description%type default null, 
+				p_publico varchar2 default null, 
+				p_x number default null, 
+				p_y number default null,
+
+        p_agency_code numeric default null,
+        p_type numeric default null,
+        p_priority numeric default null,
+        p_origin numeric default null,
+        p_validated varchar2 default null,
+       -- p_visible varchar2 default null,
+
+        p_zona_inspeccion numeric default null,
+        p_fecha_prevista date default null,
+
+        p_usuarioadmin varchar2 default null,
+        p_answer_requested varchar2 default null,
+
+        p_id_cita numeric default null,
+        p_id_cat_sip numeric default null,
+
+        xmlsal OUT CLOB
+    );
+
+    PROCEDURE ACCIONES(
+        v_requestnumber number,
+        p_accion numeric default null,
+				v_texto hbrequestactions.rqa_description%type default null, 
+
+        v_fecha date default null,
+
+        v_idexterno numeric default null,
+        v_idinterno varchar2 default null,
+
+        p_usuarioadmin varchar2 default null,
+        p_usuariogcz varchar2 default null,
+        p_uuid varchar2 default null,
+        p_estadointerno number default null,
+
+        xmlsal OUT CLOB
+    );
+
+     PROCEDURE ESTADOANTERIORQUEJA(
+        v_requestnumber number,
+        v_accion numeric default null,
+				v_texto hbrequestactions.rqa_description%type default null,        
+        p_usuarioadmin varchar2 default null,
+        p_usuariogcz varchar2 default null
+    );
+
+     PROCEDURE TOKEN(
+        v_token varchar2 default null,
+				v_texto hbrequestactions.rqa_description%type default null, 
+        xmlsal OUT CLOB
+    );
+
+    PROCEDURE ASOCIAR(
+        v_id numeric default null,
+        v_service_code numeric default null,
+        v_agency_responsible numeric default null,
+        v_user_id numeric
+    );
+
+    PROCEDURE CATEGORIA(
+        rootCategory number default null,
+        xmlsal OUT CLOB
+    );
+
+     PROCEDURE INFORMES(
+        v_start_date in date default null, 
+        v_end_date in date default null,
+        v_ids_categoria in varchar2 default null,
+       /* v_distrito in numeric default null,
+        v_barrio in numeric default null,*/
+				v_texto varchar2 default null, 
+        usuarioTicketing in numeric default null,
+        xmlsal OUT CLOB
+    );
+
+    FUNCTION generarWhere(v_ids in varchar2 default null, 
+    v_title in varchar2 default null,
+    v_notes in varchar2 default null,
+		v_service_code in varchar2 default null, 
+    v_externo_code in numeric default null,
+    v_internal_status in numeric default null,
+    v_agency_responsible in numeric default null, 
+    v_account_id in numeric default null, 
+    v_user_id in numeric default null,
+		v_start_date in date default null, 
+		v_end_date in date default null, 
+    v_type in varchar2 default null,
+		v_status in varchar2 default null,
+    v_public in varchar2 default null,
+    usuarioTicketing in numeric default null,
+    p_groupoperator varchar2 default null,
+    p_operator varchar2 default null,
+    p_answer_requested varchar2 default null,
+    p_barrio varchar2 default null,
+    origin in numeric default null,
+    inspector in varchar2 default null,
+    operadorget in varchar2 default null,
+    v_id_cat_sip in numeric default null
+    ) RETURN string;
+
+
+    FUNCTION GET_ROWS(pString IN varchar2) return integer;
+
+END PCK_QYS_REQUESTS;
+/
+
 create or replace PACKAGE BODY "PCK_QYS_REQUESTS" AS
    
    PROCEDURE DETALLE(
