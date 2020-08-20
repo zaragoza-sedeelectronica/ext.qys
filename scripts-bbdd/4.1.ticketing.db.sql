@@ -830,12 +830,7 @@
    CREATE SEQUENCE  "SEQ_HBREQUESTLOADFILES"  MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 2147483744 CACHE 20 NOORDER  NOCYCLE ;
 
 
---------------------------------------------------------
---  DDL for Index DR$RQT_CREATIONDESCRIPTION$X
---------------------------------------------------------
 
-  CREATE INDEX "DR$RQT_CREATIONDESCRIPTION$X" ON "DR$RQT_CREATIONDESCRIPTION$I" ("TOKEN_TEXT", "TOKEN_TYPE", "TOKEN_FIRST", "TOKEN_LAST", "TOKEN_COUNT") 
-  ;
 --------------------------------------------------------
 --  DDL for Index HB_ENTIDADESEXTERNAS_PK
 --------------------------------------------------------

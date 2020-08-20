@@ -1626,7 +1626,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	public JasperPrint generarInformeOrdenTrabajo(Request req, String externo, String rootCategory, Peticion peticion) throws JRException {
 		
 		@SuppressWarnings("deprecation")
-		JasperReport reporte = (JasperReport) JRLoader.loadObject(UtilsQyS.getPathInformes() + "ot-" + rootCategory + ".jasper");
+		JasperReport reporte = (JasperReport) JRLoader.loadObjectFromFile(UtilsQyS.getPathInformes() + "ot-" + rootCategory + ".jasper");
 		
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		parametros.put("LOGO", UtilsQyS.getPathInformes() + "logo.gif");
