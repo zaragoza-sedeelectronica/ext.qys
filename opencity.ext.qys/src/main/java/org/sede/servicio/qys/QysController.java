@@ -205,6 +205,7 @@ public class QysController {
     		@RequestParam(name = CheckeoParametros.PARAMSORT, required = false) String sort, 
     		@RequestParam(name = "service_request_id", required = false) @Description("Identificador de la queja") String ids, //se pueden poner varios IDs Separados por coma
     		@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
+    		@RequestParam(name = "address", required = false) @Description("Direccion de la queja") String address,
     		@RequestParam(name = "notes", required = false) String notes,
     		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String serviceCode,
     		@RequestParam(name = "origin", required = false) @Description("Origen de la queja") String origin,
@@ -310,7 +311,7 @@ public class QysController {
 //			// Como mucho 1000 resultados
 			rows = rows > 1000 ? 1000 : rows;
 			SearchResult<Request> results = daoRequest.searchAndCountRequest(rows,
-					start, sort, ids, title, notes, 
+					start, sort, ids, title, address, notes, 
 					StringUtils.isEmpty(serviceCode) ? null : serviceCode,
 					StringUtils.isEmpty(externoCode) ? null : Integer.parseInt(externoCode),	
 					StringUtils.isEmpty(agencyResponsibleId) ? null : Integer.parseInt(agencyResponsibleId),
@@ -359,7 +360,7 @@ public class QysController {
 	        	return ResponseEntity.ok(registro);
     		}
         } else {
-            ResponseEntity<?> results = apiListRequests(0, 1, null, "" + id, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+            ResponseEntity<?> results = apiListRequests(0, 1, null, "" + id, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
             if (results.getStatusCode().is2xxSuccessful()) {
                 return ResponseEntity.ok(((SearchResult<Hbrequests>) results.getBody()).getResult().get(0));
             } else {
@@ -761,6 +762,7 @@ public class QysController {
     		@RequestParam(name = CheckeoParametros.PARAMSORT, required = false) String sort, 
     		@RequestParam(name = "service_request_id", required = false) @Description("Identificador de la queja") String ids, //se pueden poner varios IDs Separados por coma
     		@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
+    		@RequestParam(name = "address", required = false) @Description("Dirección de la queja") String address,
     		@RequestParam(name = "notes", required = false) String notes,
     		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String serviceCode,
     		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despúes de esta fecha") Date startDate,
@@ -771,7 +773,7 @@ public class QysController {
     		@RequestParam(name = "id_cat_sip", required = false) @Description("Identificador de tipo de Solicitud de Información pública") String id_cat_sip,
     		HttpServletRequest request, Model model) throws SQLException {
 		Ciudadano user = Funciones.getUser(request);
-		model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, notes, serviceCode, null, null, null, null, null, ("" + user.getId()), startDate, endDate, null, null, null, barrioCode, type, status, null, id_cat_sip));
+		model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, address, notes, serviceCode, null, null, null, null, null, ("" + user.getId()), startDate, endDate, null, null, null, barrioCode, type, status, null, id_cat_sip));
 		return MAPPING + "/user";
 	}
 	

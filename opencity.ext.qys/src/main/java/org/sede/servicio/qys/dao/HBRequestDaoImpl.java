@@ -72,6 +72,7 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
 			final String sort, 
 			final String ids, 
 			final String title,
+			final String address,
 			final String notes,
 			final String service_code,
 			final Integer externo_code,
@@ -100,7 +101,7 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
 		
 		BigDecimal usuario = StringUtils.isNotEmpty(usuarioTicketing) ? new BigDecimal(usuarioTicketing) : (account_id == null ? null : BigDecimal.valueOf(account_id));		
 		if (usuario == null && user_id == null) {
-			busqueda.addFilter(Filter.equal("rqtPublic", "S"));
+			busqueda.addFilter(Filter.equal("visible", "S"));
 			busqueda.addFilter(Filter.equal("validated", "S"));
 			busqueda.addFilter(Filter.greaterThan("service_request_id", UtilsQyS.RQT_ID_FROM));
 			busqueda.addFilter(Filter.notEqual("hbrequeststates.rstHbid", 5));
@@ -161,7 +162,7 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
 
     if (StringUtils.isNotEmpty(validated)) {
     	if ("N".equals(validated)) {
-    		busqueda.addFilter(Filter.equal("rqtPublic", "S"));
+    		busqueda.addFilter(Filter.equal("visible", "S"));
     		busqueda.addFilter(Filter.equal("validated", validated));
     	} else {
     		busqueda.addFilter(Filter.equal("validated", validated));
@@ -171,10 +172,13 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
     	busqueda.addFilter(Filter.in("service_request_id", UtilsQyS.asBigDecimalArray(ids)));
     }
     if (StringUtils.isNotEmpty(title)) {
-    	busqueda.addFilter(Filter.ilike("title", title));
+    	busqueda.addFilter(Filter.contains("title", title));
     }
     if (StringUtils.isNotEmpty(notes)) {
-    	busqueda.addFilter(Filter.ilike("notes", title));
+    	busqueda.addFilter(Filter.contains("notes", title));
+    }
+    if (StringUtils.isNotEmpty(address)) {
+    	busqueda.addFilter(Filter.contains("address_string", address));
     }
     
     if (StringUtils.isNotEmpty(status)) {

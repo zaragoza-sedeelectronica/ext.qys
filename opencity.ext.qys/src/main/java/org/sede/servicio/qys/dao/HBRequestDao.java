@@ -51,6 +51,7 @@ public interface HBRequestDao extends GenericDAO<Hbrequests, BigDecimal> {
 			final String sort, 
 			final String ids, 
 			final String title,
+			final String address,
 			final String notes,
 			final String service_code,
 			final Integer externo_code,
