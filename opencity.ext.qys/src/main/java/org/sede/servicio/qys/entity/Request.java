@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys.entity;
 
 import java.math.BigDecimal;
@@ -57,14 +69,14 @@ public class Request extends EntidadBase {
 	/**
 	 *  variable service_code
 	 */
-	@Description("Identificador de categorÃ­a asignada")
+	@Description("Identificador de categoría asignada")
 	@RequiredSinValidacion
 	@Rdf(contexto = Context.OPEN311, propiedad = "has311Type")
 	private BigDecimal service_code; // The unique identifier for the service request type	
 	/**
 	 *  variable service_name
 	 */
-	@Description("Nombre de la categorÃ­a asignada")
+	@Description("Nombre de la categoría asignada")
 	@RequiredSinValidacion
 	@RdfMultiple({@Rdf(contexto = Context.SKOS, propiedad = "prefLabel"), @Rdf(contexto = Context.OPEN311, propiedad = "TypeName")})
 	private String service_name; // The human readable name of the service request type
@@ -91,7 +103,7 @@ public class Request extends EntidadBase {
 	/**
 	 *  variable agency_responsible_code
 	 */
-	@Permisos(Permisos.ADMIN) //Â¿Anonimizar? Porque ahora No lo podemos publicar porque en algunos casos son Personas
+	@Permisos(Permisos.ADMIN) //¿Anonimizar? Porque ahora No lo podemos publicar porque en algunos casos son Personas
 	private BigDecimal agency_responsible_code;
 	/**
 	 *  variable agency_responsible

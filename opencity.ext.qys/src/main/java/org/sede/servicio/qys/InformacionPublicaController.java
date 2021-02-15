@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys;
 
 import java.math.BigDecimal;
@@ -70,16 +82,16 @@ public class InformacionPublicaController {
 	public static final Map<Integer, String> tipoSip = new HashMap<Integer, String>();
     static {
     	tipoSip.put(0, "Sin asignar");
-		tipoSip.put(1, "InformaciÃ³n institucional y organizativa");
+		tipoSip.put(1, "Información institucional y organizativa");
 		tipoSip.put(2, "Planes y programas operativos");
 		tipoSip.put(3, "Normativa");
-		tipoSip.put(4, "InformaciÃ³n econÃ³mica");
+		tipoSip.put(4, "Información económica");
 		tipoSip.put(5, "Ayudas y subvenciones");
 		tipoSip.put(6, "Urbanismo");
-		tipoSip.put(7, "ContrataciÃ³n administrativa");
+		tipoSip.put(7, "Contratación administrativa");
 		tipoSip.put(8, "Medio Ambiente");
 		tipoSip.put(9, "Recursos humanos");
-		tipoSip.put(10, "Relaciones con la ciudadanÃ­a y participaciÃ³n");
+		tipoSip.put(10, "Relaciones con la ciudadanía y participación");
 		tipoSip.put(11, "Otros");
 
 	}
@@ -157,7 +169,7 @@ public class InformacionPublicaController {
 		    	} else {
 		    		if (StringUtils.isNotEmpty(request.getEmail())) {
 						try {
-							Funciones.sendMail("Solicitud:" + request.getService_request_id() , "Hemos recibido correctamente su peticiÃ³n. Puede hacer un seguimiento del estado de la gestiÃ³n a travÃ©s del siguiente enlace: "
+							Funciones.sendMail("Solicitud:" + request.getService_request_id() , "Hemos recibido correctamente su petición. Puede hacer un seguimiento del estado de la gestión a través del siguiente enlace: "
 									+ System.getProperty("line.separator")
 									+ "https://www.zaragoza.es/sede/servicio/informacion-publica/" + request.getService_request_id() + "/" + request.getToken() + "/ "
 									+ UtilsQyS.TEXTONOCONTESTAR, request.getEmail(), 

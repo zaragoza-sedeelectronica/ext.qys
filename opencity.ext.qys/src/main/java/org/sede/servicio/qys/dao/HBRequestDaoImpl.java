@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys.dao;
 
 import java.math.BigDecimal;
@@ -156,7 +168,7 @@ public class HBRequestDaoImpl extends GenericDAOImpl <Hbrequests, BigDecimal> im
 	    	busqueda.addFilter(Filter.equal("origin", Integer.parseInt(origin)));
 	    }
     
-//    TODO bÃºsqueda por barrio if p_barrio is not null then
+//    TODO busqueda por barrio if p_barrio is not null then
 //      consulta := consulta || 'hb_re.address_id in (select p.id_por from intra.portalero p where p.id_jun='||p_barrio||') AND ';      
 //    end if;
 

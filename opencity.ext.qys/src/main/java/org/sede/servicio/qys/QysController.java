@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys;
 
 import java.io.File;
@@ -115,7 +127,7 @@ import net.sf.jasperreports.engine.util.JRLoader;
 @Transactional(ConfigQys.TM)
 @RequestMapping(value = {"/" + QysController.MAPPING,
 		"/" + QysController.MAPPING_INFORMACIONPUBLICA}, method = RequestMethod.GET)
-@Description("Gobierno Abierto: Solicitudes de InformaciÃ³n PÃºblica y Quejas - sugerencias")
+@Description("Gobierno Abierto: Solicitudes de Información Pública y Quejas - sugerencias")
 public class QysController {
 
 	/**
@@ -204,7 +216,7 @@ public class QysController {
     		@RequestParam(name = CheckeoParametros.PARAMROWS, defaultValue = CheckeoParametros.ROWS) int rows, 
     		@RequestParam(name = CheckeoParametros.PARAMSORT, required = false) String sort, 
     		@RequestParam(name = "service_request_id", required = false) @Description("Identificador de la queja") String ids, //se pueden poner varios IDs Separados por coma
-    		@RequestParam(name = "title", required = false) @Description("TÃ­tulo de la queja") String title,
+    		@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
     		@RequestParam(name = "address", required = false) @Description("Direccion de la queja") String address,
     		@RequestParam(name = "notes", required = false) String notes,
     		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String serviceCode,
@@ -214,7 +226,7 @@ public class QysController {
     		@RequestParam(name = "agency_responsible_code", required = false) String agencyResponsibleId,
     		@Permisos(Permisos.NEW) @RequestParam(name = "account_id", required = false) @Description("Identificador del usuario") String accountId,
     		@Permisos(Permisos.NEW) @RequestParam(name = "user_id", required = false) @Description("Identificador del usuario") String userId,
-    		@RequestParam(name = "start_date", required = false) @DateTimeFormat(pattern = ConvertDate.ISO8601_FORMAT) @Description("Quejas introducidas despÃºes de esta fecha") Date startDate,
+    		@RequestParam(name = "start_date", required = false) @DateTimeFormat(pattern = ConvertDate.ISO8601_FORMAT) @Description("Quejas introducidas despúes de esta fecha") Date startDate,
     		@RequestParam(name = "end_date", required = false) @DateTimeFormat(pattern = ConvertDate.ISO8601_FORMAT) @Description("Quejas introducidas antes de esta fecha") Date endDate,
     		@RequestParam(name = "group_operator", required = false) String groupOperator, //El identificador de usuario de quejas y sugerencias
     		@RequestParam(name = "operator", required = false) String operator,
@@ -284,7 +296,7 @@ public class QysController {
 			}
 			
 			sort = dao.nombresParaBBDD(sort);
-			// Rango de 90 dÃ­as
+			// Rango de 90 di­as
 			if ((peticion.getPermisosEnSeccion() == null || !peticion.getPermisosEnSeccion().contains(Permisos.ADMIN)) && (startDate != null || endDate != null)) {
 				startDate = UtilsQyS.ajustarFechaInicio(startDate, endDate);
 				endDate = UtilsQyS.ajustarFechaFin(startDate, endDate);
@@ -389,7 +401,7 @@ public class QysController {
 			}
 			
 			Request req;
-			// Si los datos vienen en el body de la peticiÃ³n
+			// Si los datos vienen en el body de la peticion
 			if (StringUtils.isNotEmpty(peticion.getCuerpoPeticion())) {
 				Map<String, String> params = Funciones.tratarQueryString(peticion.getCuerpoPeticion());
 				req = new Request(params.get("service_code") == null ? null : new BigDecimal(params.get("service_code")),
@@ -556,7 +568,7 @@ public class QysController {
 		}
 		if (StringUtils.isNotEmpty(entidad.getEmail()) && !Funciones.isValidEmail(entidad.getEmail())) {
 			error = true;
-			respuesta.append("<li>Correo electrÃ³nico no vÃ¡lido.</li>");
+			respuesta.append("<li>Correo electrónico no válido.</li>");
 		}
 		respuesta.append("</ul>");
 		if (error) {
@@ -761,16 +773,16 @@ public class QysController {
     		@RequestParam(name = CheckeoParametros.PARAMROWS, defaultValue = CheckeoParametros.ROWS) int rows, 
     		@RequestParam(name = CheckeoParametros.PARAMSORT, required = false) String sort, 
     		@RequestParam(name = "service_request_id", required = false) @Description("Identificador de la queja") String ids, //se pueden poner varios IDs Separados por coma
-    		@RequestParam(name = "title", required = false) @Description("TÃ­tulo de la queja") String title,
-    		@RequestParam(name = "address", required = false) @Description("DirecciÃ³n de la queja") String address,
+    		@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
+    		@RequestParam(name = "address", required = false) @Description("Dirección de la queja") String address,
     		@RequestParam(name = "notes", required = false) String notes,
     		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String serviceCode,
-    		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despÃºes de esta fecha") Date startDate,
+    		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despúes de esta fecha") Date startDate,
     		@RequestParam(name = "end_date", required = false) @Description("Quejas introducidas antes de esta fecha") Date endDate,
     		@RequestParam(name = "barrio_code", required = false) String barrioCode,
     		@RequestParam(name = "type", required = false) String type,
     		@RequestParam(name = "status", required = false) String status,
-    		@RequestParam(name = "id_cat_sip", required = false) @Description("Identificador de tipo de Solicitud de InformaciÃ³n pÃºblica") String id_cat_sip,
+    		@RequestParam(name = "id_cat_sip", required = false) @Description("Identificador de tipo de Solicitud de Información pública") String id_cat_sip,
     		HttpServletRequest request, Model model) throws SQLException {
 		Ciudadano user = Funciones.getUser(request);
 		model.addAttribute(ModelAttr.RESULTADO, apiListRequests(start, rows, sort, ids, title, address, notes, serviceCode, null, null, null, null, null, ("" + user.getId()), startDate, endDate, null, null, null, barrioCode, type, status, null, id_cat_sip));
@@ -878,7 +890,7 @@ public class QysController {
 	 * @return
 	 */
 	@Cache(Cache.DURACION_30MIN)
-	@Description("DefiniciÃ³n del servicio")
+	@Description("Definición del servicio")
 	@ResponseClass(value = Service.class, entity = SearchResult.class)
 	@RequestMapping(value = "/services/{id}", method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
 	public @ResponseBody ResponseEntity<?> apiServiceListar(@PathVariable BigDecimal identifier) {
@@ -899,11 +911,11 @@ public class QysController {
 	 */
 	@OpenData
 	@Cache(Cache.DURACION_30MIN)
-	@Description("EstadÃ­sticas")
+	@Description("Estadísticas")
 	@ResponseClass(value = Service.class, entity = SearchResult.class)
 	@RequestMapping(value = "/statistics", method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
 	public @ResponseBody ResponseEntity<?> apiStatistics(@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String service_code,
-			@RequestParam(name = "year", required = false) @Description("AÃ±o") Integer year) {
+			@RequestParam(name = "year", required = false) @Description("Año") Integer year) {
 		year = year == null ? Calendar.getInstance().get(Calendar.YEAR) : year;
 		BigDecimal type = null;
 		if (servicioResolucionInformacionPublica()) {
@@ -928,10 +940,10 @@ public class QysController {
 			MediaType.TEXT_HTML_VALUE, "*/*" })
 	public String statistics(Model model, 
 			@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String service_code,
-			@RequestParam(name = "year", required = false) @Description("AÃ±o") Integer year, HttpServletRequest request) throws SQLException {
+			@RequestParam(name = "year", required = false) @Description("Año") Integer year, HttpServletRequest request) throws SQLException {
 		
 		if (servicioResolucionInformacionPublica()) {
-			model.addAttribute("title", "Resoluciones procedimiento de informaciÃ³n pÃºblica");
+			model.addAttribute("title", "Resoluciones procedimiento de información pública");
 			request.setAttribute(LayoutInterceptor.PLANTILLA_SALIDA, MAPPING_INFORMACIONPUBLICA);
 			model.addAttribute("resoluciones", true);
 			model.addAttribute("datosSegunFemp", dao.obtenerCategoriasConTotal(false, "" + year));
@@ -979,10 +991,10 @@ public class QysController {
 	@Permisos(Permisos.ESTADISTICA)
 	@ResponseClass(RespuestaTipo.class)
 	@RequestMapping(value = "/estadistica", method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
-	public @ResponseBody ResponseEntity<?> apiEstadistica(@RequestParam(name = "title", required = false) @Description("TÃ­tulo de la queja") String title,
+	public @ResponseBody ResponseEntity<?> apiEstadistica(@RequestParam(name = "title", required = false) @Description("Título de la queja") String title,
 		@RequestParam(name = "service_code", required = false) @Description("Identificador del servicio") String service_code,
 		//@Permisos(Permisos.NEW) @QueryParam("account_id") @Description("Identificador del usuario") String account_id,
-		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despÃºes de esta fecha") Date start_date,
+		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despúes de esta fecha") Date start_date,
 		@RequestParam(name = "end_date", required = false) @Description("Quejas introducidas antes de esta fecha") Date end_date) {
 		try {
 			String usuarioTicketing = UtilsQyS.obtenerUsuarioTicketing(Funciones.getPeticion());
@@ -996,7 +1008,7 @@ public class QysController {
 	@ResponseClass(RespuestaTipo.class)
 	@RequestMapping(value = "/datos", method = RequestMethod.GET, produces = {MimeTypes.JSON, MimeTypes.XML, MimeTypes.CSV, MimeTypes.JSONLD, MimeTypes.RDF, MimeTypes.TURTLE, MimeTypes.RDF_N3})
 	public @ResponseBody ResponseEntity<?> apiDatos(
-		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despÃºes de esta fecha") Date start_date,
+		@RequestParam(name = "start_date", required = false) @Description("Quejas introducidas despúes de esta fecha") Date start_date,
 		@RequestParam(name = "end_date", required = false) @Description("Quejas introducidas antes de esta fecha") Date end_date) {
 		try {
 			
@@ -1028,11 +1040,11 @@ public class QysController {
 	public @ResponseBody ResponseEntity<?> apiAcciones(@PathVariable BigDecimal id, @PathVariable Integer accion, @RequestParam(name = "account_id", required = false) BigDecimal account_id) {
 		Peticion peticion = Funciones.getPeticion();
 		if (accion == 2 && !peticion.getPermisosEnSeccion().contains(Permisos.CONTESTAR)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Mensaje(HttpStatus.FORBIDDEN.value(), "No puede ejecutar la peticiÃ³n"));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Mensaje(HttpStatus.FORBIDDEN.value(), "No puede ejecutar la petición"));
 		}
 		
 		if (accion == 12 && !peticion.getPermisosEnSeccion().contains(Permisos.CERRARSINCONTESTAR)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Mensaje(HttpStatus.FORBIDDEN.value(), "No puede ejecutar la peticiÃ³n"));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Mensaje(HttpStatus.FORBIDDEN.value(), "No puede ejecutar la petición"));
 		}
 		
 		ResponseEntity<?> obj = null;
@@ -1169,7 +1181,7 @@ public class QysController {
 				
 				if (!"".equals(expediente) && !"".equals(year) && !"".equals(diaCita) && !"".equals(horaCita)) {
 					Request objeto = (Request)original; 
-					descripcion = (descripcion == null ? "" : descripcion) + System.getProperty("line.separator") + "Expediente: " + expediente + " AÃ±o: " + year;
+					descripcion = (descripcion == null ? "" : descripcion) + System.getProperty("line.separator") + "Expediente: " + expediente + " Año: " + year;
 					Cita c = daoCita.nuevaCita(1021, 
 							objeto.getLast_name(),
 							objeto.getFirst_name(),
@@ -1208,7 +1220,7 @@ public class QysController {
 				Request reqObj = (Request) obj.getBody();
 				if (!reqObj.getStatus_admin().equals(estadoAnterior.getName())) {
 					try {
-						dao.devolverEstadoAnteriorQueja(id, estadoAnterior, "ERROR en acciÃ³n, se devuelve la queja al estado " + estadoAnterior.getName() + ":" + e.getMessage(), usuarioTicketing, peticion.getClientId());
+						dao.devolverEstadoAnteriorQueja(id, estadoAnterior, "ERROR en acción, se devuelve la queja al estado " + estadoAnterior.getName() + ":" + e.getMessage(), usuarioTicketing, peticion.getClientId());
 					} catch (Exception ex) {
 						logger.error(Funciones.getStackTrace(ex));
 					}

@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys.entity;
 
 import java.math.BigDecimal;
@@ -83,7 +95,7 @@ public class UtilsQyS {
 	 *  variable TEXTONOCONTESTAR
 	 */
 	public static final String TEXTONOCONTESTAR = System.getProperty("line.separator")
-			+ "AsÃ­ mismo indicarle que esta direcciÃ³n de correo no estÃ¡ habilitada para la recepciÃ³n de mensajes. Si desea ponerse  en contacto con nosotros o enviar una nueva Queja, Sugerencia o Solicitud de InformaciÃ³n PÃºblica, utilice el formulario de Quejas/Sugerencias o de Solicitud de InformaciÃ³n PÃºblica, respectivamente.";
+			+ "Así mismo indicarle que esta dirección de correo no está habilitada para la recepción de mensajes. Si desea ponerse  en contacto con nosotros o enviar una nueva Queja, Sugerencia o Solicitud de Información Pública, utilice el formulario de Quejas/Sugerencias o de Solicitud de Información Pública, respectivamente.";
 	
 	
 	/**

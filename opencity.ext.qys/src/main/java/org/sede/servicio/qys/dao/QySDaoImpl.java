@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys.dao;
 
 import java.io.File;
@@ -126,17 +138,17 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	 */
 	private static final BigDecimal[] excludedCategories = new BigDecimal[]{
 		new BigDecimal(2),//INTERNAL
-		new BigDecimal(109740032),//Admin. ElectrÃ³nica: Indra
-		new BigDecimal(109740033),//Admin. ElectrÃ³nica: IyD
-		new BigDecimal(109740034),//Admin. ElectrÃ³nica: telefÃ³nica
+		new BigDecimal(109740032),//Admin. Electronica: Indra
+		new BigDecimal(109740033),//Admin. Electronica: IyD
+		new BigDecimal(109740034),//Admin. Electronica: telefonica
 		new BigDecimal(4849667),//Infraestructuras:Coordinacion
 		new BigDecimal(5144584),//Cultura: Concursos (mal)
 		new BigDecimal(106954752),//Calidad de contenidos
-		new BigDecimal(4030464),//General: AtenciÃ³n al ciudadano
-		new BigDecimal(184647680),//GestiÃ³n web
-		new BigDecimal(15564801),//JurÃ­dico Servicios PÃºblicos
+		new BigDecimal(4030464),//General: Atencion al ciudadano
+		new BigDecimal(184647680),//Gestion web
+		new BigDecimal(15564801),//Juridico Servicios Publicos
 		new BigDecimal(188088320),//Oficina TÃ©cnica Infraestructuras
-		new BigDecimal(97779713),//SecciÃ³n SeÃ±alizaciÃ³n
+		new BigDecimal(97779713),//Seccion Senyalizacion
 		new BigDecimal(4030465),//Agua
 		new BigDecimal(4849674),//Prueba
 		new BigDecimal(5144580),//Zaragoza Cultural
@@ -210,16 +222,16 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
     		tipo.property("address_string", ElementType.FIELD).constraint(new NotEmptyDef());
     	}
     	if (solicitud.getEsNumeroExpediente() == Boolean.TRUE) {
-    		tipo.property("numExpediente", ElementType.FIELD).constraint(new SizeDef().max(7).message("El nÃºmero de expediente debe tener como mucho 7 dÃ­gitos"));
-    		tipo.property("year", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El aÃ±o del expediente debe tener 4 dÃ­gitos"));
-    		tipo.property("numExpediente1", ElementType.FIELD).constraint(new SizeDef().max(7).message("El nÃºmero de expediente debe tener como mucho 7 dÃ­gitos"));
+    		tipo.property("numExpediente", ElementType.FIELD).constraint(new SizeDef().max(7).message("El número de expediente debe tener como mucho 7 dígitos"));
+    		tipo.property("year", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El año del expediente debe tener 4 dígitos"));
+    		tipo.property("numExpediente1", ElementType.FIELD).constraint(new SizeDef().max(7).message("El número de expediente debe tener como mucho 7 dígitos"));
     		if (StringUtils.isNotEmpty(solicitud.getYear1())) {
-    			tipo.property("year1", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El aÃ±o del expediente debe tener 4 dÃ­gitos"));
+    			tipo.property("year1", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El año del expediente debe tener 4 dígitos"));
     		}
     		
-    		tipo.property("numExpediente2", ElementType.FIELD).constraint(new SizeDef().max(7).message("El nÃºmero de expediente debe tener como mucho 7 dÃ­gitos"));
+    		tipo.property("numExpediente2", ElementType.FIELD).constraint(new SizeDef().max(7).message("El número de expediente debe tener como mucho 7 dígitos"));
     		if (StringUtils.isNotEmpty(solicitud.getYear2())) {
-    			tipo.property("year2", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El aÃ±o del expediente debe tener 4 dÃ­gitos"));
+    			tipo.property("year2", ElementType.FIELD).constraint(new SizeDef().min(4).max(4).message("El año del expediente debe tener 4 dígitos"));
     		}
     		
     	}
@@ -741,7 +753,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 	}
 	/**
 	 * 
-	 * Metodo get totales para aÃ±o actual
+	 * Metodo get totales para anyo actual
 	 * 
 	 * @return
 	 */
@@ -853,10 +865,10 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 //					String tituloMail = "Sistema de quejas y sugerencias";
 //					if ("250544128".equals(results.getType())) {
 //						// texto par enviar en caso de solicitud de informacion publica
-//						tituloMail = "Solicitud de InformaciÃ³n pÃºblica";
-//						texto = texto + "\n Puede cumplimentar la informaciÃ³n accediendo a https://www.zaragoza.es/ciudad/ticketing/token_Ticketing?token=" + uuid;
+//						tituloMail = "Solicitud de Información pública";
+//						texto = texto + "\n Puede cumplimentar la información accediendo a https://www.zaragoza.es/ciudad/ticketing/token_Ticketing?token=" + uuid;
 //					} else {
-//						texto = texto + "\n Para cualquier duda sobre esta consulta puede hacÃ©rnosla llegar a travÃ©s del siguiente enlace:\n https://www.zaragoza.es/ciudad/ticketing/token_Ticketing?token=" + uuid;
+//						texto = texto + "\n Para cualquier duda sobre esta consulta puede hacérnosla llegar a través del siguiente enlace:\n https://www.zaragoza.es/ciudad/ticketing/token_Ticketing?token=" + uuid;
 //					}
 //					Funciones.sendMail("Ayuntamiento de Zaragoza. " + tituloMail + ". Solicitud: " + results.getService_request_id() + ". Asunto: " + results.getTitle(), texto, results.getEmail(), "", "text/plain");				
 //					
@@ -947,7 +959,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 				+ "],"
 				+ (StringUtils.isEmpty(registro.getTimestamp()) ? "" : "\"requestDate\":\"" + fechaGMT + "\",")
 				+ "\"requestType\":\"EXTERNAL_REQUEST\","
-				+ "\"department\":\"Solicitud de acceso a Informacion pÃºblica\""
+				+ "\"department\":\"Solicitud de acceso a Informacion pública\""
 				+ "}");
 		
 		return json.toString();
@@ -1117,7 +1129,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 		}
 	}
 	/**
-	 * Metodo Â¿es una categoria excluida?
+	 * Metodo ¿es una categoria excluida?
 	 * @param key
 	 * @return
 	 */
@@ -1389,7 +1401,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha insertado la descripcion asociada"));	
 			}
 		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningÃºn registro"));	
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningún registro"));	
 		}
 	}
 	
@@ -1446,7 +1458,7 @@ public class QySDaoImpl extends GenericDAOImpl <Request, BigDecimal> implements 
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado la descripcion"));
 				}
 			} else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningÃºn registro"));	
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(HttpStatus.BAD_REQUEST.value(), "No se ha modificado ningún registro"));	
 			}
 			
 		} catch (Exception e) {

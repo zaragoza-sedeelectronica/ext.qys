@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys.entity;
 
 import java.util.ArrayList;
@@ -154,12 +166,12 @@ public class Attribute extends EntidadBase {
 		lista.add(new Attribute(true, "account_id","number",true,"ID Usuario",++i,"Identificador del usuario que realiza la queja", null));
 		lista.add(new Attribute(true, "first_name","string",false,"Nombre",++i,"", null));
 		lista.add(new Attribute(true, "last_name","string",false,"Apellidos",++i,"", null));
-		lista.add(new Attribute(true, "phone","string",false,"TelÃ©fono",++i,"", null));
-		lista.add(new Attribute(true, "email","string",false,"Correo electrÃ³nico",++i,"Correo ElectrÃ³nico donde enviarle la confirmaciÃ³n de recepciÃ³n de sus datos asÃ³ como la respuesta a su sugerencia", null));
-		lista.add(new Attribute(true, "user_address","string",false,"DirecciÃ³n",++i,"DirecciÃ³n del usuario que realiza la queja/sugerencia", null));
-		lista.add(new Attribute(true, "title","string",true,"Asunto",++i,"DescripciÃ³n  breve de la sugerencia", null));
-		lista.add(new Attribute(true, "description","text",true,"DescripciÃ³n",++i,"Introduzca la descripciÃ³n de la queja/sugerencia de la forma mÃ¡s detallada posible", null));
-		lista.add(new Attribute(true, "address","string",false,"DirecciÃ³n",++i,"DescripciÃ³n de la localizaciÃ³n de la queja/sugerencia", null));
+		lista.add(new Attribute(true, "phone","string",false,"Teléfono",++i,"", null));
+		lista.add(new Attribute(true, "email","string",false,"Correo electrónico",++i,"Correo Electrónico donde enviarle la confirmación de recepción de sus datos asó como la respuesta a su sugerencia", null));
+		lista.add(new Attribute(true, "user_address","string",false,"Dirección",++i,"Dirección del usuario que realiza la queja/sugerencia", null));
+		lista.add(new Attribute(true, "title","string",true,"Asunto",++i,"Descripción  breve de la sugerencia", null));
+		lista.add(new Attribute(true, "description","text",true,"Descripción",++i,"Introduzca la descripción de la queja/sugerencia de la forma más detallada posible", null));
+		lista.add(new Attribute(true, "address","string",false,"Dirección",++i,"Descripción de la localización de la queja/sugerencia", null));
 		lista.add(new Attribute(true, "lat","number",false,"Latitud",++i,"Sistema de referencia wgs84", null));
 		lista.add(new Attribute(true, "lon","number",false,"Longitud",++i,"Sistema de referencia wgs84", null));
 		lista.add(new Attribute(true, "public","singlevaluelist",true,"Publicar",++i,"Desea que la sugerencia se publique en www.zaragoza.es", Value.getSiNo()));

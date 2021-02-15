@@ -1,3 +1,15 @@
+/* Copyright (C) 2020 Oficina Técnica de Participación, Transparenica y Gobierno Abierto del Ayuntamiento de Zaragoza
+ * 
+ * Este fichero es parte del "Quejas y Sugerencias - Open City Zaragoza".
+ *
+ * "Quejas y Sugerencias - Open City Zaragoza" es un software libre; usted puede utilizar esta obra respetando la licencia GNU General Public License, versión 3 o posterior, publicada por Free Software Foundation
+ *
+ * Salvo cuando lo exija la legislación aplicable o se acuerde por escrito, el programa distribuido con arreglo a la Licencia se distribuye «TAL CUAL», SIN GARANTÍAS NI CONDICIONES DE NINGÚN TIPO, ni expresas ni implícitas.
+ * Véase la Licencia en el idioma concreto que rige los permisos y limitaciones que establece la Licencia. 
+ *
+ * Para más información, puede contactar con los autores en: gobiernoabierto@zaragoza.es, sedelectronica@zaragoza.es
+ */
+
 package org.sede.servicio.qys;
 
 import java.awt.image.BufferedImage;
@@ -71,7 +83,7 @@ public class JuntaInformeQysController {
 	    juntas.put("Junta Vecinal Monzalbarba", "junta-monzalbarba@zaragoza.es");
 	    juntas.put("Junta Municipal Delicias", "junta-delicias@zaragoza.es");
 	    juntas.put("Junta Municipal El Rabal", "junta-rabal@zaragoza.es");
-	    juntas.put("Junta Vecinal MontaÃ±ana", "junta-montanana@zaragoza.es");
+	    juntas.put("Junta Vecinal Montañana", "junta-montanana@zaragoza.es");
 	    juntas.put("Junta Vecinal San Juan Mozarrifar", "junta-sanjuan@zaragoza.es");
 	    juntas.put("Junta Vecinal Garrapinillos", "junta-garrapinillos@zaragoza.es");
 	    juntas.put("Junta Vecinal Casetas", "junta-casetas@zaragoza.es");
@@ -80,15 +92,15 @@ public class JuntaInformeQysController {
 	    juntas.put("Junta Municipal Miralbueno", "junta-miralbueno@zaragoza.es");
 	    juntas.put("Junta Municipal Actur-Rey Fernando", "junta-actur@zaragoza.es");
 	    juntas.put("Junta Municipal Casablanca", "junta-casablanca@zaragoza.es");
-	    juntas.put("Junta Municipal Casco HistÃ³rico", "junta-historico@zaragoza.es");
+	    juntas.put("Junta Municipal Casco Histórico", "junta-historico@zaragoza.es");
 	    juntas.put("Junta Municipal Oliver-Valdefierro", "junta-oliver@zaragoza.es");
-	    juntas.put("Junta Municipal San JosÃ©", "junta-sanjose@zaragoza.es");
+	    juntas.put("Junta Municipal San José", "junta-sanjose@zaragoza.es");
 	    juntas.put("Junta Municipal Santa Isabel", "junta-staisabel@zaragoza.es");
 	    juntas.put("Junta Municipal Torrero", "junta-torrero@zaragoza.es");
 	    juntas.put("Junta Vecinal Juslibol-El Zorongo", "junta-juslibol@zaragoza.es");
 	    juntas.put("Junta Vecinal La Cartuja Baja", "junta-cartuja@zaragoza.es");
 	    juntas.put("Junta Municipal Sur", "junta-sur@zaragoza.es");
-	    juntas.put("Junta Vecinal PeÃ±aflor", "junta-penaflor@zaragoza.es");
+	    juntas.put("Junta Vecinal Peñaflor", "junta-penaflor@zaragoza.es");
 	    juntas.put("Junta Vecinal Venta del Olivar", "junta-volivar@zaragoza.es");
 	    juntas.put("Junta Vecinal Torrecilla de Valmadrid", "junta-torrecilla@zaragoza.es");
 	    juntas.put("Junta Municipal Universidad", "junta-universidad@zaragoza.es");
